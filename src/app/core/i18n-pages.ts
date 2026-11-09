@@ -3,6 +3,7 @@ import type { Lang } from './i18n';
 /** Texts of the footer and the extra pages (reference, installation, privacy). */
 export const PAGES: Record<Lang, Record<string, string>> = {
   cs: {
+    colorH: 'Barva fasády', t5: 'Okna a izolace', hLook: 'Barva oken a izolace',
     home: 'Úvod', menu: 'Menu', navRefs: 'Reference', navMontage: 'Doprava a montáž',
     day1: 'den', dayN: 'dny',
 

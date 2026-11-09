@@ -274,3 +274,8 @@ h1{font-weight:800;letter-spacing:-.025em;line-height:.95}
 .brand{display:flex;align-items:center}.brand svg{display:block;height:34px;width:auto}
 .ft-logo{display:inline-block}.ft-logo svg{display:block;width:min(300px,100%);height:auto}
 @media(max-width:520px){.brand svg{height:28px}}
+.swatches{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.swatches button{display:flex;align-items:center;gap:10px;background:#fff;border:2px solid var(--line);border-radius:6px;min-height:52px;padding:0 12px;font-weight:600}
+.swatches button[aria-pressed=true]{border-color:var(--g);box-shadow:inset 0 0 0 1px var(--g)}
+.swatches i{flex:none;width:24px;height:24px;border-radius:50%;border:1px solid rgba(0,0,0,.2)}
+.sw-white{background:#f1f2ef}.sw-wood{background:repeating-linear-gradient(90deg,#b4844f 0 3px,#c99a63 3px 6px)}.sw-ant{background:#3a3f44}
