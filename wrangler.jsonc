@@ -1,0 +1,6 @@
+{
+  // Cloudflare: the site is plain static files after "npm run build"
+  "name": "pmp-house",
+  "compatibility_date": "2026-11-01",
+  "assets": { "directory": "./dist/pmp-house/browser" }
+}

@@ -1,0 +1,93 @@
+<div class="adm">
+  <header class="adm-top">
+    <p class="adm-brand">PMP House · {{ t('adm_title') }}</p>
+    <div class="adm-top-end">
+      @if (hasDemo()) { <span class="adm-badge">{{ t('adm_demoBadge') }}</span> }
+      @if (langs.length > 1) {
+        <span class="langs">
+          @for (l of langs; track l.k) { <button type="button" [attr.aria-pressed]="i18n.lang() === l.k" (click)="i18n.lang.set(l.k)">{{ l.label }}</button> }
+        </span>
+      }
+      <a routerLink="/">{{ t('adm_web') }}</a>
+      <button type="button" class="adm-link" (click)="logout()">{{ t('adm_logout') }}</button>
+    </div>
+  </header>
+
+  <div class="adm-kpis">
+    <div><span>{{ t('adm_active') }}</span><b>{{ leads.active().length }}</b></div>
+    <div><span>{{ t('adm_open') }}</span><b>{{ money(leads.openValue()) }}</b></div>
+    <div [class.is-late]="leads.overdue().length"><span>{{ t('adm_overdue') }}</span><b>{{ leads.overdue().length }}</b></div>
+    <div><span>{{ t('adm_sold') }}</span><b>{{ leads.sold().length }}</b></div>
+  </div>
+
+  <div class="adm-tools">
+    <label class="adm-search"><span class="sr">{{ t('adm_search') }}</span>
+      <input type="search" [placeholder]="t('adm_search')" [value]="query()" (input)="query.set($any($event.target).value)"></label>
+    <button type="button" class="btn btn-o" (click)="leads.reset(); picked.set(null)">{{ t('adm_reset') }}</button>
+  </div>
+
+  <div class="adm-body">
+    <div class="adm-board">
+      @for (col of columns(); track col.s) {
+        <section class="adm-col" [attr.aria-label]="t('st' + col.s)">
+          <h2>{{ t('st' + col.s) }} <span>{{ col.items.length }}</span></h2>
+          @for (l of col.items; track l.id) {
+            <button type="button" class="adm-card" [class.is-picked]="picked() === l.id" (click)="picked.set(l.id); draft.set('')">
+              <span class="adm-card-meta"><span>{{ l.id }}</span><span>{{ l.source }}</span></span>
+              <b>{{ l.name }}</b>
+              <span>{{ title(l) }}</span>
+              <span class="adm-card-price">{{ l.price ? money(l.price) : t('onReq') }}</span>
+              <span class="adm-card-next" [class.is-late]="late(l)">{{ late(l) ? t('adm_overdue') + ': ' : '' }}{{ l.next || t('adm_noNext') }}</span>
+            </button>
+          } @empty { <p class="adm-empty">{{ t('adm_empty') }}</p> }
+        </section>
+      }
+    </div>
+
+    <aside class="adm-detail" [class.is-open]="lead()">
+      @if (lead(); as l) {
+        <button type="button" class="adm-close" [attr.aria-label]="t('adm_close')" (click)="picked.set(null)">×</button>
+        <p class="adm-sub">{{ l.id }} · {{ t('adm_created') }} {{ when(l.createdAt) }}</p>
+        <h2>{{ l.name }}</h2>
+        <p>{{ l.place }}@if (l.place && l.phone) {, }{{ l.phone }}</p>
+        <div class="adm-actions">
+          <a class="btn btn-g" [href]="'tel:' + digits(l.phone)">{{ t('adm_call') }}</a>
+          <a class="btn btn-wa" [href]="wa(l.phone)" target="_blank" rel="noopener">WhatsApp</a>
+          @if (l.email) { <a class="btn btn-o" [href]="'mailto:' + l.email">{{ t('adm_mail') }}</a> }
+          <button type="button" class="btn btn-o" (click)="open3d(l)">{{ t('adm_open3d') }}</button>
+        </div>
+
+        <h3>{{ t('adm_status') }}</h3>
+        <div class="adm-status">
+          @for (s of statuses; track s) {
+            <button type="button" [attr.aria-pressed]="l.status === s" (click)="setStatus(l, s)">{{ t('st' + s) }}</button>
+          }
+        </div>
+
+        <div class="adm-next">
+          <label class="fld"><span>{{ t('adm_next') }}</span><input [value]="l.next" (change)="leads.update(l.id, { next: $any($event.target).value })"></label>
+          <label class="fld"><span>{{ t('adm_due') }}</span><input type="date" [value]="l.due" (change)="leads.update(l.id, { due: $any($event.target).value })"></label>
+        </div>
+
+        <dl class="adm-facts">
+          <dt>{{ t('adm_price') }}</dt><dd>{{ l.price ? money(l.price) + ' ' + t('noVat') : t('onReq') }}</dd>
+          <dt>{{ t('adm_source') }}</dt><dd>{{ l.source }}</dd>
+          @if (l.clientNote) { <dt>{{ t('adm_clientNote') }}</dt><dd>{{ l.clientNote }}</dd> }
+        </dl>
+
+        <details class="sum" open><summary>{{ t('adm_cfg') }}</summary>
+          <ul>@for (x of lines(); track $index) { <li>{{ x }}</li> }</ul></details>
+
+        <h3>{{ t('adm_notes') }}</h3>
+        <label class="fld"><span class="sr">{{ t('adm_addNote') }}</span>
+          <textarea rows="2" [placeholder]="t('adm_notePh')" [value]="draft()" (input)="draft.set($any($event.target).value)"></textarea></label>
+        <button type="button" class="btn btn-o adm-addnote" (click)="addNote(l)">{{ t('adm_addNote') }}</button>
+        <ul class="adm-notes">
+          @for (n of l.notes; track n.at + n.text) { <li><span>{{ when(n.at) }}</span>{{ n.text }}</li> }
+        </ul>
+      } @else {
+        <p class="adm-empty">{{ t('adm_pick') }}</p>
+      }
+    </aside>
+  </div>
+</div>

@@ -1,0 +1,171 @@
+<section class="cfg" id="konfigurator">
+  <div class="panel">
+    <div class="tabs" role="tablist">
+      @for (i of tabs; track i) {
+        <button type="button" class="tab" role="tab" [attr.aria-selected]="s.step() === i" (click)="go(i)"><b>{{ i + 1 }}</b><span>{{ t('t' + (i + 1)) }}</span></button>
+      }
+    </div>
+    <div class="panes" #panes>
+      @switch (s.step()) {
+        @case (0) {
+          <div class="pane">
+            <h2>{{ t('hType') }}</h2>
+            <div class="typepick">
+              @for (k of types; track k) {
+                <button type="button" [attr.aria-pressed]="pressed(cfg().type === k)" (click)="s.setType(k)">{{ t(k) }}</button>
+              }
+            </div>
+            <h3>{{ t('hSize') }}</h3>
+            <div class="sizes">
+              @for (z of sizes(); track z.label) {
+                <button type="button" class="size" [attr.aria-pressed]="pressed(z.L === cfg().L && z.W === cfg().W)" (click)="pickSize(z.L, z.W)"><b>{{ z.label }}</b><span>{{ z.area }} m²</span></button>
+              }
+              <button type="button" class="size" [attr.aria-pressed]="pressed(s.custom())" (click)="pickCustom()"><b>{{ t('custom') }}</b></button>
+            </div>
+            @if (s.custom()) {
+              <div class="customs">
+                <label><span>{{ t('len') }}</span><input #cl type="number" min="2.4" max="12" step=".1" [value]="cfg().L" (change)="customSize(cl.value, cw.value)"></label>
+                <label><span>{{ t('wid') }}</span><input #cw type="number" min="2.4" max="4" step=".1" [value]="cfg().W" (change)="customSize(cl.value, cw.value)"></label>
+              </div>
+            }
+            <div class="opt"><span>{{ t('modules') }}</span><div class="st">
+              <button type="button" [attr.aria-label]="t('less')" [disabled]="cfg().count <= 1" (click)="s.bump('count', -1)">−</button><output>{{ cfg().count }}</output>
+              <button type="button" [attr.aria-label]="t('more2')" [disabled]="cfg().count >= 3" (click)="s.bump('count', 1)">+</button></div></div>
+            <div class="opt"><span>{{ t('floors') }}</span><div class="st">
+              <button type="button" [attr.aria-label]="t('less')" [disabled]="cfg().floors <= 1" (click)="s.bump('floors', -1)">−</button><output>{{ cfg().floors }}</output>
+              <button type="button" [attr.aria-label]="t('more2')" [disabled]="cfg().floors >= maxFloors()" (click)="s.bump('floors', 1)">+</button></div></div>
+            @if (cfg().type !== 'P') { <p class="note">{{ t('floorsNote') }}</p> }
+          </div>
+        }
+        @case (1) {
+          <div class="pane">
+            <h2>{{ t('hPosts') }}</h2>
+            <p class="txt">{{ t(cfg().type === 'P' ? 'postsP' : s.posts().length ? 'postsFix' : 'postsNone') }}</p>
+            <div class="board">
+              @for (row of postRows(); track row.w; let first = $first) {
+                @if (!first) { <div class="roomstrip"></div> }
+                <div class="wallrow"><span>{{ t(row.w === 'f' ? 'wFront' : 'wRear') }}</span>
+                  <div class="dots" [style.grid-template-columns]="row.cols">
+                    @for (d of row.dots; track d.i) {
+                      <button type="button" class="dot" [attr.aria-pressed]="pressed(d.on)" [disabled]="!d.can" [attr.title]="cfg().type === 'P' && !d.can ? t('postBlocked') : null"
+                        [attr.aria-label]="t('postAt') + ' ' + d.pos + ' m'" (click)="s.togglePost(row.w, d.i)"><i></i></button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+            @if (cfg().type === 'P') { <p class="note">{{ t('postTip') }}</p> }
+            @else { <button type="button" class="btn btn-o" (click)="s.setType('P')">{{ t('toP') }}</button> }
+          </div>
+        }
+        @case (2) {
+          <div class="pane">
+            <h2>{{ t('hIn') }}</h2>
+            <div class="opt"><span>{{ t('rooms') }}</span><div class="seg">
+              @for (r of [1, 2, 3]; track r) {
+                <button type="button" [attr.aria-pressed]="pressed(cfg().rooms === r)" [disabled]="!s.fits({ rooms: r })" (click)="s.set('rooms', r)">{{ r }}</button>
+              }
+            </div></div>
+            @for (k of ['kitchen', 'wc', 'shower']; track k) {
+              <button type="button" class="sw" role="switch" [attr.aria-checked]="pressed(isOn(k))" [disabled]="!isOn(k) && !canAdd(k)" (click)="s.toggle($any(k))"><span>{{ t(k) }}</span><i></i></button>
+            }
+            @if (cfg().wc || cfg().shower) {
+              <div class="opt"><span>{{ t('bathPos') }}</span><div class="seg">
+                @for (p of ['l', 'm', 'r']; track p) {
+                  <button type="button" [attr.aria-pressed]="pressed(cfg().bathPos === p)" [disabled]="!canBath(p)" (click)="s.set('bathPos', $any(p))">{{ t(p) }}</button>
+                }
+              </div></div>
+            }
+            @if (anyBlocked()) { <p class="note">{{ t('fitNote') }}</p> }
+          </div>
+        }
+        @case (3) {
+          <div class="pane">
+            <h2>{{ t('hWalls') }}</h2>
+            <div class="walls">
+              @for (w of walls; track w.k) {
+                <button type="button" [attr.aria-pressed]="pressed(s.wall() === w.k)" (click)="s.wall.set(w.k)"><span>{{ t(w.label) }}</span><i>{{ wallCount(w.k) }}</i></button>
+              }
+            </div>
+            @for (o of wallSteps; track o.k) {
+              <div class="opt"><span>{{ t(o.k) }}</span><div class="st">
+                <button type="button" [attr.aria-label]="t('less')" [disabled]="wallVal(o.k) <= 0" (click)="s.bumpWall(o.k, -1)">−</button><output>{{ wallVal(o.k) }}</output>
+                <button type="button" [attr.aria-label]="t('more2')" [disabled]="wallVal(o.k) >= o.max || !s.fitsWall(o.k, wallVal(o.k) + 1)" (click)="s.bumpWall(o.k, 1)">+</button></div></div>
+            }
+            @if (panoBlocked()) { <p class="note warn">{{ t('panoBlocked') }}</p> }
+            @if (!hasEntry()) { <p class="note warn">{{ t('noEntry') }}</p> }
+          </div>
+        }
+        @case (4) {
+          <div class="pane">
+            <h2>{{ t('hLook') }}</h2>
+            <h3>{{ t('walls') }}</h3>
+            <div class="seg wide">
+              @for (v of ['white', 'wood', 'ant']; track v) { <button type="button" [attr.aria-pressed]="pressed(cfg().color === v)" (click)="s.set('color', $any(v))">{{ t(v) }}</button> }
+            </div>
+            <h3>{{ t('joinery') }}</h3>
+            <div class="seg wide">
+              @for (v of ['ant', 'white']; track v) { <button type="button" [attr.aria-pressed]="pressed(cfg().joinery === v)" (click)="s.set('joinery', $any(v))">{{ t(v) }}</button> }
+            </div>
+            <h3>{{ t('frJoin') }}</h3>
+            <div class="seg wide">
+              @for (v of ['ant', 'white']; track v) { <button type="button" [attr.aria-pressed]="pressed(cfg().frJoin === v)" (click)="s.set('frJoin', $any(v))">{{ t(v) }}</button> }
+            </div>
+            <h3>{{ t('ins') }}</h3>
+            <div class="choices">
+              @for (v of insulation; track v) { <button type="button" [attr.aria-pressed]="pressed(cfg().ins === v)" (click)="s.set('ins', v)">{{ t('ins' + v) }}</button> }
+            </div>
+            <button type="button" class="sw" role="switch" [attr.aria-checked]="pressed(!!cfg().floorIns)" (click)="s.toggle('floorIns')"><span>{{ t('floorIns') }}</span><i></i></button>
+          </div>
+        }
+        @case (5) {
+          <div class="pane">
+            <h2>{{ t('hSend') }}</h2>
+            <details class="sum"><summary>{{ t('summary') }}: {{ t(cfg().type) }}, {{ dimText() }}</summary>
+              <ul>@for (line of summary(); track $index) { <li>{{ line }}</li> }</ul></details>
+            <form novalidate (submit)="submit($event)">
+              <label class="fld"><span>{{ t('fName') }}</span><input name="name" autocomplete="name" required [value]="form().name" (input)="field('name', $any($event.target).value)"></label>
+              <div class="two">
+                <label class="fld"><span>{{ t('fPhone') }}</span><input name="phone" type="tel" autocomplete="tel" required [value]="form().phone" (input)="field('phone', $any($event.target).value)"></label>
+                <label class="fld"><span>{{ t('fMail') }}</span><input name="mail" type="email" autocomplete="email" required [value]="form().email" (input)="field('email', $any($event.target).value)"></label>
+              </div>
+              <label class="fld"><span>{{ t('place') }}</span><input name="place" autocomplete="address-level2" [value]="form().place" (input)="field('place', $any($event.target).value)"></label>
+              <label class="fld"><span>{{ t('note') }}</span><textarea name="note" rows="2" maxlength="5000" [value]="form().note" (input)="field('note', $any($event.target).value)"></textarea></label>
+              <input class="hp" type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" aria-hidden="true" [checked]="form().bot" (change)="check('bot', $any($event.target).checked)">
+              <label class="chk"><input type="checkbox" name="gdpr" required [checked]="form().gdpr" (change)="check('gdpr', $any($event.target).checked)"><span>{{ t('gdpr') }}</span></label>
+              <p id="formMsg" role="status" [attr.data-state]="msg().state">{{ msg().text }}</p>
+              @if (result() === 'sentDemo') { <p style="margin:4px 0 14px"><a class="btn btn-o" routerLink="/admin">{{ t('openAdmin') }}</a></p> }
+              <div class="two">
+                <button class="btn btn-g" type="submit" [disabled]="sending()">{{ t('send') }}</button>
+                <button class="btn btn-wa" type="button" (click)="whatsapp()">{{ t('wa') }}</button>
+              </div>
+            </form>
+          </div>
+        }
+      }
+    </div>
+    <div class="foot-bar">
+      <div class="pz">
+        <strong>{{ s.price() ? t('from') + ' ' + money(s.price()!) : t('onReq') }}</strong>
+        @if (s.price()) { <span>{{ t('noVat') }}, {{ money(s.price()! * 1.21) }} {{ t('withVat') }}</span> }
+        <small>{{ t(s.price() ? 'priceBase' : 'priceNone') }}</small>
+      </div>
+      <div class="nav">
+        <button type="button" class="btn btn-o" [disabled]="s.step() === 0" (click)="go(s.step() - 1)">{{ t('back') }}</button>
+        @if (s.step() < 5) { <button type="button" class="btn btn-g" (click)="go(s.step() + 1)">{{ t('next') }}</button> }
+      </div>
+    </div>
+  </div>
+  <div class="stage" [class.no3d]="no3d()" [class.planview]="s.view() === 'plan'">
+    <canvas #canvas role="img" [attr.aria-label]="t('cfgCanvas')"></canvas>
+    @if (s.view() === 'plan') { <div class="plan" [innerHTML]="plan()"></div> }
+    <p class="no3d-msg">{{ t('no3d') }}</p>
+    <div class="views">
+      @for (v of ['3d', 'skel', 'plan']; track v) {
+        <button type="button" [attr.aria-pressed]="pressed(s.view() === v)" (click)="setView($any(v))">{{ t(v === '3d' ? 'view3d' : v === 'skel' ? 'viewSkel' : 'viewPlan') }}</button>
+      }
+    </div>
+    <span #tagBath class="tag" hidden>{{ t('bath') }}</span><span #tagKitchen class="tag" hidden>{{ t('kitchen') }}</span>
+    <p class="hint">{{ t('hint') }}</p>
+  </div>
+</section>
