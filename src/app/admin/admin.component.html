@@ -54,7 +54,7 @@
           <a class="btn btn-g" [href]="'tel:' + digits(l.phone)">{{ t('adm_call') }}</a>
           <a class="btn btn-wa" [href]="wa(l.phone)" target="_blank" rel="noopener">WhatsApp</a>
           @if (l.email) { <a class="btn btn-o" [href]="'mailto:' + l.email">{{ t('adm_mail') }}</a> }
-          <button type="button" class="btn btn-o" (click)="open3d(l)">{{ t('adm_open3d') }}</button>
+          <a class="btn btn-o" [href]="link3d(l)" target="_blank" rel="noopener">{{ t('adm_open3d') }} <span aria-hidden="true">↗</span></a>
         </div>
 
         <h3>{{ t('adm_status') }}</h3>

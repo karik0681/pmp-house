@@ -7,7 +7,7 @@ import { Lang } from '../core/i18n';
 import { AuthService } from './auth.service';
 import { LeadsService } from '../leads/leads.service';
 import { Lead, STATUSES } from '../leads/lead';
-import { encode, summaryLines, title } from '../configurator/model';
+import { linkTo, summaryLines, title } from '../configurator/model';
 
 @Component({
   selector: 'app-admin',
@@ -51,6 +51,7 @@ export class AdminComponent {
     this.leads.addNote(l.id, this.t('adm_statusNote').replace('{s}', this.t('st' + s)));
   }
   addNote(l: Lead) { const text = this.draft().trim(); if (!text) return; this.leads.addNote(l.id, text); this.draft.set(''); }
-  open3d(l: Lead) { this.router.navigate(['/'], { queryParams: { c: encode(l.cfg) } }); }
+  /** the client's configuration, opened in a new tab so the cabinet stays open */
+  link3d(l: Lead) { return linkTo(l.cfg); }
   logout() { this.auth.logout(); this.router.navigateByUrl('/admin/login'); }
 }
