@@ -13,7 +13,7 @@ import { Lang } from '../core/i18n';
       <form class="adm-login-card" novalidate (submit)="enter($event, email.value, pass.value)">
         <p class="adm-brand">PMP House</p>
         <h1>{{ t('adm_login') }}</h1>
-        <label class="fld"><span>{{ t('adm_email') }}</span><input #email type="email" autocomplete="username" value="ady@pmphouse.cz"></label>
+        <label class="fld"><span>{{ t('adm_email') }}</span><input #email type="email" autocomplete="username" value="adam@pmphouse.cz"></label>
         <label class="fld"><span>{{ t('adm_pass') }}</span><input #pass type="password" autocomplete="current-password"></label>
         <p class="note" role="status" [class.warn]="error()">{{ error() ? t('adm_bad') : t('adm_demoHint') }}</p>
         <button class="btn btn-g" type="submit">{{ t('adm_enter') }}</button>
