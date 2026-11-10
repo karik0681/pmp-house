@@ -6,6 +6,8 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     colorH: 'Barva fasády', t5: 'Okna a izolace', hLook: 'Barva oken a izolace',
     tab_type: 'Typ a rozměr', tab_walls: 'Okna a dveře', tab_look: 'Rámy a izolace', tab_inside: 'Vnitřek', tab_send: 'Odeslat',
     place_door: 'Umístění dveří', place_win: 'Umístění oken', place_fr: 'Umístění francouzských dveří',
+    metaHome: 'Obytné kontejnery a mobilní domy na klíč. Sestavte si kontejner ve 3D, vyberte okna, dveře a vybavení a uvidíte základní cenu.',
+    seoRefs: 'Reference: realizace obytných kontejnerů', seoMontage: 'Doprava a montáž kontejneru: postup a základy',
     home: 'Úvod', menu: 'Menu', navRefs: 'Reference', navMontage: 'Doprava a montáž',
     day1: 'den', dayN: 'dny',
 
@@ -102,6 +104,8 @@ export const PAGES: Record<Lang, Record<string, string>> = {
   de: {
     tab_type: 'Typ und Größe', tab_walls: 'Fenster und Türen', tab_look: 'Rahmen und Dämmung', tab_inside: 'Innenraum', tab_send: 'Absenden',
     place_door: 'Lage der Tür', place_win: 'Lage der Fenster', place_fr: 'Lage der Fenstertür',
+    metaHome: 'Wohncontainer und Mobilhäuser schlüsselfertig. Stellen Sie Ihren Container in 3D zusammen und sehen Sie den Grundpreis.',
+    seoRefs: 'Referenzen: realisierte Wohncontainer', seoMontage: 'Lieferung und Montage: Ablauf und Fundament',
     home: 'Start', menu: 'Menü', navRefs: 'Referenzen', navMontage: 'Lieferung und Montage',
     day1: 'Tag', dayN: 'Tage',
 

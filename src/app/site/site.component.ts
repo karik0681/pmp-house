@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnDestroy, afterNextRender, inject } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { I18nService } from '../core/i18n.service';
+import { SeoService } from '../core/seo.service';
 import { goTo, scrollToId } from '../core/scroll';
 import { HeroComponent } from './hero.component';
 import { TypesComponent } from './types.component';
@@ -70,12 +71,13 @@ export class SiteComponent implements OnDestroy {
   go = goTo;
 
   constructor() {
+    inject(SeoService).page(this.t('title'), this.t('metaHome'));
     /* a link with ?c=… (from an e-mail, the CRM or a reference) opens that exact configuration */
     const c = this.route.snapshot.queryParamMap.get('c');
     const loaded = c ? decode(c) : null;
     if (loaded) { this.cfg.load(loaded); this.cfg.go(0); }
     /* coming from another page via a menu item: scroll to that section */
-    const target: string | undefined = inject(Router).currentNavigation()?.extras.state?.['scroll'] ?? history.state?.scroll;
+    const target: string | undefined = inject(Router).currentNavigation()?.extras.state?.['scroll'] ?? (typeof history !== 'undefined' ? history.state?.scroll : undefined);
     afterNextRender(() => {
       if (loaded) setTimeout(() => scrollToId('konfigurator'), 300);
       else if (target) setTimeout(() => scrollToId(target), 60);

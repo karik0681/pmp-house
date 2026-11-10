@@ -10,6 +10,7 @@ export class SourceService {
 
 /** Called in main.ts before Angular starts, because the router rewrites the URL and drops ?utm_… */
 export function captureSource(): string {
+  if (typeof location === 'undefined') return 'Web';   /* while pages are being built there is no browser */
   {
     try {
       const saved = sessionStorage.getItem(KEY);

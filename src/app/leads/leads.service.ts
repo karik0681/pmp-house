@@ -20,7 +20,7 @@ export class LeadsService {
 
   constructor() {
     /* an enquiry sent from the website in another tab shows up here straight away */
-    addEventListener('storage', e => { if (e.key === KEY) this.leads.set(this.read()); });
+    if (typeof window !== 'undefined') addEventListener('storage', e => { if (e.key === KEY) this.leads.set(this.read()); });
   }
 
   add(data: Omit<Lead, 'id' | 'createdAt' | 'status' | 'notes' | 'next' | 'due'>, firstNote: string, next = ''): Lead {

@@ -111,7 +111,8 @@ export class ExplodedComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    cancelAnimationFrame(this.raf); this.io?.disconnect();
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.io?.disconnect();
     this.view?.destroy();
   }
 }

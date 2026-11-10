@@ -1,15 +1,17 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { SeoService } from '../core/seo.service';
 import { I18nService } from '../core/i18n.service';
 import { RefCardComponent } from './ref-card.component';
 import { REFERENCES, USES, Use } from './refs.data';
 
 @Component({
   selector: 'app-references',
-  imports: [RefCardComponent],
+  imports: [RefCardComponent, RouterLink],
   template: `
     <main class="pg">
       <header class="pg-head"><div class="wrap">
-        <p class="crumbs"><a href="#/">{{ t('home') }}</a> <span aria-hidden="true">/</span> {{ t('navRefs') }}</p>
+        <p class="crumbs"><a routerLink="/">{{ t('home') }}</a> <span aria-hidden="true">/</span> {{ t('navRefs') }}</p>
         <h1>{{ t('refH') }}</h1>
         <p class="sub">{{ t('refSub') }}</p>
         <dl class="stats">
@@ -42,5 +44,6 @@ export class ReferencesComponent {
   readonly places = new Set(REFERENCES.map(r => r.place)).size;
   readonly area = REFERENCES.reduce((s, r) => s + r.L * r.W * r.count, 0);
   t = (k: string) => this.i18n.t(k);
+  constructor() { inject(SeoService).page(this.t('seoRefs'), this.t('refSub')); }
   count = (u: Use) => this.all.filter(r => r.use === u).length;
 }

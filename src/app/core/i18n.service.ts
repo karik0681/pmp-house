@@ -1,4 +1,4 @@
-import { Injectable, signal, effect } from '@angular/core';
+import { DOCUMENT, Injectable, effect, inject, signal } from '@angular/core';
 import { Lang, T } from './i18n';
 import { PAGES } from './i18n-pages';
 import { SETTINGS } from './settings';
@@ -11,10 +11,10 @@ export class I18nService {
   readonly lang = signal<Lang>(this.initial());
 
   constructor() {
+    const doc = inject(DOCUMENT);
     effect(() => {
       const l = this.lang();
-      document.documentElement.lang = l;
-      document.title = T[l]['title'];
+      doc.documentElement.lang = l;
       try { localStorage.setItem(KEY, l); } catch { /* private mode */ }
     });
   }

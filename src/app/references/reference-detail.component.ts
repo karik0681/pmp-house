@@ -1,5 +1,7 @@
 import { Component, computed, effect, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { SeoService } from '../core/seo.service';
+
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { I18nService } from '../core/i18n.service';
@@ -12,13 +14,13 @@ import { REFERENCES } from './refs.data';
 
 @Component({
   selector: 'app-reference-detail',
-  imports: [RefCardComponent, LightboxComponent],
+  imports: [RefCardComponent, LightboxComponent, RouterLink],
   template: `
     @if (ref(); as r) {
       <main class="pg">
         <header class="pg-head"><div class="wrap">
-          <p class="crumbs"><a href="#/">{{ t('home') }}</a> <span aria-hidden="true">/</span>
-            <a href="#/reference">{{ t('navRefs') }}</a> <span aria-hidden="true">/</span> {{ r.title[lang()] }}</p>
+          <p class="crumbs"><a routerLink="/">{{ t('home') }}</a> <span aria-hidden="true">/</span>
+            <a routerLink="/reference">{{ t('navRefs') }}</a> <span aria-hidden="true">/</span> {{ r.title[lang()] }}</p>
           <div class="rd-head">
             <div>
               <p class="rd-use">{{ t('use_' + r.use) }}</p>
@@ -91,6 +93,11 @@ export class ReferenceDetailComponent {
   t = (k: string) => this.i18n.t(k);
 
   constructor() {
-    effect(() => { if (this.slug() && !this.ref()) this.router.navigate(['/reference']); });
+    const seo = inject(SeoService);
+    effect(() => {
+      const r = this.ref();
+      if (r) seo.page(`${r.title[this.lang()]}, ${r.place} – ${this.t('navRefs')}`, r.lead[this.lang()]);
+      else if (this.slug()) this.router.navigate(['/reference']);
+    });
   }
 }

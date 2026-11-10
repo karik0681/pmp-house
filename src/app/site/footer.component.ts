@@ -34,7 +34,7 @@ const ICONS: Record<string, string> = {
 
       <div class="wrap ft-grid">
         <div class="ft-brand">
-          <a class="ft-logo" href="#/" aria-label="PMP house" [innerHTML]="logo" (click)="nav.section('top', $event)"></a>
+          <a class="ft-logo" href="/" aria-label="PMP house" [innerHTML]="logo" (click)="nav.section('top', $event)"></a>
           <p>{{ t('ftAbout') }}</p>
           <ul class="soc" [attr.aria-label]="t('ftSocial')">
             @for (k of socials; track k) {

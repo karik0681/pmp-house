@@ -14,7 +14,7 @@ interface Item { label: string; id?: string; route?: string }
   imports: [RouterLink, RouterLinkActive],
   template: `
     <header class="top">
-      <a class="brand" href="#/" aria-label="PMP house" [innerHTML]="logo" (click)="nav.section('top', $event)"></a>
+      <a class="brand" href="/" aria-label="PMP house" [innerHTML]="logo" (click)="nav.section('top', $event)"></a>
       <nav aria-label="Menu">
         @for (n of items; track n.label) {
           @if (n.route) { <a [routerLink]="n.route" routerLinkActive="on" (click)="nav.menuOpen.set(false)">{{ t(n.label) }}</a> }

@@ -32,7 +32,8 @@ export class LayoutComponent {
     const router = inject(Router);
     const sub = router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
       this.nav.menuOpen.set(false);
-      const keep = router.currentNavigation()?.extras.state?.['scroll'] || router.url.includes('c=');
+      if (typeof window === 'undefined') return;
+      const keep = router.currentNavigation()?.extras.state?.['scroll'] || history.state?.scroll || router.url.includes('c=');
       if (!keep) scrollTo({ top: 0, behavior: 'instant' });
       setTimeout(onScroll, 100);
     });
@@ -46,6 +47,7 @@ export class LayoutComponent {
       }));
     };
     const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(check); } };
+    if (typeof window === 'undefined') return;   /* building the page, no browser */
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onScroll, { passive: true });
     inject(DestroyRef).onDestroy(() => { sub.unsubscribe(); removeEventListener('scroll', onScroll); removeEventListener('resize', onScroll); });

@@ -4,5 +4,6 @@
   "compatibility_date": "2026-11-01",
   // public link https://pmp-house.<account>.workers.dev
   "workers_dev": true,
-  "assets": { "directory": "./dist/pmp-house/browser" }
+  // unknown addresses get 404.html (the empty app shell), which then shows the right page or the home page
+  "assets": { "directory": "./dist/pmp-house/browser", "not_found_handling": "404-page" }
 }

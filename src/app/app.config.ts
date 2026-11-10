@@ -1,11 +1,13 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withHashLocation } from '@angular/router';
+import { provideRouter } from '@angular/router';
+import { provideClientHydration } from '@angular/platform-browser';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    /* hash URLs (#/admin) work on any static hosting and even when the file is opened directly */
-    provideRouter(routes, withHashLocation()),
+    provideRouter(routes),
+    /* pages are built as ready HTML (prerender); the browser then takes them over without redrawing */
+    provideClientHydration(),
   ],
 };

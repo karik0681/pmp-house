@@ -10,7 +10,7 @@ npm run build      # готовый сайт в dist/pmp-house/browser
 ```
 
 - Сайт: `http://localhost:4200/`
-- Кабинет: `http://localhost:4200/#/admin`, пароль `demo`
+- Кабинет: `http://localhost:4200/admin`, пароль `demo`
 
 ## Где что лежит
 
@@ -33,6 +33,13 @@ npm run build      # готовый сайт в dist/pmp-house/browser
 - `mail`, `phone`, `whatsapp`, `address`, `hours`, `ico`, `dic`: контакты и реквизиты для футера.
 - `social`: ссылки на Facebook, Instagram, TikTok, YouTube. Пустая ссылка = серая иконка.
 - `demoCrm: true` сохраняет заявки в демо-кабинет. Для боевого сайта без CRM поставьте `false`.
+
+## Пререндер (для Google)
+
+- `npm run build` заранее собирает каждую публичную страницу в готовый HTML с текстом: главную, `/reference`, каждую референцию, `/montaz`, `/ochrana-udaju`. Список страниц — в `src/app/app.routes.server.ts`.
+- Кабинет `/admin` не пререндерится: после сборки `scripts/postbuild.mjs` кладёт туда пустую оболочку приложения (она же `404.html`).
+- Код, которому нужен браузер (`window`, `localStorage`, 3D), должен запускаться в `afterNextRender` или за проверкой `typeof window !== 'undefined'`, иначе сборка упадёт.
+- Заголовок и описание каждой страницы задаёт `SeoService` (`src/app/core/seo.service.ts`).
 
 ## Тексты страниц
 

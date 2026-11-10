@@ -64,5 +64,5 @@ export class HeroComponent implements OnDestroy {
     });
   }
 
-  ngOnDestroy() { clearTimeout(this.timer); removeEventListener('resize', this.place); this.stage?.destroy(); }
+  ngOnDestroy() { clearTimeout(this.timer); if (this.stage) removeEventListener('resize', this.place); this.stage?.destroy(); }
 }

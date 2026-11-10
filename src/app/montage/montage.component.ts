@@ -1,15 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { RouterLink } from '@angular/router';
+import { SeoService } from '../core/seo.service';
 import { I18nService } from '../core/i18n.service';
 import { NavService } from '../site/nav.service';
 import { FOUNDATION_ART, STEP_ART } from './drawings';
 
 @Component({
   selector: 'app-montage',
+  imports: [RouterLink],
   template: `
     <main class="pg">
       <header class="pg-head"><div class="wrap">
-        <p class="crumbs"><a href="#/">{{ t('home') }}</a> <span aria-hidden="true">/</span> {{ t('navMontage') }}</p>
+        <p class="crumbs"><a routerLink="/">{{ t('home') }}</a> <span aria-hidden="true">/</span> {{ t('navMontage') }}</p>
         <h1>{{ t('mtH') }}</h1>
         <p class="sub">{{ t('mtSub') }}</p>
         <dl class="stats">
@@ -73,6 +76,7 @@ export class MontageComponent {
   readonly steps: SafeHtml[] = STEP_ART.map(a => this.dom.bypassSecurityTrustHtml(a));
   readonly foundations = ['pads', 'strips', 'slab', 'screws'].map(k => ({ k, art: this.dom.bypassSecurityTrustHtml(FOUNDATION_ART[k]) }));
   t = (k: string) => this.i18n.t(k);
+  constructor() { inject(SeoService).page(this.t('seoMontage'), this.t('mtSub')); }
   print() {
     const html = document.documentElement;
     html.classList.add('print-ck');

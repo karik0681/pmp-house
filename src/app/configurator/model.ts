@@ -105,4 +105,4 @@ export const encode = (c: Cfg) => btoa(unescape(encodeURIComponent(JSON.stringif
 export function decode(s: string): Cfg | null {
   try { const c = JSON.parse(decodeURIComponent(escape(atob(s)))); return c && c.w && layout(c) ? c : null; } catch { return null; }
 }
-export const linkTo = (c: Cfg) => `${location.href.split('#')[0]}#/?c=${encodeURIComponent(encode(c))}`;
+export const linkTo = (c: Cfg) => `${location.origin}/?c=${encodeURIComponent(encode(c))}`;
