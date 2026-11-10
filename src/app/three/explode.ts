@@ -1,5 +1,5 @@
 // @ts-nocheck
-/* Exploded view: what a container is made of. Seven layers move apart as `amount` goes 0 → 1. */
+/* Exploded view: what a container is made of. Six layers move apart as `amount` goes 0 → 1. */
 import * as THREE from 'three';
 import { skyEnv } from './stage';
 
@@ -79,10 +79,8 @@ export class Exploded {
     floor.add(box(L - .3, .025, W - .3, M.board, 0, BASE + .02, 0));
     floor.add(box(L - .3, .01, W - .3, M.pvc, 0, BASE + .04, 0));
 
-    /* 3 posts: four corners and two in each long wall */
-    const posts = layer([0, 2.1, 0]); pin(posts, -L / 2 + .08, BASE + WH * .75, W / 2 - .08);
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) posts.add(box(POST, WH, POST, M.frame, sx * (L / 2 - POST / 2), BASE + WH / 2, sz * (W / 2 - POST / 2)));
-    for (const x of postsX) for (const sz of [-1, 1]) posts.add(box(.12, WH, .12, M.post, x, BASE + WH / 2, sz * (W / 2 - .06)));
+    /* the four corner posts belong to the frame and stay standing on it */
+    for (const sx of [-1, 1]) for (const sz of [-1, 1]) base.add(box(POST, WH, POST, M.frame, sx * (L / 2 - POST / 2), BASE + WH / 2, sz * (W / 2 - POST / 2)));
 
     /* 4 sandwich walls: steel sheet, foam core, steel sheet, with openings for the windows and the door */
     const walls = layer([0, 2.1, 0]);
@@ -164,14 +162,12 @@ export class Exploded {
       l.k = k;
       l.g.position.set(l.move[0] * k, l.move[1] * k, l.move[2] * k);
     });
-    const kw = this.layers[3].k, ko = this.layers[4].k;
+    const kw = this.layers[2].k, ko = this.layers[3].k;
     for (const m of this.wallMove) {
       if (m.d[2]) m.g.position.z = m.z0 + m.d[2] * kw; else m.g.position.x = m.x0 + m.d[0] * kw;
     }
     for (const m of this.openMove) m.g.position.copy(m.p0).addScaledVector(m.d, ko);
-    this.ceil.position.y = .55 * this.layers[5].k;
-    /* the extra posts turn orange as they come apart, so they are easy to spot */
-    this.mats.post.color.copy(this.dark).lerp(this.orange, this.layers[2].k);      /* the ceiling lifts off the top frame */
+    this.ceil.position.y = .55 * this.layers[4].k;
     /* the camera backs off and looks higher as the stack grows */
     const e = this.layers[n - 1].k;   /* the roof moves first and highest */
     this.target.y = 1.35 + 2.95 * e;

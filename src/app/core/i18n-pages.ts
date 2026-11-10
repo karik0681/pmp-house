@@ -80,7 +80,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
 
     /* exploded container */
     xpH: 'Z čeho se skládá kontejner', xpSub: 'Šipkami projdete kontejner vrstvu po vrstvě.', xpStart: 'Teď vidíte celý kontejner. Stiskněte šipku a rozložíme ho na vrstvy.', xpPrev: 'Předchozí vrstva', xpNext: 'Další vrstva', xpReset: 'Složit zpět', xpLayer: 'Vrstva', xpWhole: 'Celý kontejner', xpSubStill: 'Sedm vrstev, ze kterých se kontejner skládá.',
-    xp1: 'Ocelový rám podlahy', xp1D: 'Svařený rám z ocelových profilů nese celou stavbu. Za jeho rohy kontejner zvedá jeřáb.',
+    xp1: 'Ocelový rám', xp1D: 'Svařený rám z ocelových profilů nese celou stavbu. Za jeho rohy kontejner zvedá jeřáb.',
     xp2: 'Zateplená podlaha', xp2D: 'Izolace mezi profily, nad ní cementotřísková deska a PVC krytina. U typu Ekonom minerální vata 50 mm.',
     xp3: 'Sloupy', xp3D: 'Čtyři rohové sloupy spojují spodní a horní rám. Ekonom a Standard mají navíc dva sloupy v každé delší stěně.',
     xp4: 'Sendvičové stěny', xp4D: 'Dva lakované ocelové plechy a mezi nimi izolační jádro PUR 50 mm. Panely se zasunou do rámu a sešroubují.',

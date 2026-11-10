@@ -35,7 +35,8 @@ export class ConfiguratorService {
     return !!layout({ ...c, w: { ...c.w, [w]: { ...c.w[w], [k]: v } } });
   }
 
-  load(c: Cfg) { this.cfg.set(c); }
+  /** Opens a saved configuration. Three-part windows are no longer offered, so old links lose them. */
+  load(c: Cfg) { for (const w of Object.values(c.w)) w.win3 = 0; this.cfg.set(c); }
   set<K extends keyof Cfg>(k: K, v: Cfg[K]) { this.edit(c => { c[k] = v; }); }
   toggle(k: 'kitchen' | 'wc' | 'shower' | 'floorIns') { this.edit(c => { c[k] = c[k] ? 0 : 1; }); }
   bump(k: 'count' | 'floors', d: number) { this.edit(c => { c[k] += d; }); }

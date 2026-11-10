@@ -33,7 +33,7 @@ export class ConfiguratorComponent implements OnDestroy {
   readonly tabs = STEPS.map((_, i) => i);
   readonly types: Kind[] = ['Y', 'K', 'P'];
   readonly walls: { k: WallKey; label: string }[] = [{ k: 'f', label: 'front' }, { k: 'b', label: 'rear' }, { k: 'l', label: 'left' }, { k: 'r', label: 'right' }];
-  readonly wallSteps = [{ k: 'door', max: 3 }, { k: 'win', max: 8 }, { k: 'win3', max: 6 }, { k: 'fr', max: 4 }, { k: 'pano', max: 2 }];
+  readonly wallSteps = [{ k: 'door', max: 3 }, { k: 'win', max: 8 }, { k: 'fr', max: 4 }, { k: 'pano', max: 2 }];
   readonly insulation = ['0', '1', '50', '80', '100'];
 
   readonly cfg = this.s.cfg;
