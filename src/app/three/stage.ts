@@ -321,13 +321,14 @@ export class Stage {
     const x0 = Math.random() * 2;
     if (kind === 'panel') g.add(box(w, h, WT, mat, 0, h / 2, 0, x0));
     if (kind === 'window' || kind === 'win3' || kind === 'french' || kind === 'vent' || kind === 'pano') {
+      const frSill = .06, frOh = Math.round((WALL_H - frSill - .08) * 100) / 100;
       const [ow, oh, sill, bars] = kind === 'window' ? [.97, 1.2, .78, 1] : kind === 'win3' ? [1.5, 1.2, .78, 2]
-        : kind === 'french' ? [Math.min(2.5, w - .08), 2.0, .06, 2] : kind === 'pano' ? [w - .08, 2.0, .06, 3] : [.5, .45, 1.55, 0];
+        : kind === 'french' ? [Math.min(2.5, w - .08), frOh, frSill, 2] : kind === 'pano' ? [w - .08, frOh, frSill, 3] : [.5, .45, 1.55, 0];
       const cy = this.opening(g, w, h, ow, oh, sill, mat, join, x0);
       const gl = box(ow - .08, oh - .08, .012, this.mats.glass, 0, cy, 0);
       gl.castShadow = false; g.add(gl);
       for (let i = 1; i <= bars; i++) g.add(box(.05, oh, WT + .05, join, -ow / 2 + ow * i / (bars + 1), cy, 0));
-      if (kind === 'french') g.add(box(.022, .2, .05, this.mats.bolt, -ow / 2 + ow / 3 + .07, 1.05, .07));
+      if (kind === 'french') g.add(box(.022, .2, .05, this.mats.bolt, -ow / 2 + ow / 3 + .07, frSill + frOh * .44, .07));
     }
     if (kind === 'door') {
       const ow = .845, oh = 1.96;
