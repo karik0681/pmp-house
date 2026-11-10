@@ -50,7 +50,17 @@ export class ConfiguratorService {
   set<K extends keyof Cfg>(k: K, v: Cfg[K]) { this.edit(c => { c[k] = v; }); }
   toggle(k: 'kitchen' | 'wc' | 'shower' | 'floorIns') { this.edit(c => { c[k] = c[k] ? 0 : 1; }); }
   bump(k: 'count' | 'floors', d: number) { this.edit(c => { c[k] += d; }); }
-  bumpWall(k: string, d: number) { const w = this.wall(); this.edit(c => { (c.w[w] as any)[k] = ((c.w[w] as any)[k] || 0) + d; }); }
+  /** French doors and a panoramic window are the entrance and the glazing of their wall, so adding one clears its plain doors and windows. */
+  bumpWall(k: string, d: number) {
+    const w = this.wall();
+    this.edit(c => {
+      const o = c.w[w] as any;
+      o[k] = (o[k] || 0) + d;
+      if (d > 0 && (k === 'fr' || k === 'pano')) { o.door = 0; o.win = 0; if (o.pos) { delete o.pos.door; delete o.pos.win; } }
+    });
+  }
+  /** A wall with French doors or a panoramic window takes no plain doors or windows. */
+  readonly bigOnWall = computed(() => { const o = this.cfg().w[this.wall()]; return o.fr + (o.pano || 0) > 0; });
 
   setType(type: Kind) {
     this.edit(c => {

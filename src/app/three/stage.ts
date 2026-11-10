@@ -321,7 +321,8 @@ export class Stage {
     const x0 = Math.random() * 2;
     if (kind === 'panel') g.add(box(w, h, WT, mat, 0, h / 2, 0, x0));
     if (kind === 'window' || kind === 'win3' || kind === 'french' || kind === 'vent' || kind === 'pano') {
-      const frSill = .06, frOh = Math.round((WALL_H - frSill - .08) * 100) / 100;
+      /* French doors and panoramic windows stand on the bottom frame; the strip of wall panel stays above them */
+      const frSill = 0, frOh = Math.round((WALL_H - .26) * 100) / 100;
       const [ow, oh, sill, bars] = kind === 'window' ? [.97, 1.2, .78, 1] : kind === 'win3' ? [1.5, 1.2, .78, 2]
         : kind === 'french' ? [Math.min(2.5, w - .08), frOh, frSill, 2] : kind === 'pano' ? [w - .08, frOh, frSill, 3] : [.5, .45, 1.55, 0];
       const cy = this.opening(g, w, h, ow, oh, sill, mat, join, x0);

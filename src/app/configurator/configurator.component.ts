@@ -54,8 +54,16 @@ export class ConfiguratorComponent implements OnDestroy {
     if (w === 'l' || w === 'r') return true;
     const opp = w === 'f' ? 'b' : 'f';
     if ((c.w[opp].pano || 0) > 0 || c.w[opp].fr > 0) return true;
-    return !this.s.fitsWall('pano', (c.w[w].pano || 0) + 1);
+    const o = c.w[w];
+    return !layout({ ...c, w: { ...c.w, [w]: { ...o, door: 0, win: 0, pano: (o.pano || 0) + 1 } } });
   });
+  /** Is the + button of this opening off? Adding French doors or a panoramic window replaces the plain doors and windows of the wall. */
+  addDisabled(k: string, max: number) {
+    if (k === 'pano') return this.wallVal(k) >= max || this.panoAddDisabled();
+    if (k === 'door' || k === 'win') return this.s.bigOnWall() || this.wallVal(k) >= max || !this.s.fitsWall(k, this.wallVal(k) + 1);
+    const c = this.cfg(), w = this.s.wall(), o = c.w[w];
+    return this.wallVal(k) >= max || !layout({ ...c, w: { ...c.w, [w]: { ...o, door: 0, win: 0, fr: o.fr + 1 } } });
+  }
   readonly anyBlocked = computed(() => {
     const c = this.cfg();
     return (['kitchen', 'wc', 'shower'] as const).some(k => !c[k] && !this.s.fits({ [k]: 1 }))
