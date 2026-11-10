@@ -241,35 +241,41 @@ h1{font-weight:800;letter-spacing:-.025em;line-height:.95}
 .mm-end .btn{white-space:nowrap;padding:0 10px}
 
 /* ---------- exploded container ---------- */
-.xpl{height:330vh;background:var(--mint);position:relative}
-.xpl-pin{position:sticky;top:62px;height:calc(100svh - 62px);overflow:hidden}
-.xpl-grid{height:100%;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(16px,3vw,40px);align-items:center}
+.xpl{background:var(--mint);padding:clamp(48px,6vw,84px) 0}
+.xpl-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(16px,3vw,40px);align-items:center}
 .xpl-text h2{font:700 clamp(30px,3.6vw,50px)/1.05 var(--disp);font-stretch:118%;letter-spacing:-.01em}
 .xpl-list{list-style:none;margin:18px 0 0;padding:0}
 .xpl-list button{display:flex;gap:12px;width:100%;text-align:left;background:none;border:0;padding:8px 10px;border-radius:8px;align-items:flex-start}
-.xpl-list li{opacity:.5;transition:opacity .25s}
-.xpl-list li.on{opacity:1}.xpl-list li.on button{background:#fff;box-shadow:0 4px 14px rgba(23,57,44,.08)}
+.xpl-list button:hover{background:rgba(255,255,255,.55)}
+.xpl-list li.on button{background:#fff;box-shadow:0 4px 14px rgba(23,57,44,.08)}
 .xn{flex:none;width:28px;height:28px;border-radius:50%;background:var(--g);color:#fff;font:700 14px/28px var(--disp);text-align:center}
 .xpl-list li.on .xn{background:var(--post)}
 .xpl-list b{display:block;font-size:17px;line-height:1.25}
 .xpl-list small{display:none;font-size:15px;line-height:1.4;color:var(--mute);margin-top:3px}
 .xpl-list li.on small{display:block}
 .xpl-note{font-size:14px;color:var(--mute);margin-top:12px!important}
-.xpl-3d{position:relative;height:100%;min-height:0}
-.xpl-3d canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.xpl-start{display:none}
+.xpl-view{position:relative;height:clamp(380px,62vh,640px);touch-action:pan-y}
+.xpl-view canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 .xtag{position:absolute;left:-14px;top:-14px;width:28px;height:28px;border-radius:50%;background:var(--g);color:#fff;font:700 14px/28px var(--disp);text-align:center;box-shadow:0 0 0 3px rgba(255,255,255,.85);pointer-events:none;transition:background .2s}
 .xtag.on{background:var(--post);box-shadow:0 0 0 4px #fff,0 0 0 9px rgba(200,116,42,.25)}
-.xpl-bar{position:absolute;left:10%;right:10%;bottom:18px;height:4px;border-radius:2px;background:rgba(23,57,44,.12)}.xpl-bar i{display:block;height:100%;background:var(--g);border-radius:2px}
-.xpl.still{height:auto}.xpl.still .xpl-pin{position:static;height:auto;padding:clamp(48px,6vw,80px) 0}.xpl.still .xpl-3d{height:560px}.xpl.still .xpl-bar{display:none}.xpl.still .xpl-list li{opacity:1}
+.xpl-ctl{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px}
+.xarrow{flex:none;width:52px;height:52px;border-radius:50%;border:0;background:var(--g);color:#fff;font-size:26px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+.xarrow:hover{background:#0f2a20}.xarrow:disabled{opacity:.3;cursor:not-allowed}
+.xdots{display:flex;gap:6px}
+.xdots button{width:36px;height:36px;border-radius:50%;border:2px solid var(--g);background:#fff;color:var(--g);font:700 14px var(--disp)}
+.xdots button[aria-pressed=true]{background:var(--post);border-color:var(--post);color:#fff}
+.xcount{display:none;min-width:150px;text-align:center;font-weight:700}
 @media(max-width:860px){
-  .xpl{height:380vh}
-  .xpl-grid{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;align-items:stretch;gap:0;padding-bottom:14px}
-  .xpl-3d{order:-1}
-  .xpl-text{padding-top:6px}
-  .xpl-text h2{font-size:24px}.xpl-text .sub{display:none}
-  .xpl-list{margin-top:8px}.xpl-list li:not(.on){display:none}.xpl-list li.on button{padding:10px 12px}
-  .xpl-note{display:none}
-  .xpl.still .xpl-list li{display:block}.xpl.still .xpl-3d{height:420px}
+  .xpl-grid{grid-template-columns:minmax(0,1fr);gap:0}
+  .xpl-text{display:contents}
+  .xpl-text h2{order:1}.xpl-text .sub{order:2;margin-top:8px}
+  .xpl-3d{order:3}
+  .xpl-list{order:4;margin-top:14px}.xpl-list li:not(.on){display:none}.xpl-list li.on button{padding:12px 14px}
+  .xpl-start{order:4;display:block;margin-top:14px!important;background:#fff;border-radius:8px;padding:12px 14px}
+  .xpl-note{order:5}
+  .xpl-view{height:min(58svh,400px)}
+  .xdots{display:none}.xcount{display:block}
 }
 .brand{display:flex;align-items:center}.brand svg{display:block;height:34px;width:auto}
 .ft-logo{display:inline-block}.ft-logo svg{display:block;width:min(300px,100%);height:auto}

@@ -4,6 +4,7 @@ import type { Lang } from './i18n';
 export const PAGES: Record<Lang, Record<string, string>> = {
   cs: {
     colorH: 'Barva fasády', t5: 'Okna a izolace', hLook: 'Barva oken a izolace',
+    tab_type: 'Typ a rozměr', tab_walls: 'Okna a dveře', tab_look: 'Rámy a izolace', tab_inside: 'Vnitřek', tab_send: 'Odeslat',
     home: 'Úvod', menu: 'Menu', navRefs: 'Reference', navMontage: 'Doprava a montáž',
     day1: 'den', dayN: 'dny',
 
@@ -78,7 +79,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
 
 
     /* exploded container */
-    xpH: 'Z čeho se skládá kontejner', xpSub: 'Posouvejte stránku a kontejner se rozloží na jednotlivé vrstvy.', xpSubStill: 'Sedm vrstev, ze kterých se kontejner skládá.',
+    xpH: 'Z čeho se skládá kontejner', xpSub: 'Šipkami projdete kontejner vrstvu po vrstvě.', xpStart: 'Teď vidíte celý kontejner. Stiskněte šipku a rozložíme ho na vrstvy.', xpPrev: 'Předchozí vrstva', xpNext: 'Další vrstva', xpReset: 'Složit zpět', xpLayer: 'Vrstva', xpWhole: 'Celý kontejner', xpSubStill: 'Sedm vrstev, ze kterých se kontejner skládá.',
     xp1: 'Ocelový rám podlahy', xp1D: 'Svařený rám z ocelových profilů nese celou stavbu. Za jeho rohy kontejner zvedá jeřáb.',
     xp2: 'Zateplená podlaha', xp2D: 'Izolace mezi profily, nad ní cementotřísková deska a PVC krytina. U typu Ekonom minerální vata 50 mm.',
     xp3: 'Sloupy', xp3D: 'Čtyři rohové sloupy spojují spodní a horní rám. Ekonom a Standard mají navíc dva sloupy v každé delší stěně.',
@@ -98,6 +99,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     pvH6: 'Cookies a prohlížeč', pvP6: 'Web nepoužívá reklamní cookies. V prohlížeči si pamatuje jen zvolený jazyk a odkud jste na web přišli, aby šla poptávka správně přiřadit.',
   },
   de: {
+    tab_type: 'Typ und Größe', tab_walls: 'Fenster und Türen', tab_look: 'Rahmen und Dämmung', tab_inside: 'Innenraum', tab_send: 'Absenden',
     home: 'Start', menu: 'Menü', navRefs: 'Referenzen', navMontage: 'Lieferung und Montage',
     day1: 'Tag', dayN: 'Tage',
 
@@ -168,7 +170,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     homeMtBtn: 'Ablauf der Montage',
 
 
-    xpH: 'Woraus ein Container besteht', xpSub: 'Scrollen Sie, und der Container zerlegt sich in seine Schichten.', xpSubStill: 'Die sieben Schichten eines Containers.',
+    xpH: 'Woraus ein Container besteht', xpSub: 'Mit den Pfeilen gehen Sie den Container Schicht für Schicht durch.', xpStart: 'Sie sehen den ganzen Container. Drücken Sie den Pfeil, und wir zerlegen ihn in Schichten.', xpPrev: 'Vorherige Schicht', xpNext: 'Nächste Schicht', xpReset: 'Wieder zusammensetzen', xpLayer: 'Schicht', xpWhole: 'Ganzer Container', xpSubStill: 'Die sieben Schichten eines Containers.',
     xp1: 'Bodenrahmen aus Stahl', xp1D: 'Der geschweißte Rahmen aus Stahlprofilen trägt das ganze Gebäude. An seinen Ecken hebt der Kran den Container.',
     xp2: 'Gedämmter Boden', xp2D: 'Dämmung zwischen den Profilen, darüber eine Zementspanplatte und PVC-Belag. Beim Typ Ekonom 50 mm Mineralwolle.',
     xp3: 'Stützen', xp3D: 'Vier Eckstützen verbinden Boden- und Dachrahmen. Ekonom und Standard haben zusätzlich zwei Stützen in jeder Längswand.',

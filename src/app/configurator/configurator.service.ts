@@ -5,10 +5,14 @@ import { Cfg, Kind, WallKey, fresh, isCustom, priceOf, repair, shell, sizesOf } 
 export type View = '3d' | 'skel' | 'plan';
 
 /** Single source of truth for the configurator. Components read signals and call these methods. */
+/** The configurator steps, in the order the visitor walks through them. */
+export const STEPS = ['type', 'walls', 'look', 'inside', 'send'] as const;
+
 @Injectable({ providedIn: 'root' })
 export class ConfiguratorService {
   readonly cfg = signal<Cfg>(fresh('P', 6, 3));
   readonly step = signal(0);
+  readonly stepKey = computed(() => STEPS[this.step()]);
   readonly wall = signal<WallKey>('f');
   readonly view = signal<View>('3d');
 
@@ -43,7 +47,7 @@ export class ConfiguratorService {
       if (JSON.stringify(c.w) === JSON.stringify(shell(c.type))) { c.w = shell(type); if (type === 'P') c.bathPos = 'l'; }
       const wasCustom = isCustom(c);
       c.type = type;
-      if (wasCustom || !sizesOf(type).some(([L, W]) => L === c.L && W === c.W)) { const [L, W] = sizesOf(type)[0]; c.L = L; c.W = W; }
+      if (wasCustom || !sizesOf(type).some(([L, W]) => L === c.L && W === c.W)) { c.L = 6; c.W = 3; }   /* 3 × 6 m exists in every type */
     }, true);
   }
   setSize(L: number, W: number) { this.edit(c => { c.L = L; c.W = W; }, true); }
@@ -55,9 +59,6 @@ export class ConfiguratorService {
   }
 
   go(i: number) {
-    const s = Math.max(0, Math.min(5, i));
-    this.step.set(s);
-    if (s === 1) this.view.set('skel');
-    else if (this.view() === 'skel') this.view.set('3d');
+    this.step.set(Math.max(0, Math.min(STEPS.length - 1, i)));
   }
 }

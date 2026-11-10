@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { Stage, layout } from '../three/stage';
 import { I18nService } from '../core/i18n.service';
 import { money, num, dim } from '../core/format';
-import { ConfiguratorService, View } from './configurator.service';
+import { STEPS, ConfiguratorService, View } from './configurator.service';
 import { Kind, WallKey, blank, planSvg, sizesOf, summaryLines } from './model';
 import { EnquiryService, Result } from '../leads/enquiry.service';
 
@@ -29,7 +29,8 @@ export class ConfiguratorComponent implements OnDestroy {
   private stage: any = null;
   readonly no3d = signal(false);
 
-  readonly tabs = [0, 1, 2, 3, 4, 5];
+  readonly steps = STEPS;
+  readonly tabs = STEPS.map((_, i) => i);
   readonly types: Kind[] = ['Y', 'K', 'P'];
   readonly walls: { k: WallKey; label: string }[] = [{ k: 'f', label: 'front' }, { k: 'b', label: 'rear' }, { k: 'l', label: 'left' }, { k: 'r', label: 'right' }];
   readonly wallSteps = [{ k: 'door', max: 3 }, { k: 'win', max: 8 }, { k: 'win3', max: 6 }, { k: 'fr', max: 4 }, { k: 'pano', max: 2 }];
@@ -41,19 +42,6 @@ export class ConfiguratorComponent implements OnDestroy {
   readonly summary = computed(() => summaryLines(this.cfg(), k => this.i18n.t(k)));
   readonly dimText = computed(() => dim(this.cfg().L, this.cfg().W));
   readonly hasEntry = computed(() => Object.values(this.cfg().w).some(w => w.door + w.fr + (w.pano || 0) > 0));
-  readonly postRows = computed(() => {
-    const c = this.cfg(), lay = this.s.lay(), free = c.type === 'P', posts = this.s.posts();
-    if (!lay) return [];
-    return (['b', 'f'] as const).map(w => {
-      const dots = [];
-      for (let i = 2; i < lay.n; i += 2) {
-        const on = posts.some((p: any) => p.w === w && p.i === i);
-        const next = on ? c.posts.filter(p => !(p.w === w && p.i === i)) : [...c.posts, { w, i }];
-        dots.push({ i, on, can: free && (on || !!layout({ ...c, posts: next })), pos: num(+(.16 + i * lay.sw).toFixed(1)) });
-      }
-      return { w, dots, cols: `repeat(${lay.n / 2 - 1},1fr)` };
-    });
-  });
   readonly panoBlocked = computed(() => {
     const c = this.cfg(), w = this.s.wall();
     return c.type !== 'P' && !c.w[w].pano && !layout({ ...c, w: { ...c.w, [w]: { ...blank(), pano: 1 } } })
@@ -97,20 +85,15 @@ export class ConfiguratorComponent implements OnDestroy {
 
   private camera() {
     const st = this.stage; if (!st) return;
-    const step = this.s.step(), view = this.s.view(), inside = step === 2 && view !== 'skel', skel = view === 'skel';
+    const step = this.s.stepKey(), view = this.s.view(), inside = step === 'inside' && view !== 'skel', skel = view === 'skel';
     st.liftTo = inside ? 1 : 0; st.skelTo = skel ? 1 : 0;
     st.fitScale = inside ? 1 : 1.04; st.fit();
-    if (skel) st.look(...SKEL); else if (inside) st.look(...TOP); else if (step === 3) st.look(WALL_THETA[this.s.wall()], 1.36); else st.look(...SIDE);
+    if (skel) st.look(...SKEL); else if (inside) st.look(...TOP); else if (step === 'walls') st.look(WALL_THETA[this.s.wall()], 1.36); else st.look(...SIDE);
   }
 
   go(i: number) { this.s.go(i); this.panes().nativeElement.scrollTop = 0; }
   setView(v: View) { this.s.view.set(v); }
   pickSize(L: number, W: number) { this.s.setSize(L, W); }
-  pickCustom() { if (!this.s.custom()) this.s.setSize(5.5, 3); }
-  customSize(L: string, W: string) {
-    const l = Math.min(12, Math.max(2.4, +L || 2.4)), w = Math.min(4, Math.max(2.4, +W || 2.4));
-    this.s.setSize(Math.round(l * 10) / 10, Math.round(w * 10) / 10);
-  }
   isOn(k: string) { return !!(this.cfg() as any)[k]; }
   canAdd(k: string) { return this.s.fits({ [k]: 1 } as any); }
   canBath(p: string) { return this.s.fits({ bathPos: p } as any); }

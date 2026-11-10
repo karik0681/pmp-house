@@ -2,12 +2,12 @@
   <div class="panel">
     <div class="tabs" role="tablist">
       @for (i of tabs; track i) {
-        <button type="button" class="tab" role="tab" [attr.aria-selected]="s.step() === i" (click)="go(i)"><b>{{ i + 1 }}</b><span>{{ t('t' + (i + 1)) }}</span></button>
+        <button type="button" class="tab" role="tab" [attr.aria-selected]="s.step() === i" (click)="go(i)"><b>{{ i + 1 }}</b><span>{{ t('tab_' + steps[i]) }}</span></button>
       }
     </div>
     <div class="panes" #panes>
-      @switch (s.step()) {
-        @case (0) {
+      @switch (s.stepKey()) {
+        @case ('type') {
           <div class="pane">
             <h2>{{ t('hType') }}</h2>
             <div class="typepick">
@@ -26,14 +26,7 @@
               @for (z of sizes(); track z.label) {
                 <button type="button" class="size" [attr.aria-pressed]="pressed(z.L === cfg().L && z.W === cfg().W)" (click)="pickSize(z.L, z.W)"><b>{{ z.label }}</b><span>{{ z.area }} m²</span></button>
               }
-              <button type="button" class="size" [attr.aria-pressed]="pressed(s.custom())" (click)="pickCustom()"><b>{{ t('custom') }}</b></button>
             </div>
-            @if (s.custom()) {
-              <div class="customs">
-                <label><span>{{ t('len') }}</span><input #cl type="number" min="2.4" max="12" step=".1" [value]="cfg().L" (change)="customSize(cl.value, cw.value)"></label>
-                <label><span>{{ t('wid') }}</span><input #cw type="number" min="2.4" max="4" step=".1" [value]="cfg().W" (change)="customSize(cl.value, cw.value)"></label>
-              </div>
-            }
             <div class="opt"><span>{{ t('modules') }}</span><div class="st">
               <button type="button" [attr.aria-label]="t('less')" [disabled]="cfg().count <= 1" (click)="s.bump('count', -1)">−</button><output>{{ cfg().count }}</output>
               <button type="button" [attr.aria-label]="t('more2')" [disabled]="cfg().count >= 3" (click)="s.bump('count', 1)">+</button></div></div>
@@ -43,28 +36,7 @@
             @if (cfg().type !== 'P') { <p class="note">{{ t('floorsNote') }}</p> }
           </div>
         }
-        @case (1) {
-          <div class="pane">
-            <h2>{{ t('hPosts') }}</h2>
-            <p class="txt">{{ t(cfg().type === 'P' ? 'postsP' : s.posts().length ? 'postsFix' : 'postsNone') }}</p>
-            <div class="board">
-              @for (row of postRows(); track row.w; let first = $first) {
-                @if (!first) { <div class="roomstrip"></div> }
-                <div class="wallrow"><span>{{ t(row.w === 'f' ? 'wFront' : 'wRear') }}</span>
-                  <div class="dots" [style.grid-template-columns]="row.cols">
-                    @for (d of row.dots; track d.i) {
-                      <button type="button" class="dot" [attr.aria-pressed]="pressed(d.on)" [disabled]="!d.can" [attr.title]="cfg().type === 'P' && !d.can ? t('postBlocked') : null"
-                        [attr.aria-label]="t('postAt') + ' ' + d.pos + ' m'" (click)="s.togglePost(row.w, d.i)"><i></i></button>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-            @if (cfg().type === 'P') { <p class="note">{{ t('postTip') }}</p> }
-            @else { <button type="button" class="btn btn-o" (click)="s.setType('P')">{{ t('toP') }}</button> }
-          </div>
-        }
-        @case (2) {
+        @case ('inside') {
           <div class="pane">
             <h2>{{ t('hIn') }}</h2>
             <div class="opt"><span>{{ t('rooms') }}</span><div class="seg">
@@ -85,7 +57,7 @@
             @if (anyBlocked()) { <p class="note">{{ t('fitNote') }}</p> }
           </div>
         }
-        @case (3) {
+        @case ('walls') {
           <div class="pane">
             <h2>{{ t('hWalls') }}</h2>
             <div class="walls">
@@ -102,7 +74,7 @@
             @if (!hasEntry()) { <p class="note warn">{{ t('noEntry') }}</p> }
           </div>
         }
-        @case (4) {
+        @case ('look') {
           <div class="pane">
             <h2>{{ t('hLook') }}</h2>
             <h3>{{ t('joinery') }}</h3>
@@ -120,7 +92,7 @@
             <button type="button" class="sw" role="switch" [attr.aria-checked]="pressed(!!cfg().floorIns)" (click)="s.toggle('floorIns')"><span>{{ t('floorIns') }}</span><i></i></button>
           </div>
         }
-        @case (5) {
+        @case ('send') {
           <div class="pane">
             <h2>{{ t('hSend') }}</h2>
             <details class="sum"><summary>{{ t('summary') }}: {{ t(cfg().type) }}, {{ dimText() }}</summary>
@@ -154,7 +126,7 @@
       </div>
       <div class="nav">
         <button type="button" class="btn btn-o" [disabled]="s.step() === 0" (click)="go(s.step() - 1)">{{ t('back') }}</button>
-        @if (s.step() < 5) { <button type="button" class="btn btn-g" (click)="go(s.step() + 1)">{{ t('next') }}</button> }
+        @if (s.step() < steps.length - 1) { <button type="button" class="btn btn-g" (click)="go(s.step() + 1)">{{ t('next') }}</button> }
       </div>
     </div>
   </div>

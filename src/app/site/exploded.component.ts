@@ -3,37 +3,50 @@ import { I18nService } from '../core/i18n.service';
 import { Exploded } from '../three/explode';
 
 /**
- * "What a container is made of": while the visitor scrolls through this tall section,
- * the 3D container stays pinned and comes apart layer by layer, with the matching text highlighted.
+ * "What a container is made of": the visitor steps through seven layers with the arrows
+ * (or the numbered buttons, or a swipe). Step 0 is the whole container; from step 1 it is taken apart.
  */
 @Component({
   selector: 'app-exploded',
   template: `
-    <section class="xpl" id="skladba" [class.still]="still">
-      <div class="xpl-pin"><div class="wrap xpl-grid">
+    <section class="xpl" id="skladba">
+      <div class="wrap xpl-grid">
         <div class="xpl-text">
           <h2>{{ t('xpH') }}</h2>
-          <p class="sub">{{ t(still ? 'xpSubStill' : 'xpSub') }}</p>
+          <p class="sub">{{ t('xpSub') }}</p>
           <ol class="xpl-list">
             @for (i of items; track i) {
-              <li [class.on]="still || active() === i">
-                <button type="button" (click)="jump(i)">
+              <li [class.on]="step() === i + 1">
+                <button type="button" (click)="go(i + 1)">
                   <span class="xn">{{ i + 1 }}</span>
                   <span><b>{{ t('xp' + (i + 1)) }}</b><small>{{ t('xp' + (i + 1) + 'D') }}</small></span>
                 </button>
               </li>
             }
           </ol>
+          @if (step() === 0) { <p class="xpl-start">{{ t('xpStart') }}</p> }
           <p class="xpl-note">{{ t('xpNote') }}</p>
         </div>
         <div class="xpl-3d">
-          <canvas #canvas aria-hidden="true"></canvas>
-          @for (p of tags(); track $index) {
-            <span class="xtag" [class.on]="active() === $index" [style.transform]="'translate(' + p[0] + 'px,' + p[1] + 'px)'" aria-hidden="true">{{ $index + 1 }}</span>
-          }
-          <div class="xpl-bar" aria-hidden="true"><i [style.width.%]="progress() * 100"></i></div>
+          <div class="xpl-view" (touchstart)="tx = $any($event).touches[0].clientX" (touchend)="swipe($event)">
+            <canvas #canvas aria-hidden="true"></canvas>
+            @for (p of tags(); track $index) {
+              <span class="xtag" [class.on]="step() === $index + 1" [style.transform]="'translate(' + p[0] + 'px,' + p[1] + 'px)'" aria-hidden="true">{{ $index + 1 }}</span>
+            }
+          </div>
+          <div class="xpl-ctl">
+            <button type="button" class="xarrow" [attr.aria-label]="t('xpPrev')" [disabled]="step() === 0" (click)="go(step() - 1)">‹</button>
+            <div class="xdots">
+              @for (i of items; track i) {
+                <button type="button" [attr.aria-pressed]="step() === i + 1" [attr.aria-label]="t('xpLayer') + ' ' + (i + 1) + ': ' + t('xp' + (i + 1))" (click)="go(i + 1)">{{ i + 1 }}</button>
+              }
+            </div>
+            <span class="xcount" aria-live="polite">{{ step() ? t('xpLayer') + ' ' + step() + ' / 7' : t('xpWhole') }}</span>
+            @if (step() < 7) { <button type="button" class="xarrow" [attr.aria-label]="t('xpNext')" (click)="go(step() + 1)">›</button> }
+            @else { <button type="button" class="xarrow" [attr.aria-label]="t('xpReset')" [title]="t('xpReset')" (click)="go(0)">↺</button> }
+          </div>
         </div>
-      </div></div>
+      </div>
     </section>`,
 })
 export class ExplodedComponent implements OnDestroy {
@@ -41,50 +54,62 @@ export class ExplodedComponent implements OnDestroy {
   private host = inject(ElementRef<HTMLElement>);
   private canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private view: any = null;
+  private raf = 0;
+  private io?: IntersectionObserver;
+  private amount = 0;
+  private theta = -.5;
   readonly items = [0, 1, 2, 3, 4, 5, 6];
-  readonly active = signal(-1);
-  readonly progress = signal(0);
+  /** 0 = whole container, 1–7 = the layer being explained */
+  readonly step = signal(0);
   readonly tags = signal<number[][]>([]);
-  readonly still = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  tx = 0;
   t = (k: string) => this.i18n.t(k);
-
-  private section() { return this.host.nativeElement.querySelector('.xpl') as HTMLElement; }
-
-  private onScroll = () => {
-    const v = this.view; if (!v || this.still) return;
-    const r = this.section().getBoundingClientRect();
-    const span = r.height - (innerHeight - 62);
-    const p = Math.min(1, Math.max(0, (62 - r.top) / span));
-    this.progress.set(p);
-    v.setAmount(Math.min(1, p * 1.6));
-    v.setView(-.5 - .5 * p);
-    this.active.set(Math.min(6, Math.floor(p * 7)));
-  };
 
   constructor() {
     afterNextRender(() => {
       try {
         const v: any = this.view = new Exploded(this.canvas().nativeElement);
-        v.onRender = () => this.tags.set(this.amountShown() ? v.anchors() : []);
-        if (this.still) { v.setAmount(1); v.setView(-.8); }
-        addEventListener('scroll', this.onScroll, { passive: true });
-        addEventListener('resize', this.onScroll, { passive: true });
-        this.onScroll();
+        v.onRender = () => this.tags.set(v.amount > .35 ? v.anchors() : []);
+        v.setView(this.theta);
+        /* the first time the block is on screen, take the container apart once to show what the arrows do */
+        this.io = new IntersectionObserver(es => {
+          if (es[0].isIntersecting) { this.io?.disconnect(); if (this.step() === 0) this.go(1); }
+        }, { threshold: .6 });
+        this.io.observe(this.canvas().nativeElement);
       } catch (e) { console.warn(e); }
     });
   }
-  private amountShown() { return this.view && this.view.amount > .35; }
 
-  /** clicking a line scrolls to the moment where that layer is explained */
-  jump(i: number) {
-    if (this.still) return;
-    const el = this.section(), span = el.offsetHeight - (innerHeight - 62);
-    const top = el.getBoundingClientRect().top + scrollY - 62 + span * (i + .5) / 7;
-    scrollTo({ top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  go(i: number) {
+    this.step.set(Math.max(0, Math.min(7, i)));
+    this.animate();
+  }
+  swipe(e: TouchEvent) {
+    const d = e.changedTouches[0].clientX - this.tx;
+    if (Math.abs(d) > 50) this.go(this.step() + (d < 0 ? 1 : -1));
+  }
+
+  /** eases the model towards the state of the current step */
+  private animate() {
+    const v = this.view; if (!v) return;
+    const toAmount = this.step() ? 1 : 0, toTheta = -.5 - .5 * (this.step() / 7);
+    cancelAnimationFrame(this.raf);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.amount = toAmount; this.theta = toTheta; v.setAmount(toAmount); v.setView(toTheta); return;
+    }
+    const tick = () => {
+      this.amount += (toAmount - this.amount) * .07;
+      this.theta += (toTheta - this.theta) * .07;
+      const done = Math.abs(toAmount - this.amount) < .002 && Math.abs(toTheta - this.theta) < .002;
+      if (done) { this.amount = toAmount; this.theta = toTheta; }
+      v.setAmount(this.amount); v.setView(this.theta);
+      if (!done) this.raf = requestAnimationFrame(tick);
+    };
+    tick();
   }
 
   ngOnDestroy() {
-    removeEventListener('scroll', this.onScroll); removeEventListener('resize', this.onScroll);
+    cancelAnimationFrame(this.raf); this.io?.disconnect();
     this.view?.destroy();
   }
 }
