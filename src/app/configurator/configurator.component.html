@@ -68,7 +68,7 @@
             @for (o of wallSteps; track o.k) {
               <div class="opt"><span>{{ t(o.k) }}</span><div class="st">
                 <button type="button" [attr.aria-label]="t('less')" [disabled]="wallVal(o.k) <= 0" (click)="s.bumpWall(o.k, -1)">−</button><output>{{ wallVal(o.k) }}</output>
-                <button type="button" [attr.aria-label]="t('more2')" [disabled]="wallVal(o.k) >= o.max || !s.fitsWall(o.k, wallVal(o.k) + 1)" (click)="s.bumpWall(o.k, 1)">+</button></div></div>
+                <button type="button" [attr.aria-label]="t('more2')" [disabled]="o.k === 'pano' ? panoAddDisabled() : (wallVal(o.k) >= o.max || !s.fitsWall(o.k, wallVal(o.k) + 1))" (click)="s.bumpWall(o.k, 1)">+</button></div></div>
               @if (o.move && wallVal(o.k) > 0) {
                 <div class="opt sub-opt"><span>{{ t('place_' + o.k) }}</span><div class="seg">
                   @for (p of sides; track p) {
@@ -78,6 +78,7 @@
               }
             }
             @if (panoBlocked()) { <p class="note warn">{{ t('panoBlocked') }}</p> }
+            @if (!panoBlocked() && panoAddDisabled() && wallVal('pano') === 0) { <p class="note">{{ t('panoFront') }}</p> }
             @if (!hasEntry()) { <p class="note warn">{{ t('noEntry') }}</p> }
           </div>
         }

@@ -48,6 +48,14 @@ export class ConfiguratorComponent implements OnDestroy {
     return c.type !== 'P' && !c.w[w].pano && !layout({ ...c, w: { ...c.w, [w]: { ...blank(), pano: 1 } } })
       && !!layout({ ...c, type: 'P', posts: [], w: { ...c.w, [w]: { ...blank(), pano: 1 } } });
   });
+  /** Panoramic window is only for front/rear walls; also blocked when the opposite wall already has a large opening. */
+  readonly panoAddDisabled = computed(() => {
+    const c = this.cfg(), w = this.s.wall();
+    if (w === 'l' || w === 'r') return true;
+    const opp = w === 'f' ? 'b' : 'f';
+    if ((c.w[opp].pano || 0) > 0 || c.w[opp].fr > 0) return true;
+    return !this.s.fitsWall('pano', (c.w[w].pano || 0) + 1);
+  });
   readonly anyBlocked = computed(() => {
     const c = this.cfg();
     return (['kitchen', 'wc', 'shower'] as const).some(k => !c[k] && !this.s.fits({ [k]: 1 }))

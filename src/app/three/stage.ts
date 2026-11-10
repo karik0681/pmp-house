@@ -158,7 +158,7 @@ export const slots = L => 2 * Math.max(1, Math.round((L - 2 * F) / (2 * SLOT)));
 export function postsOf(c) {
   if (c.type === 'P') return c.posts || [];
   if (c.L < 6) return [];
-  const n = slots(c.L), a = 2 * Math.round(n * .3 / 2);
+  const n = slots(c.L), a = 2 * Math.round(n * .2 / 2);
   return [a, n - a].flatMap(i => [{ w: 'f', i }, { w: 'b', i }]);
 }
 export function layout(c) {
