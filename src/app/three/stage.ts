@@ -158,7 +158,7 @@ export const slots = L => 2 * Math.max(1, Math.round((L - 2 * F) / (2 * SLOT)));
 export function postsOf(c) {
   if (c.type === 'P') return c.posts || [];
   if (c.L < 6) return [];
-  const n = slots(c.L), a = 2 * Math.round(n * .2 / 2);
+  const n = slots(c.L), a = Math.round(n * .25);   /* a quarter of the wall from each end: French doors fit between them with a strip of wall on both sides */
   return [a, n - a].flatMap(i => [{ w: 'f', i }, { w: 'b', i }]);
 }
 export function layout(c) {
@@ -471,6 +471,17 @@ export class Stage {
     cover.add(box(L - 2 * F, .1, W - 2 * F, this.mats.roof, 0, ROOF - .05, 0));
     cover.add(box(L - .3, .03, W - .3, c.type === 'P' ? this.mats.roofP : this.mats.roof, 0, ROOF + .012, 0));
     roof.add(cover); this.covers.push(cover);
+    if (c.type !== 'P') {
+      /* lifting lugs for the crane: above the fixed posts, or near the corners on short containers without them */
+      const px = lay.posts.filter(p => p.w === 'f').map(p => -lay.inner / 2 + p.i * lay.sw), xs = px.length ? px : [-L / 2 + .3, L / 2 - .3];
+      for (const x of xs) for (const sz of [1, -1]) {
+        const z = sz * (W / 2 - F / 2), lug = new THREE.Group();
+        lug.add(box(.11, .07, .03, fm, 0, .035, 0));
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(.055, .055, .03, 28).rotateX(Math.PI / 2), fm); top.position.y = .07; top.castShadow = true; lug.add(top);
+        const eye = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .034, 20).rotateX(Math.PI / 2), this.mats.hole); eye.position.y = .075; lug.add(eye);
+        lug.position.set(x, ROOF, z); roof.add(lug);
+      }
+    }
     g.add(roof);
     this.part(roof, { p: [0, stackTop, 0] }, { p: [0, H - ROOF, 0] }, 0, .3);
     if (isTop) this.roofs.push(roof);
