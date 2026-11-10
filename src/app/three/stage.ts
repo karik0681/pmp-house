@@ -106,32 +106,46 @@ function disc(rx, h, rz, mat, x, y, z) {
 }
 
 /* Places openings bay by bay: posts and the bathroom split a wall into bays, and an opening can never cross a post. */
-function seq(w, n, sw, reserved, blocked, frM) {
+function seq(w, n, sw, reserved, blocked, frM, flip = false) {
+  /* the customer may ask for doors and windows on the left, in the middle or on the right of a wall (seen from outside) */
+  const P = w.pos || {}, side = k => { const v = P[k]; return flip && v === 'l' ? 'r' : flip && v === 'r' ? 'l' : v; };
   const list = [], sp = m => Math.ceil(m / sw);
   for (let i = 0; i < (w.pano || 0); i++) list.push({ k: 'pano', span: sp(4.5) });
-  for (let i = 0; i < w.fr; i++) list.push({ k: 'french', span: sp(frM) });
-  for (let i = 0; i < w.door; i++) list.push({ k: 'door', span: sp(.95) });
+  for (let i = 0; i < w.fr; i++) list.push({ k: 'french', span: sp(frM), pos: side('fr') });
+  for (let i = 0; i < w.door; i++) list.push({ k: 'door', span: sp(.95), pos: side('door') });
   for (let i = 0; i < (w.win3 || 0); i++) list.push({ k: 'win3', span: sp(1.6) });
-  for (let i = 0; i < w.win; i++) list.push({ k: 'window', span: sp(1.07) });
+  for (let i = 0; i < w.win; i++) list.push({ k: 'window', span: sp(1.07), pos: side('win') });
   const bays = []; let cur = null;
   for (let i = 0; i < n; i++) {
     if (reserved.has(i)) { cur = null; continue; }
     if (!cur || blocked.has(i)) { cur = { a: i, b: i + 1, items: [] }; bays.push(cur); } else cur.b = i + 1;
   }
   bays.forEach(b => { b.free = b.b - b.a; });
+  const off = b => Math.abs((b.a + b.b) / 2 - n / 2);
   for (const it of list) {
-    let best = null;
-    for (const b of bays) if (b.free >= it.span && (!best || b.free > best.free)) best = b;
-    if (!best) return null;
+    const fit = bays.filter(b => b.free >= it.span);
+    if (!fit.length) return null;
+    const best = it.pos === 'l' ? fit[0] : it.pos === 'r' ? fit[fit.length - 1]
+      : it.pos === 'm' ? fit.reduce((x, b) => (off(b) < off(x) ? b : x))
+      : fit.reduce((x, b) => (b.free > x.free ? b : x));
     best.items.push(it); best.free -= it.span;
   }
   const out = []; let i = 0;
   const put = (k, span) => { out.push({ k, span, at: i }); i += span; };
+  const panels = c => { for (let g = 0; g < c; g++) put('panel', 1); };
   for (const b of bays) {
     while (i < b.a) put('panel', 1);
-    const c = b.items.length, gap = c ? Math.floor(b.free / (c + 1)) : 0, lead = c ? Math.floor((b.free - gap * (c - 1)) / 2) : 0;
-    for (let g = 0; g < lead; g++) put('panel', 1);
-    b.items.forEach((it, x) => { if (x) for (let g = 0; g < gap; g++) put('panel', 1); put(it.k, it.span); });
+    if (b.items.some(it => it.pos === 'l' || it.pos === 'r')) {
+      /* left ones against the left edge of the bay, right ones against the right edge, the rest centred between them */
+      const mid = b.items.filter(it => it.pos !== 'l' && it.pos !== 'r'), lead = mid.length ? Math.floor(b.free / 2) : b.free;
+      b.items.filter(it => it.pos === 'l').forEach(it => put(it.k, it.span));
+      panels(lead); mid.forEach(it => put(it.k, it.span)); panels(b.free - lead);
+      b.items.filter(it => it.pos === 'r').forEach(it => put(it.k, it.span));
+    } else {
+      const c = b.items.length, gap = c ? Math.floor(b.free / (c + 1)) : 0, lead = c ? Math.floor((b.free - gap * (c - 1)) / 2) : 0;
+      panels(lead);
+      b.items.forEach((it, x) => { if (x) panels(gap); put(it.k, it.span); });
+    }
     while (i < b.b) put('panel', 1);
   }
   while (i < n) put('panel', 1);
@@ -168,9 +182,14 @@ export function layout(c) {
   const busy = w => w.door + w.win + w.fr + (w.pano || 0) + (w.win3 || 0) > 0;
   if (!f || !b || !l || !r) return null;
   if ((bath && pos === 'r' && busy(c.w.r)) || (bath && pos === 'l' && busy(c.w.l))) return null;
-  if (c.wc && resB.size > 3) {
-    const idx = [...resB].sort((x, y) => x - y)[2], at = b.findIndex(x => x.at === idx);
-    if (b[at] && b[at + 1] && b[at].k === 'panel' && b[at + 1].k === 'panel') b.splice(at, 2, { k: 'vent', span: 2, at: idx });
+  if (bath) {
+    /* a bathroom always gets a small window in the rear wall, as close to its middle as the wall allows */
+    const zoneIdx = [...resB].sort((x, y) => x - y), centre = (zoneIdx[0] + zoneIdx[zoneIdx.length - 1]) / 2;
+    const spots = zoneIdx.filter(i => resB.has(i + 1)).sort((x, y) => Math.abs(x + .5 - centre) - Math.abs(y + .5 - centre));
+    for (const idx of spots) {
+      const at = b.findIndex(x => x.at === idx);
+      if (b[at] && b[at + 1] && b[at].k === 'panel' && b[at + 1].k === 'panel') { b.splice(at, 2, { k: 'vent', span: 2, at: idx }); break; }
+    }
   }
   f = merge(f); b = merge(b); l = merge(l); r = merge(r);
   return { n, sw, m, sh, f, b, l, r, inner, innerW, bath, zone, segs, big, parts, room, posts, pos };

@@ -4,7 +4,10 @@ import { num, money, dim } from '../core/format';
 
 export type Kind = 'Y' | 'K' | 'P';
 export type WallKey = 'f' | 'b' | 'l' | 'r';
-export interface Openings { door: number; win: number; win3: number; fr: number; pano: number }
+export type Side = 'l' | 'm' | 'r';
+export type Movable = 'door' | 'win' | 'fr';
+/** counts of openings in one wall; pos = where the customer wants them (left, middle, right seen from outside) */
+export interface Openings { door: number; win: number; win3: number; fr: number; pano: number; pos?: Partial<Record<Movable, Side>> }
 export interface Post { w: 'f' | 'b'; i: number }
 export interface Cfg {
   type: Kind; L: number; W: number; count: number; floors: number; rooms: number;
@@ -50,7 +53,7 @@ export function summaryLines(c: Cfg, t: T): string[] {
   if (eq.length) out.push(eq.join(', '));
   if (c.wc || c.shower) out.push(`${t('bathPos')}: ${t(c.bathPos)}`);
   for (const [k, n] of [['f', 'front'], ['b', 'rear'], ['l', 'left'], ['r', 'right']] as [WallKey, string][]) {
-    const w = c.w[k], p = (['door', 'win', 'win3', 'fr', 'pano'] as const).filter(x => w[x]).map(x => `${t(x)} ${w[x]}`);
+    const w = c.w[k], p = (['door', 'win', 'win3', 'fr', 'pano'] as const).filter(x => w[x]).map(x => `${t(x)} ${w[x]}${(w.pos as any)?.[x] ? ' (' + t((w.pos as any)[x]).toLowerCase() + ')' : ''}`);
     if (p.length) out.push(`${t(n)}: ${p.join(', ')}`);
   }
   out.push(`${t('walls')}: ${t(c.color)}, ${t('joinery')}: ${t(c.joinery)}, ${t('frJoin')}: ${t(c.frJoin)}`);

@@ -5,7 +5,7 @@ import { Stage, layout } from '../three/stage';
 import { I18nService } from '../core/i18n.service';
 import { money, num, dim } from '../core/format';
 import { STEPS, ConfiguratorService, View } from './configurator.service';
-import { Kind, WallKey, blank, planSvg, sizesOf, summaryLines } from './model';
+import { Kind, WallKey, blank, planSvg, sizesOf, summaryLines, Side } from './model';
 import { EnquiryService, Result } from '../leads/enquiry.service';
 
 const WALL_THETA: Record<WallKey, number> = { f: 0, b: Math.PI, l: -Math.PI / 2, r: Math.PI / 2 };
@@ -33,7 +33,8 @@ export class ConfiguratorComponent implements OnDestroy {
   readonly tabs = STEPS.map((_, i) => i);
   readonly types: Kind[] = ['Y', 'K', 'P'];
   readonly walls: { k: WallKey; label: string }[] = [{ k: 'f', label: 'front' }, { k: 'b', label: 'rear' }, { k: 'l', label: 'left' }, { k: 'r', label: 'right' }];
-  readonly wallSteps = [{ k: 'door', max: 3 }, { k: 'win', max: 8 }, { k: 'fr', max: 4 }, { k: 'pano', max: 2 }];
+  readonly wallSteps = [{ k: 'door', max: 3, move: true }, { k: 'win', max: 8, move: true }, { k: 'fr', max: 4, move: true }, { k: 'pano', max: 2, move: false }];
+  readonly sides: Side[] = ['l', 'm', 'r'];
   readonly insulation = ['0', '1', '50', '80', '100'];
 
   readonly cfg = this.s.cfg;
@@ -97,6 +98,7 @@ export class ConfiguratorComponent implements OnDestroy {
   isOn(k: string) { return !!(this.cfg() as any)[k]; }
   canAdd(k: string) { return this.s.fits({ [k]: 1 } as any); }
   canBath(p: string) { return this.s.fits({ bathPos: p } as any); }
+  posOf(k: string) { return (this.cfg().w[this.s.wall()].pos as any)?.[k] ?? null; }
   wallVal(k: string) { return (this.cfg().w[this.s.wall()] as any)[k] || 0; }
   wallCount(k: WallKey) { const w = this.cfg().w[k]; return w.door + w.win + (w.win3 || 0) + w.fr + (w.pano || 0) || ''; }
   maxFloors() { return this.cfg().type === 'P' ? 2 : 1; }

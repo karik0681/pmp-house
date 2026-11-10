@@ -29,7 +29,7 @@ export const REFERENCES: Reference[] = [
     year: 2025, use: 'business', type: 'P', L: 6, W: 3, count: 1, days: 1, cover: cover(0), photos: extra(3, 11, 36), demo: true,
     lead: { cs: 'Prodejna květin s velkým prosklením do ulice, aby kytice byly vidět už z chodníku.', de: 'Ein Blumenladen mit großer Glasfront zur Straße, damit die Sträuße schon vom Gehweg aus zu sehen sind.' },
     task: { cs: 'Majitelka hledala malou prodejnu, která bude hotová před sezónou a nebude potřebovat stavební práce na místě.', de: 'Die Inhaberin suchte einen kleinen Laden, der vor der Saison fertig ist und vor Ort keine Bauarbeiten braucht.' },
-    solution: { cs: 'Zvolili jsme Premium bez prostředních sloupů. Přední stěnu tvoří francouzská okna, uvnitř je pult, umyvadlo a police na vědra s vodou.', de: 'Wir haben Premium ohne Mittelstützen gewählt. Die Front besteht aus französischen Fenstern, innen gibt es Theke, Waschbecken und Regale für Wassereimer.' },
+    solution: { cs: 'Zvolili jsme Premium bez prostředních sloupů. Přední stěnu tvoří francouzské dveře, uvnitř je pult, umyvadlo a police na vědra s vodou.', de: 'Wir haben Premium ohne Mittelstützen gewählt. Die Front besteht aus französischen Fenstern, innen gibt es Theke, Waschbecken und Regale für Wassereimer.' },
     result: { cs: 'Kontejner stál na připravených patkách za jedno dopoledne. Prodejna otevřela týden po dodání.', de: 'Der Container stand an einem Vormittag auf den vorbereiteten Punktfundamenten. Der Laden öffnete eine Woche nach der Lieferung.' },
   },
   {

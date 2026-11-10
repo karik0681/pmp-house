@@ -3,11 +3,22 @@ import { I18nService } from '../core/i18n.service';
 import { goTo, scrollToId } from '../core/scroll';
 import { Stage } from '../three/stage';
 import { fresh } from '../configurator/model';
+import { CZ } from './cz-map';
 
 @Component({
   selector: 'app-hero',
   template: `
     <section class="hero">
+      <svg class="hero-map" [attr.viewBox]="'0 0 ' + cz.w + ' ' + cz.h" aria-hidden="true">
+        <path class="land" [attr.d]="cz.path" />
+        @for (c of cz.cities; track c.n) { <line class="route" [attr.x1]="cz.home.x" [attr.y1]="cz.home.y" [attr.x2]="c.x" [attr.y2]="c.y" /> }
+        @for (c of cz.cities; track c.n) {
+          <circle class="city" [attr.cx]="c.x" [attr.cy]="c.y" r="4" />
+        }
+        <circle class="home-ring" [attr.cx]="cz.home.x" [attr.cy]="cz.home.y" r="12" />
+        <circle class="home" [attr.cx]="cz.home.x" [attr.cy]="cz.home.y" r="5.5" />
+        <text class="home-t" [attr.x]="cz.home.x - 14" [attr.y]="cz.home.y - 12" text-anchor="end">{{ cz.home.n }}</text>
+      </svg>
       <div class="hero-3d"><canvas #canvas aria-hidden="true"></canvas></div>
       <div class="hero-t">
         <h1>{{ t('h1') }}</h1>
@@ -26,6 +37,7 @@ import { fresh } from '../configurator/model';
 export class HeroComponent implements OnDestroy {
   private i18n = inject(I18nService);
   private canvas = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  readonly cz = CZ;
   private stage: any = null;
   private timer = 0;
   t = (k: string) => this.i18n.t(k);

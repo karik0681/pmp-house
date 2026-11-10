@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { layout, postsOf } from '../three/stage';
-import { Cfg, Kind, WallKey, fresh, isCustom, priceOf, repair, shell, sizesOf } from './model';
+import { Cfg, Kind, WallKey, fresh, isCustom, priceOf, repair, shell, sizesOf, Movable, Side } from './model';
 
 export type View = '3d' | 'skel' | 'plan';
 
@@ -33,6 +33,16 @@ export class ConfiguratorService {
   fitsWall(k: string, v: number) {
     const c = this.cfg(), w = this.wall();
     return !!layout({ ...c, w: { ...c.w, [w]: { ...c.w[w], [k]: v } } });
+  }
+
+  /** Where on the current wall the doors or windows of one kind should sit; picking the same side again returns to automatic. */
+  setPos(k: Movable, side: Side) {
+    const w = this.wall();
+    this.edit(c => { const pos = { ...(c.w[w].pos || {}) }; if (pos[k] === side) delete pos[k]; else pos[k] = side; c.w[w].pos = pos; });
+  }
+  fitsPos(k: Movable, side: Side) {
+    const c = this.cfg(), w = this.wall();
+    return !!layout({ ...c, w: { ...c.w, [w]: { ...c.w[w], pos: { ...(c.w[w].pos || {}), [k]: side } } } });
   }
 
   /** Opens a saved configuration. Three-part windows are no longer offered, so old links lose them. */
