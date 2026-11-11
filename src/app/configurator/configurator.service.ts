@@ -46,9 +46,9 @@ export class ConfiguratorService {
   }
 
   /** Opens a saved configuration. Three-part windows are no longer offered, so old links lose them. */
-  load(c: Cfg) { for (const w of Object.values(c.w)) w.win3 = 0; this.cfg.set(c); }
+  load(c: Cfg) { for (const w of Object.values(c.w)) w.win3 = 0; repair(c); this.cfg.set(c); }
   set<K extends keyof Cfg>(k: K, v: Cfg[K]) { this.edit(c => { c[k] = v; }); }
-  toggle(k: 'kitchen' | 'wc' | 'shower' | 'floorIns') { this.edit(c => { c[k] = c[k] ? 0 : 1; }); }
+  toggle(k: 'kitchen' | 'wc' | 'shower') { this.edit(c => { c[k] = c[k] ? 0 : 1; }); }
   bump(k: 'count' | 'floors', d: number) { this.edit(c => { c[k] += d; }); }
   /** French doors and a panoramic window are the entrance and the glazing of their wall, so adding one clears its plain doors and windows. */
   bumpWall(k: string, d: number) {

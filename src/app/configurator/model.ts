@@ -23,7 +23,7 @@ export const shell = (type: Kind): Record<WallKey, Openings> => (type === 'P'
   : { f: { ...blank(), door: 1, win: 2 }, b: blank(), l: blank(), r: blank() });
 export const fresh = (type: Kind, L: number, W: number): Cfg => ({
   type, L, W, count: 1, floors: 1, rooms: 1, kitchen: 0, wc: 0, shower: 0, bathPos: type === 'P' ? 'l' : 'r',
-  color: 'white', joinery: 'white', frJoin: 'ant', ins: '1', floorIns: 1, posts: [], w: shell(type),
+  color: 'white', joinery: 'white', frJoin: 'ant', ins: '50', floorIns: 1, posts: [], w: shell(type),
 });
 
 export const sizesOf = (k: Kind): number[][] => SIZES[k];
@@ -34,6 +34,10 @@ export const valid = (c: Cfg) => !!layout(c);
 
 /** Keeps a choice physically valid after a type or size change. */
 export function repair(c: Cfg) {
+  /* insulation: there is no uninsulated version; walls 50 or 100 mm, floor standard (1) or +50/80/100 mm */
+  if (c.ins !== '100') c.ins = '50';
+  if (![1, 50, 80, 100].includes(c.floorIns)) c.floorIns = 1;
+  for (const w of Object.values(c.w)) if (w.pos) delete (w.pos as any).fr;
   if (c.type !== 'P') c.floors = 1;
   if (c.type === 'P') { const n = slots(c.L); c.posts = c.posts.filter(p => p.i > 0 && p.i < n); }
   if (!layout(c)) for (const k of Object.keys(c.w) as WallKey[]) c.w[k].pano = 0;
@@ -57,7 +61,7 @@ export function summaryLines(c: Cfg, t: T): string[] {
     if (p.length) out.push(`${t(n)}: ${p.join(', ')}`);
   }
   out.push(`${t('walls')}: ${t(c.color)}, ${t('joinery')}: ${t(c.joinery)}, ${t('frJoin')}: ${t(c.frJoin)}`);
-  out.push(`${t('ins')}: ${t('ins' + c.ins)}${c.floorIns ? ', ' + t('floorIns') : ''}`);
+  out.push(`${t('insWall')}: ${t('insW' + c.ins)}`, `${t('insFloor')}: ${t('insF' + c.floorIns)}`);
   return out;
 }
 

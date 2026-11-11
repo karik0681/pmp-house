@@ -111,7 +111,8 @@ function seq(w, n, sw, reserved, blocked, frM, flip = false) {
   const P = w.pos || {}, side = k => { const v = P[k]; return flip && v === 'l' ? 'r' : flip && v === 'r' ? 'l' : v; };
   const list = [], sp = m => Math.ceil(m / sw);
   for (let i = 0; i < (w.pano || 0); i++) list.push({ k: 'pano', span: sp(4.5) });
-  for (let i = 0; i < w.fr; i++) list.push({ k: 'french', span: sp(frM), pos: side('fr') });
+  /* French doors always sit in the middle of their bay; they have no left/right choice */
+  for (let i = 0; i < w.fr; i++) list.push({ k: 'french', span: sp(frM) });
   for (let i = 0; i < w.door; i++) list.push({ k: 'door', span: sp(.95), pos: side('door') });
   for (let i = 0; i < (w.win3 || 0); i++) list.push({ k: 'win3', span: sp(1.6) });
   for (let i = 0; i < w.win; i++) list.push({ k: 'window', span: sp(1.07), pos: side('win') });
@@ -142,6 +143,8 @@ function seq(w, n, sw, reserved, blocked, frM, flip = false) {
       panels(lead); mid.forEach(it => put(it.k, it.span)); panels(b.free - lead);
       b.items.filter(it => it.pos === 'r').forEach(it => put(it.k, it.span));
     } else {
+      /* a single opening with an odd number of spare cells takes one more cell, so it sits exactly in the middle */
+      if (b.items.length === 1 && b.free % 2) { b.items[0].span += 1; b.free -= 1; }
       const c = b.items.length, gap = c ? Math.floor(b.free / (c + 1)) : 0, lead = c ? Math.floor((b.free - gap * (c - 1)) / 2) : 0;
       panels(lead);
       b.items.forEach((it, x) => { if (x) panels(gap); put(it.k, it.span); });

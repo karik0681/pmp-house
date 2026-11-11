@@ -94,11 +94,14 @@
             <div class="seg wide">
               @for (v of ['ant', 'white']; track v) { <button type="button" [attr.aria-pressed]="pressed(cfg().frJoin === v)" (click)="s.set('frJoin', $any(v))">{{ t(v) }}</button> }
             </div>
-            <h3>{{ t('ins') }}</h3>
+            <h3>{{ t('insWall') }}</h3>
             <div class="choices">
-              @for (v of insulation; track v) { <button type="button" [attr.aria-pressed]="pressed(cfg().ins === v)" (click)="s.set('ins', v)">{{ t('ins' + v) }}</button> }
+              @for (v of wallIns; track v) { <button type="button" [attr.aria-pressed]="pressed(cfg().ins === v)" (click)="s.set('ins', v)">{{ t('insW' + v) }}</button> }
             </div>
-            <button type="button" class="sw" role="switch" [attr.aria-checked]="pressed(!!cfg().floorIns)" (click)="s.toggle('floorIns')"><span>{{ t('floorIns') }}</span><i></i></button>
+            <h3>{{ t('insFloor') }}</h3>
+            <div class="choices">
+              @for (v of floorInsOpts; track v) { <button type="button" [attr.aria-pressed]="pressed(cfg().floorIns === v)" (click)="s.set('floorIns', v)">{{ t('insF' + v) }}</button> }
+            </div>
           </div>
         }
         @case ('send') {
