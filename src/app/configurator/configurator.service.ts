@@ -1,6 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { layout, postsOf } from '../three/stage';
-import { Cfg, Kind, WallKey, fresh, isCustom, priceOf, repair, shell, sizesOf, Movable, Side, frAside, tidyWall } from './model';
+import { Cfg, Kind, WallKey, fresh, isCustom, priceOf, repair, shell, sizesOf, Movable, Side, asideCap, tidyWall } from './model';
 
 export type View = '3d' | 'skel' | 'plan';
 
@@ -38,7 +38,7 @@ export class ConfiguratorService {
   /** Where on the current wall the doors or windows of one kind should sit; picking the same side again returns to automatic. */
   setPos(k: Movable, side: Side) {
     const w = this.wall();
-    this.edit(c => { const pos = { ...(c.w[w].pos || {}) }; if (pos[k] === side) delete pos[k]; else pos[k] = side; c.w[w].pos = pos; tidyWall(c, c.w[w]); });
+    this.edit(c => { const pos = { ...(c.w[w].pos || {}) }; if (pos[k] === side) delete pos[k]; else pos[k] = side; c.w[w].pos = pos; tidyWall(c, w); });
   }
   fitsPos(k: Movable, side: Side) {
     const c = this.cfg(), w = this.wall();
@@ -56,13 +56,13 @@ export class ConfiguratorService {
     this.edit(c => {
       const o = c.w[w] as any;
       o[k] = (o[k] || 0) + d;
-      if (d > 0 && (k === 'fr' || k === 'pano')) tidyWall(c, o);
+      if (d > 0 && (k === 'fr' || k === 'pano')) tidyWall(c, w);
     });
   }
-  /** A wall with French doors or a panoramic window takes no plain doors or windows (except beside Premium French doors set left or right). */
-  readonly bigOnWall = computed(() => { const c = this.cfg(), o = c.w[this.wall()]; return o.fr + (o.pano || 0) > 0 && !frAside(c, o); });
-  /** Premium French doors on the left or right: room beside them for two windows, or a door and a window. */
-  readonly besideFr = computed(() => { const c = this.cfg(); return frAside(c, c.w[this.wall()]); });
+  /** A wall with French doors or a panoramic window takes no plain doors or windows at all. */
+  readonly bigOnWall = computed(() => { const c = this.cfg(), w = this.wall(); return c.w[w].fr + (c.w[w].pano || 0) > 0 && !asideCap(c, w); });
+  /** Room beside the French doors for two windows, or a door and a window. */
+  readonly besideFr = computed(() => asideCap(this.cfg(), this.wall()) > 0);
 
   setType(type: Kind) {
     this.edit(c => {

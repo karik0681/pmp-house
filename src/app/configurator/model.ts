@@ -33,12 +33,20 @@ export const isCustom = (c: Cfg) => !SIZES[c.type].some(([L, W]: number[]) => L 
 export const valid = (c: Cfg) => !!layout(c);
 
 /** Keeps a choice physically valid after a type or size change. */
-/** Premium French doors pushed to the left or right of a wall leave room beside them for up to two windows, or one door and one window. */
-export const frAside = (c: Cfg, o: Openings) => c.type === 'P' && o.fr > 0 && !o.pano && (o.pos?.fr === 'l' || o.pos?.fr === 'r');
+/** How many plain doors or windows may stand beside French doors on one wall, at most one of them a door.
+ *  Premium: doors pushed to the left or right leave the rest of the wall free.
+ *  Economy and Standard: the fixed posts split the front and rear wall, the doors take the middle bay and the outer ones stay free. */
+export function asideCap(c: Cfg, k: WallKey): number {
+  const o = c.w[k];
+  if (o.fr === 0 || (o.pano || 0) > 0) return 0;
+  if (c.type === 'P') return o.pos?.fr === 'l' || o.pos?.fr === 'r' ? 2 : 0;
+  return (k === 'f' || k === 'b') && postsOf(c).length ? 2 : 0;
+}
 /** On a wall with French doors or a panoramic window, keep only what may stand beside them. */
-export function tidyWall(c: Cfg, o: Openings) {
+export function tidyWall(c: Cfg, k: WallKey) {
+  const o = c.w[k], cap = asideCap(c, k);
   if (o.fr + (o.pano || 0) === 0) return;
-  if (frAside(c, o)) { o.door = Math.min(o.door, 1); o.win = Math.min(o.win, 2 - o.door); }
+  if (cap) { o.door = Math.min(o.door, 1); o.win = Math.min(o.win, cap - o.door); }
   else { o.door = 0; o.win = 0; if (o.pos) { delete o.pos.door; delete o.pos.win; } }
 }
 export function repair(c: Cfg) {
@@ -46,7 +54,7 @@ export function repair(c: Cfg) {
   if (c.ins !== '100') c.ins = '50';
   if (![1, 50, 80, 100].includes(c.floorIns)) c.floorIns = 1;
   if (c.type !== 'P') for (const w of Object.values(c.w)) if (w.pos) delete (w.pos as any).fr;
-  for (const w of Object.values(c.w)) tidyWall(c, w);
+  for (const k of Object.keys(c.w) as WallKey[]) tidyWall(c, k);
   if (c.type !== 'P') c.floors = 1;
   if (c.type === 'P') { const n = slots(c.L); c.posts = c.posts.filter(p => p.i > 0 && p.i < n); }
   if (!layout(c)) for (const k of Object.keys(c.w) as WallKey[]) c.w[k].pano = 0;
