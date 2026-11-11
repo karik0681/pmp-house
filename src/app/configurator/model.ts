@@ -33,11 +33,20 @@ export const isCustom = (c: Cfg) => !SIZES[c.type].some(([L, W]: number[]) => L 
 export const valid = (c: Cfg) => !!layout(c);
 
 /** Keeps a choice physically valid after a type or size change. */
+/** Premium French doors pushed to the left or right of a wall leave room beside them for up to two windows, or one door and one window. */
+export const frAside = (c: Cfg, o: Openings) => c.type === 'P' && o.fr > 0 && !o.pano && (o.pos?.fr === 'l' || o.pos?.fr === 'r');
+/** On a wall with French doors or a panoramic window, keep only what may stand beside them. */
+export function tidyWall(c: Cfg, o: Openings) {
+  if (o.fr + (o.pano || 0) === 0) return;
+  if (frAside(c, o)) { o.door = Math.min(o.door, 1); o.win = Math.min(o.win, 2 - o.door); }
+  else { o.door = 0; o.win = 0; if (o.pos) { delete o.pos.door; delete o.pos.win; } }
+}
 export function repair(c: Cfg) {
   /* insulation: there is no uninsulated version; walls 50 or 100 mm, floor standard (1) or +50/80/100 mm */
   if (c.ins !== '100') c.ins = '50';
   if (![1, 50, 80, 100].includes(c.floorIns)) c.floorIns = 1;
   if (c.type !== 'P') for (const w of Object.values(c.w)) if (w.pos) delete (w.pos as any).fr;
+  for (const w of Object.values(c.w)) tidyWall(c, w);
   if (c.type !== 'P') c.floors = 1;
   if (c.type === 'P') { const n = slots(c.L); c.posts = c.posts.filter(p => p.i > 0 && p.i < n); }
   if (!layout(c)) for (const k of Object.keys(c.w) as WallKey[]) c.w[k].pano = 0;

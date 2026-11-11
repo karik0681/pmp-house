@@ -62,7 +62,11 @@ export class ConfiguratorComponent implements OnDestroy {
   /** Is the + button of this opening off? Adding French doors or a panoramic window replaces the plain doors and windows of the wall. */
   addDisabled(k: string, max: number) {
     if (k === 'pano') return this.wallVal(k) >= max || this.panoAddDisabled();
-    if (k === 'door' || k === 'win') return this.s.bigOnWall() || this.wallVal(k) >= max || !this.s.fitsWall(k, this.wallVal(k) + 1);
+    if (k === 'door' || k === 'win') {
+      const o = this.cfg().w[this.s.wall()];
+      if (this.s.besideFr() && (o.door + o.win >= 2 || (k === 'door' && o.door >= 1))) return true;
+      return this.s.bigOnWall() || this.wallVal(k) >= max || !this.s.fitsWall(k, this.wallVal(k) + 1);
+    }
     const c = this.cfg(), w = this.s.wall(), o = c.w[w];
     return this.wallVal(k) >= max || !layout({ ...c, w: { ...c.w, [w]: { ...o, door: 0, win: 0, fr: o.fr + 1 } } });
   }

@@ -138,9 +138,10 @@ function seq(w, n, sw, reserved, blocked, frM, frPos = false, flip = false) {
     while (i < b.a) put('panel', 1);
     if (b.items.some(it => it.pos === 'l' || it.pos === 'r')) {
       /* left ones against the left edge of the bay, right ones against the right edge, the rest centred between them */
-      const mid = b.items.filter(it => it.pos !== 'l' && it.pos !== 'r'), lead = mid.length ? Math.floor(b.free / 2) : b.free;
+      const mid = b.items.filter(it => it.pos !== 'l' && it.pos !== 'r'), c = mid.length;
+      const gap = c ? Math.floor(b.free / (c + 1)) : 0, lead = c ? Math.floor((b.free - gap * (c - 1)) / 2) : b.free;
       b.items.filter(it => it.pos === 'l').forEach(it => put(it.k, it.span));
-      panels(lead); mid.forEach(it => put(it.k, it.span)); panels(b.free - lead);
+      panels(lead); mid.forEach((it, x) => { if (x) panels(gap); put(it.k, it.span); }); panels(b.free - lead - gap * Math.max(0, c - 1));
       b.items.filter(it => it.pos === 'r').forEach(it => put(it.k, it.span));
     } else {
       /* a single opening with an odd number of spare cells takes one more cell, so it sits exactly in the middle */

@@ -80,6 +80,7 @@
             @if (panoBlocked()) { <p class="note warn">{{ t('panoBlocked') }}</p> }
             @if (!panoBlocked() && panoAddDisabled() && wallVal('pano') === 0) { <p class="note">{{ t('panoFront') }}</p> }
             @if (s.bigOnWall()) { <p class="note">{{ t('bigOnly') }}</p> }
+            @if (s.besideFr()) { <p class="note">{{ t('besideFr') }}</p> }
             @if (!hasEntry()) { <p class="note warn">{{ t('noEntry') }}</p> }
           </div>
         }
