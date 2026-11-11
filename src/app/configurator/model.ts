@@ -37,7 +37,7 @@ export function repair(c: Cfg) {
   /* insulation: there is no uninsulated version; walls 50 or 100 mm, floor standard (1) or +50/80/100 mm */
   if (c.ins !== '100') c.ins = '50';
   if (![1, 50, 80, 100].includes(c.floorIns)) c.floorIns = 1;
-  for (const w of Object.values(c.w)) if (w.pos) delete (w.pos as any).fr;
+  if (c.type !== 'P') for (const w of Object.values(c.w)) if (w.pos) delete (w.pos as any).fr;
   if (c.type !== 'P') c.floors = 1;
   if (c.type === 'P') { const n = slots(c.L); c.posts = c.posts.filter(p => p.i > 0 && p.i < n); }
   if (!layout(c)) for (const k of Object.keys(c.w) as WallKey[]) c.w[k].pano = 0;

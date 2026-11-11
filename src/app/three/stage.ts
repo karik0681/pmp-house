@@ -106,13 +106,13 @@ function disc(rx, h, rz, mat, x, y, z) {
 }
 
 /* Places openings bay by bay: posts and the bathroom split a wall into bays, and an opening can never cross a post. */
-function seq(w, n, sw, reserved, blocked, frM, flip = false) {
+function seq(w, n, sw, reserved, blocked, frM, frPos = false, flip = false) {
   /* the customer may ask for doors and windows on the left, in the middle or on the right of a wall (seen from outside) */
   const P = w.pos || {}, side = k => { const v = P[k]; return flip && v === 'l' ? 'r' : flip && v === 'r' ? 'l' : v; };
   const list = [], sp = m => Math.ceil(m / sw);
   for (let i = 0; i < (w.pano || 0); i++) list.push({ k: 'pano', span: sp(4.5) });
-  /* French doors always sit in the middle of their bay; they have no left/right choice */
-  for (let i = 0; i < w.fr; i++) list.push({ k: 'french', span: sp(frM) });
+  /* French doors: left/middle/right only on Premium (no fixed posts); otherwise always in the middle of their bay */
+  for (let i = 0; i < w.fr; i++) list.push({ k: 'french', span: sp(frM), pos: frPos ? side('fr') : undefined });
   for (let i = 0; i < w.door; i++) list.push({ k: 'door', span: sp(.95), pos: side('door') });
   for (let i = 0; i < (w.win3 || 0); i++) list.push({ k: 'win3', span: sp(1.6) });
   for (let i = 0; i < w.win; i++) list.push({ k: 'window', span: sp(1.07), pos: side('win') });
@@ -181,7 +181,8 @@ export function layout(c) {
   const posts = postsOf(c);
   const bf = new Set(posts.filter(p => p.w === 'f').map(p => p.i)), bb = new Set(posts.filter(p => p.w === 'b').map(p => n - p.i));
   const frM = c.type === 'P' ? 2.5 : 2.2;
-  let f = seq(c.w.f, n, sw, res, bf, frM), b = seq(c.w.b, n, sw, resB, bb, frM), l = seq(c.w.l, m, sh, new Set(), new Set(), frM), r = seq(c.w.r, m, sh, new Set(), new Set(), frM);
+  const frPos = c.type === 'P';
+  let f = seq(c.w.f, n, sw, res, bf, frM, frPos), b = seq(c.w.b, n, sw, resB, bb, frM, frPos), l = seq(c.w.l, m, sh, new Set(), new Set(), frM, frPos), r = seq(c.w.r, m, sh, new Set(), new Set(), frM, frPos);
   const busy = w => w.door + w.win + w.fr + (w.pano || 0) + (w.win3 || 0) > 0;
   if (!f || !b || !l || !r) return null;
   if ((bath && pos === 'r' && busy(c.w.r)) || (bath && pos === 'l' && busy(c.w.l))) return null;
