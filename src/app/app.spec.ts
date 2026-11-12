@@ -23,21 +23,25 @@ describe('container layout rules', () => {
 });
 
 describe('price calculation in the cabinet', () => {
-  const prices = () => { const p = defaultPrices(); p.base['K:6x3'] = 100000; p.opt.win = 5000; p.opt.kitchen = 20000; p.km = 30; return p; };
-  it('the standard doors and windows are part of the base price', () => {
+  const prices = () => { const p = defaultPrices(); p.base['K:6x3'] = 100000; p.opt.door = 8000; p.opt.win = 5000; p.opt.kitchen = 20000; p.km = 30; return p; };
+  it('every part of the configuration is its own line', () => {
     const r = quote(fresh('K', 6, 3), prices(), blankQuote());
-    expect(r.total).toBe(100000);
+    expect(r.lines.map(l => l.id)).toEqual(['base', 'door', 'win']);
+    expect(r.total).toBe(100000 + 8000 + 2 * 5000);
     expect(r.missing).toBe(false);
   });
-  it('extra windows, equipment, delivery and a discount add up', () => {
-    const c = fresh('K', 6, 3); c.w.b.win = 2; c.kitchen = 1;
-    const r = quote(c, prices(), { ...blankQuote(), km: 100, discount: 10 });
-    expect(r.subtotal).toBe(100000 + 2 * 5000 + 20000 + 100 * 30);
+  it('a line can be removed, repriced and discounted, and lines can be added', () => {
+    const c = fresh('K', 6, 3); c.kitchen = 1;
+    const q = { ...blankQuote(), rows: { door: { off: true }, win: { unit: 6000, disc: 50 }, km: { qty: 100 } }, added: ['km'], custom: [{ label: 'Schody', qty: 1, unit: 4000, disc: 0 }], discount: 10 };
+    const r = quote(c, prices(), q);
+    expect(r.lines.map(l => l.id)).toEqual(['base', 'win', 'kitchen', 'km', 'c0']);
+    expect(r.subtotal).toBe(100000 + 6000 + 20000 + 3000 + 4000);
     expect(r.total).toBe(119700);
-    expect(r.vat).toBe(144837);
+    expect(r.available).toContain('door');
   });
-  it('a price that is not filled in marks the calculation as incomplete', () => {
+  it('a price that is not filled in marks the calculation as incomplete until one is typed into the line', () => {
     const c = fresh('K', 6, 3); c.wc = 1;
     expect(quote(c, prices(), blankQuote()).missing).toBe(true);
+    expect(quote(c, prices(), { ...blankQuote(), rows: { wc: { unit: 0 } } }).missing).toBe(false);
   });
 });
