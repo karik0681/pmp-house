@@ -316,6 +316,13 @@ app-price-list{flex:1;min-width:0}
 .sw-white{background:#f1f2ef}.sw-wood{background:repeating-linear-gradient(90deg,#b4844f 0 3px,#c99a63 3px 6px)}.sw-ant{background:#3a3f44}
 .sub-opt{margin-top:-4px;padding-left:14px;border-left:3px solid var(--mint)}.sub-opt>span{font-size:15px;color:var(--mute)}
 .sub-opt .seg button{min-width:0;padding:0 10px;font-size:14px}
+/* construction types: compact cards with a small picture of each container */
+.tgrid{gap:14px;margin-top:24px}
+.tc{padding:18px;gap:8px}.tc h3{font-size:22px}.tc>p{font-size:15px;min-height:2.9em;line-height:1.45}
+.tc-pic{background:var(--mint);border-radius:6px;padding:8px 12px;display:flex;justify-content:center}
+.tc-pic img{display:block;width:auto;max-width:100%;height:118px}
+.tc dl{font-size:14.5px;margin:2px 0 6px}.tc dl div{padding:6px 0}
+.tc .btn{min-height:44px;font-size:15.5px}
 /* hero: the offer on the left, a site plan with four container sets and a small delivery map on the right */
 .hero{--pw:min(61vw,1040px);min-height:max(88vh,640px,calc(112px + var(--pw)*.666))}
 .hero h1{font-size:clamp(34px,3.7vw,60px);line-height:1.02}
