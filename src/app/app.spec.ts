@@ -22,6 +22,23 @@ describe('container layout rules', () => {
   });
 });
 
+describe('inside the container', () => {
+  it('a bathroom in the middle has no shower and leaves the front wall free', () => {
+    const c = fresh('K', 6, 3); c.wc = 1; c.shower = 1; c.bathPos = 'm';
+    expect(valid(c)).toBe(false);
+    c.shower = 0;
+    expect(valid(c)).toBe(true);
+    expect(layout(c)?.mid).toBe(true);
+  });
+  it('the kitchen goes left, middle or right, but not into a bathroom in the middle', () => {
+    const c = fresh('P', 9, 3); c.kitchen = 1;
+    const x = (p: 'l' | 'm' | 'r') => layout({ ...c, kitchenPos: p })!.kx;
+    expect(x('l')).toBeLessThan(x('m'));
+    expect(x('m')).toBeLessThan(x('r'));
+    expect(valid({ ...c, wc: 1, bathPos: 'm', kitchenPos: 'm' })).toBe(false);
+  });
+});
+
 describe('price calculation in the cabinet', () => {
   const prices = () => { const p = defaultPrices(); p.base['K:6x3'] = 100000; p.opt.door = 8000; p.opt.win = 5000; p.opt.kitchen = 20000; p.km = 30; return p; };
   it('every part of the configuration is its own line', () => {

@@ -74,7 +74,8 @@ export class ConfiguratorComponent implements OnDestroy {
     const c = this.cfg();
     return (['kitchen', 'wc', 'shower'] as const).some(k => !c[k] && !this.s.fits({ [k]: 1 }))
       || [1, 2, 3].some(r => !this.s.fits({ rooms: r }))
-      || (!!(c.wc || c.shower) && (['l', 'm', 'r'] as const).some(p => !this.s.fits({ bathPos: p })));
+      || (!!(c.wc || c.shower) && (['l', 'm', 'r'] as const).some(p => !this.s.fitsBath(p)))
+      || (!!c.kitchen && (['l', 'm', 'r'] as const).some(p => !this.s.fits({ kitchenPos: p })));
   });
 
   /* form */
@@ -119,7 +120,8 @@ export class ConfiguratorComponent implements OnDestroy {
   pickSize(L: number, W: number) { this.s.setSize(L, W); }
   isOn(k: string) { return !!(this.cfg() as any)[k]; }
   canAdd(k: string) { return this.s.fits({ [k]: 1 } as any); }
-  canBath(p: string) { return this.s.fits({ bathPos: p } as any); }
+  canBath(p: string) { return this.s.fitsBath(p as any); }
+  canKitchen(p: string) { return this.s.fits({ kitchenPos: p } as any); }
   posOf(k: string) { return (this.cfg().w[this.s.wall()].pos as any)?.[k] ?? null; }
   wallVal(k: string) { return (this.cfg().w[this.s.wall()] as any)[k] || 0; }
   wallCount(k: WallKey) { const w = this.cfg().w[k]; return w.door + w.win + (w.win3 || 0) + w.fr + (w.pano || 0) || ''; }

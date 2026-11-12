@@ -48,6 +48,9 @@ export class ConfiguratorService {
   /** Opens a saved configuration. Three-part windows are no longer offered, so old links lose them. */
   load(c: Cfg) { for (const w of Object.values(c.w)) w.win3 = 0; repair(c); this.cfg.set(c); }
   set<K extends keyof Cfg>(k: K, v: Cfg[K]) { this.edit(c => { c[k] = v; }); }
+  /** Where the bathroom stands. In the middle it is a small cabin at the rear wall with a toilet and a basin, so the shower goes. */
+  setBathPos(p: 'l' | 'm' | 'r') { this.edit(c => { c.bathPos = p; if (p === 'm') { c.shower = 0; c.wc = 1; } }); }
+  fitsBath(p: 'l' | 'm' | 'r') { return p === 'm' ? this.fits({ bathPos: p, shower: 0, wc: 1 }) : this.fits({ bathPos: p }); }
   toggle(k: 'kitchen' | 'wc' | 'shower') { this.edit(c => { c[k] = c[k] ? 0 : 1; }); }
   bump(k: 'count' | 'floors', d: number) { this.edit(c => { c[k] += d; }); }
   /** French doors and a panoramic window are the entrance and the glazing of their wall, so adding one clears its plain doors and windows. */

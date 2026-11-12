@@ -44,15 +44,24 @@
                 <button type="button" [attr.aria-pressed]="pressed(cfg().rooms === r)" [disabled]="!s.fits({ rooms: r })" (click)="s.set('rooms', r)">{{ r }}</button>
               }
             </div></div>
-            @for (k of ['kitchen', 'wc', 'shower']; track k) {
+            <button type="button" class="sw" role="switch" [attr.aria-checked]="pressed(isOn('kitchen'))" [disabled]="!isOn('kitchen') && !canAdd('kitchen')" (click)="s.toggle('kitchen')"><span>{{ t('kitchen') }}</span><i></i></button>
+            @if (cfg().kitchen) {
+              <div class="opt sub-opt"><span>{{ t('kitchenPos') }}</span><div class="seg">
+                @for (p of ['l', 'm', 'r']; track p) {
+                  <button type="button" [attr.aria-pressed]="pressed((cfg().kitchenPos || 'r') === p)" [disabled]="!canKitchen(p)" (click)="s.set('kitchenPos', $any(p))">{{ t(p) }}</button>
+                }
+              </div></div>
+            }
+            @for (k of ['wc', 'shower']; track k) {
               <button type="button" class="sw" role="switch" [attr.aria-checked]="pressed(isOn(k))" [disabled]="!isOn(k) && !canAdd(k)" (click)="s.toggle($any(k))"><span>{{ t(k) }}</span><i></i></button>
             }
             @if (cfg().wc || cfg().shower) {
-              <div class="opt"><span>{{ t('bathPos') }}</span><div class="seg">
+              <div class="opt sub-opt"><span>{{ t('bathPos') }}</span><div class="seg">
                 @for (p of ['l', 'm', 'r']; track p) {
-                  <button type="button" [attr.aria-pressed]="pressed(cfg().bathPos === p)" [disabled]="!canBath(p)" (click)="s.set('bathPos', $any(p))">{{ t(p) }}</button>
+                  <button type="button" [attr.aria-pressed]="pressed(cfg().bathPos === p)" [disabled]="!canBath(p)" (click)="s.setBathPos($any(p))">{{ t(p) }}</button>
                 }
               </div></div>
+              <p class="note">{{ t(cfg().bathPos === 'm' ? 'bathMid' : 'bathEnd') }}</p>
             }
             @if (anyBlocked()) { <p class="note">{{ t('fitNote') }}</p> }
           </div>

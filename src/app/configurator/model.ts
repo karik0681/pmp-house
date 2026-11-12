@@ -11,7 +11,7 @@ export interface Openings { door: number; win: number; win3: number; fr: number;
 export interface Post { w: 'f' | 'b'; i: number }
 export interface Cfg {
   type: Kind; L: number; W: number; count: number; floors: number; rooms: number;
-  kitchen: number; wc: number; shower: number; bathPos: 'l' | 'm' | 'r';
+  kitchen: number; wc: number; shower: number; bathPos: 'l' | 'm' | 'r'; kitchenPos?: 'l' | 'm' | 'r';
   color: 'white' | 'wood' | 'ant'; joinery: 'white' | 'ant'; frJoin: 'white' | 'ant';
   ins: string; floorIns: number; posts: Post[]; w: Record<WallKey, Openings>;
 }
@@ -22,7 +22,7 @@ export const shell = (type: Kind): Record<WallKey, Openings> => (type === 'P'
   ? { f: { ...blank(), fr: 1 }, b: blank(), l: blank(), r: { ...blank(), win: 1 } }
   : { f: { ...blank(), door: 1, win: 2 }, b: blank(), l: blank(), r: blank() });
 export const fresh = (type: Kind, L: number, W: number): Cfg => ({
-  type, L, W, count: 1, floors: 1, rooms: 1, kitchen: 0, wc: 0, shower: 0, bathPos: type === 'P' ? 'l' : 'r',
+  type, L, W, count: 1, floors: 1, rooms: 1, kitchen: 0, wc: 0, shower: 0, bathPos: type === 'P' ? 'l' : 'r', kitchenPos: 'r',
   color: 'white', joinery: 'white', frJoin: 'ant', ins: '50', floorIns: 1, posts: [], w: shell(type),
 });
 
@@ -72,6 +72,7 @@ export function summaryLines(c: Cfg, t: T): string[] {
   out.push(`${t('rooms')}: ${c.rooms}`);
   const eq = (['kitchen', 'wc', 'shower'] as const).filter(k => c[k]).map(t);
   if (eq.length) out.push(eq.join(', '));
+  if (c.kitchen) out.push(`${t('kitchenPos')}: ${t(c.kitchenPos || 'r')}`);
   if (c.wc || c.shower) out.push(`${t('bathPos')}: ${t(c.bathPos)}`);
   for (const [k, n] of [['f', 'front'], ['b', 'rear'], ['l', 'left'], ['r', 'right']] as [WallKey, string][]) {
     const w = c.w[k], p = (['door', 'win', 'win3', 'fr', 'pano'] as const).filter(x => w[x]).map(x => `${t(x)} ${w[x]}${(w.pos as any)?.[x] ? ' (' + t((w.pos as any)[x]).toLowerCase() + ')' : ''}`);
@@ -91,7 +92,9 @@ export function planSvg(c: Cfg, t: T): string {
   const { L, W } = c, s = 60, pad = 58, F = .16;
   const X = (v: number) => pad + (v + L / 2) * s, Z = (v: number) => pad + (v + W / 2) * s, p: string[] = [];
   p.push(`<rect x="${pad}" y="${pad}" width="${L * s}" height="${W * s}" fill="#fff" stroke="#17392c" stroke-width="7"/>`);
-  if (lay.zone) p.push(`<rect x="${X(lay.zone[0])}" y="${pad + 4}" width="${(lay.zone[1] - lay.zone[0]) * s}" height="${W * s - 8}" fill="#dceee3"/>`);
+  /* a bathroom at an end takes the whole width; one in the middle is a cabin against the rear wall */
+  const bathH = lay.mid ? lay.cabin * s + F * s - 4 : W * s - 8;
+  if (lay.zone) p.push(`<rect x="${X(lay.zone[0])}" y="${pad + 4}" width="${(lay.zone[1] - lay.zone[0]) * s}" height="${bathH}" fill="#dceee3"/>`);
   const wallV = (x: number) => p.push(`<line x1="${X(x)}" y1="${pad}" x2="${X(x)}" y2="${pad + W * s}" stroke="#17392c" stroke-width="4"/>`);
   const label = (x: number, y: number, tx: string, size = 18) => p.push(`<text x="${x}" y="${y}" text-anchor="middle" font-size="${size}" font-weight="600" fill="#17392c">${tx}</text>`);
   const mark = (x1: number, y1: number, x2: number, y2: number, k: string) => { const col = k === 'door' ? '#c8742a' : k === 'vent' ? '#7e9489' : '#4d9fc4'; p.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="11"/>`); };
@@ -107,13 +110,16 @@ export function planSvg(c: Cfg, t: T): string {
   edge(lay.b, lay.sw, lay.inner, (a, b, k) => mark(X(-a), Z(-W / 2), X(-b), Z(-W / 2), k));
   edge(lay.r, lay.sh, lay.innerW, (a, b, k) => mark(X(L / 2), Z(-a), X(L / 2), Z(-b), k));
   edge(lay.l, lay.sh, lay.innerW, (a, b, k) => mark(X(-L / 2), Z(a), X(-L / 2), Z(b), k));
-  if (lay.zone) { if (lay.pos !== 'l') wallV(lay.zone[0]); if (lay.pos !== 'r') wallV(lay.zone[1]); label(X((lay.zone[0] + lay.zone[1]) / 2), Z(0) + 6, t('bath')); }
+  if (lay.mid) {
+    p.push(`<path d="M${X(lay.zone[0])} ${pad}V${pad + 4 + bathH}H${X(lay.zone[1])}V${pad}" fill="none" stroke="#17392c" stroke-width="4"/>`);
+    label(X(0), pad + 4 + bathH / 2 + 6, t('bath'), 15);
+  } else if (lay.zone) { if (lay.pos !== 'l') wallV(lay.zone[0]); if (lay.pos !== 'r') wallV(lay.zone[1]); label(X((lay.zone[0] + lay.zone[1]) / 2), Z(0) + 6, t('bath')); }
   const big = lay.big, st = (big[1] - big[0]) / lay.parts;
   for (let i = 1; i < lay.parts; i++) wallV(big[0] + i * st);
   const rooms: number[] = [];
   for (const sg of lay.segs) { if (sg === big) for (let i = 0; i < lay.parts; i++) rooms.push(big[0] + (i + .5) * st); else rooms.push((sg[0] + sg[1]) / 2); }
   rooms.forEach((x, i) => label(X(x), Z(0) + 30, `${t('room')} ${i + 1}`));
-  if (c.kitchen) { const sg = lay.segs[0], len = Math.min(1.8, lay.room - .3), xr = lay.pos === 'l' && lay.bath ? sg[0] + .1 : sg[1] - .1 - len; p.push(`<rect x="${X(xr)}" y="${pad + 4}" width="${len * s}" height="${.6 * s}" fill="#ecd9b8" stroke="#17392c" stroke-width="2"/>`); label(X(xr + len / 2), pad + 28, t('kitchen'), 15); }
+  if (c.kitchen) { const len = lay.klen, xr = lay.kx - len / 2; p.push(`<rect x="${X(xr)}" y="${pad + 4}" width="${len * s}" height="${.6 * s}" fill="#ecd9b8" stroke="#17392c" stroke-width="2"/>`); label(X(xr + len / 2), pad + 28, t('kitchen'), 15); }
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) p.push(`<rect x="${X(sx * (L / 2 - F / 2)) - 9}" y="${Z(sz * (W / 2 - F / 2)) - 9}" width="18" height="18" fill="#17392c"/>`);
   for (const q of lay.posts) p.push(`<rect x="${X(-lay.inner / 2 + q.i * lay.sw) - 9}" y="${Z((q.w === 'f' ? 1 : -1) * (W / 2 - F / 2)) - 9}" width="18" height="18" fill="#c8742a"/>`);
   label(X(0), pad - 22, `${num(L)} m`, 22);
