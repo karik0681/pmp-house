@@ -163,8 +163,11 @@ export function postsOf(c) {
   if (c.type === 'P') return c.posts || [];
   if (c.L < 6) return [];
   const n = slots(c.L), a = Math.round(n * .25);   /* a quarter of the wall from each end: French doors fit between them with a strip of wall on both sides */
-  return [a, n - a].flatMap(i => [{ w: 'f', i }, { w: 'b', i }]);
+  const v = braced(c);
+  return [a, n - a].flatMap(i => [{ w: 'f', i, v }, { w: 'b', i, v }]);
 }
+/* Standard 9 x 3 m and 12 x 4 m: instead of an upright post, two flat braces run from the lifting lug down and apart, about half a metre to each side */
+export const braced = c => c.type === 'K' && ((c.L === 9 && c.W === 3) || (c.L === 12 && c.W === 4));
 export function layout(c) {
   const { L, W } = c, inner = L - 2 * F, innerW = W - 2 * F, ex = L / 2 - F;
   const n = slots(L), sw = inner / n;
@@ -181,9 +184,12 @@ export function layout(c) {
   const resB = new Set([...res].map(i => n - 1 - i));
   const posts = postsOf(c);
   const bf = new Set(posts.filter(p => p.w === 'f').map(p => p.i)), bb = new Set(posts.filter(p => p.w === 'b').map(p => n - p.i));
+  /* the panels under a pair of braces stay plain wall: no door or window there */
+  const under = s => new Set(posts.filter(p => p.v && p.w === s).flatMap(p => { const i = s === 'f' ? p.i : n - p.i; return [i - 2, i - 1, i, i + 1]; }));
+  const resF2 = new Set([...res, ...under('f')]), resB2 = new Set([...resB, ...under('b')]);
   const frM = c.type === 'P' ? 2.5 : 2.2;
   const frPos = c.type === 'P';
-  let f = seq(c.w.f, n, sw, res, bf, frM, frPos), b = seq(c.w.b, n, sw, resB, bb, frM, frPos), l = seq(c.w.l, m, sh, new Set(), new Set(), frM, frPos), r = seq(c.w.r, m, sh, new Set(), new Set(), frM, frPos);
+  let f = seq(c.w.f, n, sw, resF2, bf, frM, frPos), b = seq(c.w.b, n, sw, resB2, bb, frM, frPos), l = seq(c.w.l, m, sh, new Set(), new Set(), frM, frPos), r = seq(c.w.r, m, sh, new Set(), new Set(), frM, frPos);
   const busy = w => w.door + w.win + w.fr + (w.pano || 0) + (w.win3 || 0) > 0;
   if (!f || !b || !l || !r) return null;
   if ((bath && pos === 'r' && busy(c.w.r)) || (bath && pos === 'l' && busy(c.w.l))) return null;
@@ -441,9 +447,14 @@ export class Stage {
       if (sz > 0) this.parts[this.parts.length - 1].front = true;
     }
     for (const p of lay.posts) {
-      const post = new THREE.Group(); post.add(box(.15, WALL_H, F, this.mats.post, 0, WALL_H / 2, 0));
+      const post = new THREE.Group(), sz = p.w === 'f' ? 1 : -1;
+      if (p.v) {
+        /* two flat braces: together under the lug at the top, half a metre apart on each side at the bottom */
+        const top = .05, run = 2 * lay.sw - top, len = Math.hypot(run, WALL_H);
+        for (const s of [-1, 1]) { const bar = box(.085, len, .05, this.mats.post, s * (top + run / 2), WALL_H / 2, sz * (F / 2 - .03)); bar.rotation.z = s * Math.atan(run / WALL_H); post.add(bar); }
+      } else post.add(box(.15, WALL_H, F, this.mats.post, 0, WALL_H / 2, 0));
       g.add(post);
-      const x = -lay.inner / 2 + p.i * lay.sw, z = (p.w === 'f' ? 1 : -1) * (W / 2 - F / 2);
+      const x = -lay.inner / 2 + p.i * lay.sw, z = sz * (W / 2 - F / 2);
       this.part(post, { p: [x, BASE, z], r: [0, 0] }, { p: [x, BASE, z], r: [0, 0] }, 0, .3);
       if (p.w === 'f') this.parts[this.parts.length - 1].front = true;
     }
@@ -459,8 +470,11 @@ export class Stage {
         hole(sx * (L / 2 - .1), .1, z, 0, .035, .035); hole(x, .1, sz * (W / 2 - .1), Math.PI / 2, .035, .035);
       }
     } else {
-      const xs = [-L / 2 + F / 2, L / 2 - F / 2, ...lay.posts.filter(p => p.w === 'f').map(p => -lay.inner / 2 + p.i * lay.sw)];
-      for (const x of xs) for (const sz of [1, -1]) for (const y of [BASE / 2, H - ROOF / 2]) for (const [ox, oy] of [[-.05, -.045], [.05, -.045], [-.05, .045], [.05, .045]]) {
+      const fp = lay.posts.filter(p => p.w === 'f'), px = p => -lay.inner / 2 + p.i * lay.sw;
+      /* bolted plates: at the corners, at every post, and at the feet of the braces */
+      const spots = [-L / 2 + F / 2, L / 2 - F / 2].flatMap(x => [[x, BASE / 2], [x, H - ROOF / 2]]);
+      for (const p of fp) { if (p.v) spots.push([px(p) - 2 * lay.sw, BASE / 2], [px(p) + 2 * lay.sw, BASE / 2]); else spots.push([px(p), BASE / 2]); }
+      for (const [x, y] of spots) for (const sz of [1, -1]) for (const [ox, oy] of [[-.05, -.045], [.05, -.045], [-.05, .045], [.05, .045]]) {
         const b = box(.022, .022, .012, this.mats.bolt, x + ox, y + oy, sz * (W / 2 + .004)); b.castShadow = false; g.add(b); if (y > 1) this.topBits.push(b);
       }
     }
@@ -480,11 +494,14 @@ export class Stage {
       /* lifting lugs for the crane: above the fixed posts, or near the corners on short containers without them */
       const px = lay.posts.filter(p => p.w === 'f').map(p => -lay.inner / 2 + p.i * lay.sw), xs = px.length ? px : [-L / 2 + .3, L / 2 - .3];
       for (const x of xs) for (const sz of [1, -1]) {
-        const z = sz * (W / 2 - F / 2), lug = new THREE.Group();
-        lug.add(box(.11, .07, .03, fm, 0, .035, 0));
-        const top = new THREE.Mesh(new THREE.CylinderGeometry(.055, .055, .03, 28).rotateX(Math.PI / 2), fm); top.position.y = .07; top.castShadow = true; lug.add(top);
-        const eye = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .034, 20).rotateX(Math.PI / 2), this.mats.hole); eye.position.y = .075; lug.add(eye);
-        lug.position.set(x, ROOF, z); roof.add(lug);
+        /* a square plate bolted to the face of the top frame, with an ear and an eye for the crane hook standing above the roof */
+        const lug = new THREE.Group(), pw = .15, eh = .075;
+        lug.add(box(pw, pw, .014, fm, 0, ROOF - pw / 2, 0));
+        lug.add(box(.08, eh, .014, fm, 0, ROOF + eh / 2 - .005, 0));
+        const top = new THREE.Mesh(new THREE.CylinderGeometry(.04, .04, .014, 28).rotateX(Math.PI / 2), fm); top.position.y = ROOF + eh - .005; top.castShadow = true; lug.add(top);
+        const eye = new THREE.Mesh(new THREE.CylinderGeometry(.017, .017, .018, 20).rotateX(Math.PI / 2), this.mats.hole); eye.position.y = ROOF + eh - .003; lug.add(eye);
+        for (const [ox, oy] of [[-.05, -.05], [.05, -.05], [-.05, .05], [.05, .05]]) { const b = box(.02, .02, .01, this.mats.bolt, ox, ROOF - pw / 2 + oy, sz * .009); b.castShadow = false; lug.add(b); }
+        lug.position.set(x, 0, sz * (W / 2 + .007)); roof.add(lug);
       }
     }
     g.add(roof);
