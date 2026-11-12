@@ -24,7 +24,10 @@
     <label class="adm-search"><span class="sr">{{ t('adm_search') }}</span>
       <input type="search" [placeholder]="t('adm_search')" [value]="query()" (input)="query.set($any($event.target).value)"></label>
     <button type="button" class="btn btn-o" (click)="leads.reset(); picked.set(null)">{{ t('adm_reset') }}</button>
+    <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'prices'" (click)="view.set(view() === 'prices' ? 'board' : 'prices')">{{ t(view() === 'prices' ? 'adm_toBoard' : 'pl_title') }}</button>
   </div>
+
+  @if (view() === 'prices') { <div class="adm-body"><app-price-list /></div> } @else {
 
   <div class="adm-body">
     <div class="adm-board">
@@ -78,6 +81,8 @@
         <details class="sum" open><summary>{{ t('adm_cfg') }}</summary>
           <ul>@for (x of lines(); track $index) { <li>{{ x }}</li> }</ul></details>
 
+        <app-quote [lead]="l" />
+
         <h3>{{ t('adm_notes') }}</h3>
         <label class="fld"><span class="sr">{{ t('adm_addNote') }}</span>
           <textarea rows="2" [placeholder]="t('adm_notePh')" [value]="draft()" (input)="draft.set($any($event.target).value)"></textarea></label>
@@ -90,4 +95,5 @@
       }
     </aside>
   </div>
+  }
 </div>

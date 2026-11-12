@@ -1,4 +1,5 @@
 import { Cfg } from '../configurator/model';
+import type { Quote } from '../admin/quote';
 
 export interface Note { at: string; text: string }
 export interface Lead {
@@ -7,6 +8,7 @@ export interface Lead {
   name: string; phone: string; email: string; place: string; clientNote: string;
   cfg: Cfg;
   price: number | null;
+  quote?: Quote;         // the employee's price calculation: delivery, services, discount
   source: string;
   status: number;        // 0 new … 4 sold
   next: string;          // next step

@@ -8,10 +8,12 @@ import { AuthService } from './auth.service';
 import { LeadsService } from '../leads/leads.service';
 import { Lead, STATUSES } from '../leads/lead';
 import { linkTo, summaryLines, title } from '../configurator/model';
+import { PriceListComponent } from './price-list.component';
+import { QuoteComponent } from './quote.component';
 
 @Component({
   selector: 'app-admin',
-  imports: [RouterLink],
+  imports: [RouterLink, PriceListComponent, QuoteComponent],
   templateUrl: './admin.component.html',
 })
 export class AdminComponent {
@@ -25,6 +27,8 @@ export class AdminComponent {
   readonly query = signal('');
   readonly picked = signal<string | null>(null);
   readonly draft = signal('');
+  /** the board of enquiries or the price list */
+  readonly view = signal<'board' | 'prices'>('board');
 
   readonly filtered = computed(() => {
     const q = this.query().trim().toLowerCase();
