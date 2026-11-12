@@ -7,7 +7,8 @@ const F = 0.16, WT = 0.07;
 let BASE = 0.18, ROOF = 0.18;
 export const HEIGHT = { Y: 2.57, K: 2.64, P: 2.8 };
 let H = 2.64, WALL_H = H - BASE - ROOF;
-const BATH_D = 1.7;
+/* a bathroom at an end of the container is this deep; a cabin in the middle is MID_W wide */
+const BATH_D = 1.2, MID_W = 1.5;
 /* a bathroom in the middle is a cabin against the rear wall, this deep; the passage in front of it stays free */
 const CABIN = 1.25;
 export const SLOT = .285;
@@ -177,7 +178,7 @@ export function layout(c) {
   const bath = hasBath(c), pos = c.bathPos || 'r', mid = bath && pos === 'm';
   /* in the middle there is room for a toilet and a basin only, and the passage past the cabin must stay wide enough */
   if (mid && (c.shower || innerW - CABIN < .75)) return null;
-  const zone = !bath ? null : pos === 'r' ? [ex - BATH_D, ex] : pos === 'l' ? [-ex, -ex + BATH_D] : [-BATH_D / 2, BATH_D / 2];
+  const zone = !bath ? null : pos === 'r' ? [ex - BATH_D, ex] : pos === 'l' ? [-ex, -ex + BATH_D] : [-MID_W / 2, MID_W / 2];
   const segs = !zone ? [[-ex, ex]] : pos === 'r' ? [[-ex, zone[0]]] : pos === 'l' ? [[zone[1], ex]] : [[-ex, zone[0]], [zone[1], ex]];
   if (segs.some(s => s[1] - s[0] < 1)) return null;
   const extra = Math.max(0, c.rooms - segs.length), big = segs.reduce((a, s) => (s[1] - s[0] > a[1] - a[0] ? s : a));
@@ -185,16 +186,22 @@ export function layout(c) {
   if (room < 1 || (c.kitchen && room < 1.5)) return null;
   /* rooms as stretches of the long axis, left to right */
   const spans = segs.flatMap(s => (s === big ? Array.from({ length: parts }, (_, i) => [s[0] + i * (s[1] - s[0]) / parts, s[0] + (i + 1) * (s[1] - s[0]) / parts]) : [s]));
-  /* the kitchen stands against the rear wall: at the left end, in the middle or at the right end, never across a partition or the bathroom */
-  let kx = 0, klen = 0;
+  /* the kitchen: in the middle it stands against the rear wall; left or right it stands along that end wall */
+  let kx = 0, kz = 0, klen = 0, kside = null;
   if (c.kitchen) {
     const kp = c.kitchenPos || 'r';
-    if (kp === 'm' && mid) return null;
-    klen = Math.min(1.8, room - .3);
-    const centre = s => Math.abs((s[0] + s[1]) / 2);
-    const sp = kp === 'l' ? spans[0] : kp === 'r' ? spans[spans.length - 1] : spans.reduce((a, s) => (centre(s) < centre(a) ? s : a));
-    const lo = sp[0] + .1 + klen / 2, hi = sp[1] - .1 - klen / 2;
-    kx = kp === 'l' ? lo : kp === 'r' ? hi : Math.min(hi, Math.max(lo, 0));
+    if (kp === 'm') {
+      if (mid) return null;
+      klen = Math.min(1.8, room - .3);
+      const centre = s => Math.abs((s[0] + s[1]) / 2), sp = spans.reduce((a, s) => (centre(s) < centre(a) ? s : a));
+      kx = Math.min(sp[1] - .1 - klen / 2, Math.max(sp[0] + .1 + klen / 2, 0)); kz = -innerW / 2 + .3;
+    } else {
+      /* not at the end the bathroom takes, and not across a door in that end wall */
+      const w = c.w[kp];
+      if ((bath && pos === kp) || w.door + w.fr + (w.pano || 0) > 0) return null;
+      kside = kp; klen = Math.min(1.8, innerW - .4);
+      kx = (kp === 'l' ? -1 : 1) * (ex - .3); kz = -innerW / 2 + .1 + klen / 2;
+    }
   }
   const res = new Set();
   if (zone) for (let i = Math.floor((zone[0] + inner / 2) / sw + .001); i < Math.ceil((zone[1] + inner / 2) / sw - .001); i++) res.add(i);
@@ -221,7 +228,7 @@ export function layout(c) {
     }
   }
   f = merge(f); b = merge(b); l = merge(l); r = merge(r);
-  return { n, sw, m, sh, f, b, l, r, inner, innerW, bath, zone, segs, big, parts, room, posts, pos, mid, cabin: CABIN, spans, kx, klen };
+  return { n, sw, m, sh, f, b, l, r, inner, innerW, bath, zone, segs, big, parts, room, posts, pos, mid, cabin: CABIN, spans, kx, kz, klen, kside };
 }
 
 export class Stage {
@@ -418,39 +425,46 @@ export class Stage {
       for (const sg of [-1, 1]) inside.add(box(side, hw, .08, inner, sg * (dw / 2 + side / 2), y0 + hw / 2, zc));
       inside.add(box(dw, hw - 2, .08, inner, 0, y0 + 2 + (hw - 2) / 2, zc));
       inside.add(box(dw - .04, 2, .05, oak, 0, y0 + 1, zc));
-      toilet(x0 + .45); basin(x1 - .4, 1);
+      toilet(x0 + .4); basin(x1 - .38, 1);
       this.anch.bath = [0, y0 + .02, zc + .45];
     } else if (lay.bath) {
       const [x0, x1] = lay.zone, sgn = lay.pos === 'l' ? -1 : 1, e = sgn > 0 ? x1 : x0, xp = sgn > 0 ? x0 : x1, at = d => e - sgn * d;
-      partition(xp, W / 2 - F - .6);
+      /* the way it is built: toilet at the rear wall, basin on the end wall, shower in the front corner, door in the middle of the partition */
+      const zf = W / 2 - F, toiletEnd = zb + .69, showerStart = zf - .9;
+      partition(xp, Math.min(0, showerStart - .45));
       if (c.shower) {
-        const sx = at(.47), sz = zb + .47;
+        const sx = at(.47), sz = zf - .47;
         inside.add(box(.9, .1, .9, san, sx, y0 + .05, sz));
         inside.add(disc(.05, .012, .05, dark, sx, y0 + .105, sz));
-        inside.add(box(.012, 1.9, .9, this.mats.glass, at(.94), y0 + 1.05, sz));
-        inside.add(disc(.1, .02, .1, steel, at(.17), y0 + 2, sz - .3));
+        inside.add(box(.9, 1.9, .012, this.mats.glass, sx, y0 + 1.05, sz - .45));
+        inside.add(disc(.1, .02, .1, steel, at(.17), y0 + 2, sz));
       }
       if (c.wc) {
-        /* beside the shower when there is one; the basin then moves to the front wall */
-        toilet(at(c.shower ? 1.25 : .45));
-        if (c.shower) basin(at(.4), -1); else basin(xp + sgn * .4, 1);
+        toilet((x0 + x1) / 2);
+        const bz = c.shower ? (toiletEnd + showerStart) / 2 : .25;
+        inside.add(box(.4, .14, .46, san, at(.24), y0 + .82, bz));
+        inside.add(disc(.13, .012, .17, hole, at(.24), y0 + .895, bz));
+        inside.add(box(.03, .16, .03, steel, at(.07), y0 + .96, bz));
       }
       this.anch.bath = [(x0 + x1) / 2, y0 + .02, W / 2 - F - 1.05];
     }
     const big = lay.big, step = (big[1] - big[0]) / lay.parts;
     for (let i = 1; i < lay.parts; i++) partition(big[0] + i * step, 0);
     if (c.kitchen) {
-      const len = lay.klen, xr = lay.kx;
-      inside.add(box(len, .86, .6, inner, xr, y0 + .43, zb + .3));
-      inside.add(box(len + .02, .04, .62, oak, xr, y0 + .88, zb + .31));
-      const hx = xr - len / 4, kx = xr + len / 4, kz = zb + .3;
-      inside.add(box(.56, .012, .48, dark, hx, y0 + .906, kz));
-      for (const [ox, oz] of [[-.13, -.11], [.13, -.11], [-.13, .11], [.13, .11]]) inside.add(disc(.075, .004, .075, hole, hx + ox, y0 + .914, kz + oz));
-      inside.add(box(.44, .012, .38, steel, kx, y0 + .906, kz));
-      inside.add(box(.34, .004, .28, hole, kx, y0 + .914, kz));
-      inside.add(box(.03, .18, .03, steel, kx, y0 + 1, kz - .23));
-      inside.add(box(len, .6, .26, inner, xr, y0 + 1.82, zb + .13));
-      this.anch.kitchen = [xr, y0 + .02, zb + .95];
+      /* drawn with its back to the wall, then turned to the rear wall or to an end wall */
+      const len = lay.klen, k = new THREE.Group(), sgn = lay.kside === 'l' ? -1 : 1;
+      k.add(box(len, .86, .6, inner, 0, y0 + .43, 0));
+      k.add(box(len + .02, .04, .62, oak, 0, y0 + .88, .01));
+      const hx = -len / 4, sx = len / 4;
+      k.add(box(.56, .012, .48, dark, hx, y0 + .906, 0));
+      for (const [ox, oz] of [[-.13, -.11], [.13, -.11], [-.13, .11], [.13, .11]]) k.add(disc(.075, .004, .075, hole, hx + ox, y0 + .914, oz));
+      k.add(box(.44, .012, .38, steel, sx, y0 + .906, 0));
+      k.add(box(.34, .004, .28, hole, sx, y0 + .914, 0));
+      k.add(box(.03, .18, .03, steel, sx, y0 + 1, -.23));
+      k.add(box(len, .6, .26, inner, 0, y0 + 1.82, -.17));
+      k.position.set(lay.kx, 0, lay.kz); if (lay.kside) k.rotation.y = -sgn * Math.PI / 2;
+      inside.add(k);
+      this.anch.kitchen = lay.kside ? [lay.kx - sgn * .65, y0 + .02, lay.kz] : [lay.kx, y0 + .02, zb + .95];
     }
     this.part(inside, { s: .001 }, { s: 1 }, .84, 1);
     this.parts[this.parts.length - 1].inside = true;

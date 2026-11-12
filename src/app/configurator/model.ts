@@ -113,13 +113,19 @@ export function planSvg(c: Cfg, t: T): string {
   if (lay.mid) {
     p.push(`<path d="M${X(lay.zone[0])} ${pad}V${pad + 4 + bathH}H${X(lay.zone[1])}V${pad}" fill="none" stroke="#17392c" stroke-width="4"/>`);
     label(X(0), pad + 4 + bathH / 2 + 6, t('bath'), 15);
-  } else if (lay.zone) { if (lay.pos !== 'l') wallV(lay.zone[0]); if (lay.pos !== 'r') wallV(lay.zone[1]); label(X((lay.zone[0] + lay.zone[1]) / 2), Z(0) + 6, t('bath')); }
+  } else if (lay.zone) { if (lay.pos !== 'l') wallV(lay.zone[0]); if (lay.pos !== 'r') wallV(lay.zone[1]); label(X((lay.zone[0] + lay.zone[1]) / 2), Z(0) + 5, t('bath'), 13); }
   const big = lay.big, st = (big[1] - big[0]) / lay.parts;
   for (let i = 1; i < lay.parts; i++) wallV(big[0] + i * st);
   const rooms: number[] = [];
   for (const sg of lay.segs) { if (sg === big) for (let i = 0; i < lay.parts; i++) rooms.push(big[0] + (i + .5) * st); else rooms.push((sg[0] + sg[1]) / 2); }
   rooms.forEach((x, i) => label(X(x), Z(0) + 30, `${t('room')} ${i + 1}`));
-  if (c.kitchen) { const len = lay.klen, xr = lay.kx - len / 2; p.push(`<rect x="${X(xr)}" y="${pad + 4}" width="${len * s}" height="${.6 * s}" fill="#ecd9b8" stroke="#17392c" stroke-width="2"/>`); label(X(xr + len / 2), pad + 28, t('kitchen'), 15); }
+  if (c.kitchen) {
+    /* in the middle along the rear wall, left or right along the end wall */
+    const len = lay.klen, [w, h] = lay.kside ? [.6, len] : [len, .6], x = X(lay.kx - w / 2), y = Z(lay.kz - h / 2);
+    p.push(`<rect x="${x}" y="${y}" width="${w * s}" height="${h * s}" fill="#ecd9b8" stroke="#17392c" stroke-width="2"/>`);
+    if (lay.kside) p.push(`<text transform="translate(${x + w * s / 2 + 5} ${y + h * s / 2}) rotate(-90)" text-anchor="middle" font-size="15" font-weight="600" fill="#17392c">${t('kitchen')}</text>`);
+    else label(x + w * s / 2, y + h * s / 2 + 5, t('kitchen'), 15);
+  }
   for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) p.push(`<rect x="${X(sx * (L / 2 - F / 2)) - 9}" y="${Z(sz * (W / 2 - F / 2)) - 9}" width="18" height="18" fill="#17392c"/>`);
   for (const q of lay.posts) p.push(`<rect x="${X(-lay.inner / 2 + q.i * lay.sw) - 9}" y="${Z((q.w === 'f' ? 1 : -1) * (W / 2 - F / 2)) - 9}" width="18" height="18" fill="#c8742a"/>`);
   label(X(0), pad - 22, `${num(L)} m`, 22);

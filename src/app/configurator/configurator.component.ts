@@ -119,8 +119,12 @@ export class ConfiguratorComponent implements OnDestroy {
   setView(v: View) { this.s.view.set(v); }
   pickSize(L: number, W: number) { this.s.setSize(L, W); }
   isOn(k: string) { return !!(this.cfg() as any)[k]; }
-  canAdd(k: string) { return this.s.fits({ [k]: 1 } as any); }
-  canBath(p: string) { return this.s.fitsBath(p as any); }
+  /** Can this piece of equipment be switched on? The kitchen may take any of its three places, a bathroom may push the kitchen aside. */
+  canAdd(k: string) {
+    const c = this.cfg(), places = ['l', 'm', 'r'] as const;
+    return places.some(p => this.s.fits({ [k]: 1, kitchenPos: k === 'kitchen' || c.kitchen ? p : c.kitchenPos } as any));
+  }
+  canBath(p: string) { return this.s.fitsBath(p as any) || (['l', 'm', 'r'] as const).some(k => this.s.fits({ bathPos: p as any, kitchenPos: k, ...(p === 'm' ? { shower: 0, wc: 1 } : {}) })); }
   canKitchen(p: string) { return this.s.fits({ kitchenPos: p } as any); }
   posOf(k: string) { return (this.cfg().w[this.s.wall()].pos as any)?.[k] ?? null; }
   wallVal(k: string) { return (this.cfg().w[this.s.wall()] as any)[k] || 0; }

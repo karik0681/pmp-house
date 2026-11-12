@@ -30,12 +30,18 @@ describe('inside the container', () => {
     expect(valid(c)).toBe(true);
     expect(layout(c)?.mid).toBe(true);
   });
-  it('the kitchen goes left, middle or right, but not into a bathroom in the middle', () => {
+  it('the kitchen stands at the rear wall in the middle and along an end wall left or right', () => {
     const c = fresh('P', 9, 3); c.kitchen = 1;
-    const x = (p: 'l' | 'm' | 'r') => layout({ ...c, kitchenPos: p })!.kx;
-    expect(x('l')).toBeLessThan(x('m'));
-    expect(x('m')).toBeLessThan(x('r'));
-    expect(valid({ ...c, wc: 1, bathPos: 'm', kitchenPos: 'm' })).toBe(false);
+    const at = (p: 'l' | 'm' | 'r') => layout({ ...c, kitchenPos: p })!;
+    expect(at('m').kside).toBe(null);
+    expect(at('l').kside).toBe('l');
+    expect(at('l').kx).toBeLessThan(at('r').kx);
+  });
+  it('the kitchen cannot share an end with the bathroom or the middle with a cabin', () => {
+    const c = fresh('K', 8, 3); c.kitchen = 1; c.wc = 1;
+    expect(valid({ ...c, bathPos: 'm', kitchenPos: 'm' })).toBe(false);
+    expect(valid({ ...c, bathPos: 'r', kitchenPos: 'r' })).toBe(false);
+    expect(valid({ ...c, bathPos: 'r', kitchenPos: 'l' })).toBe(true);
   });
 });
 

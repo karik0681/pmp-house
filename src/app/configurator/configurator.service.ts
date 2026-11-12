@@ -49,9 +49,15 @@ export class ConfiguratorService {
   load(c: Cfg) { for (const w of Object.values(c.w)) w.win3 = 0; repair(c); this.cfg.set(c); }
   set<K extends keyof Cfg>(k: K, v: Cfg[K]) { this.edit(c => { c[k] = v; }); }
   /** Where the bathroom stands. In the middle it is a small cabin at the rear wall with a toilet and a basin, so the shower goes. */
-  setBathPos(p: 'l' | 'm' | 'r') { this.edit(c => { c.bathPos = p; if (p === 'm') { c.shower = 0; c.wc = 1; } }); }
+  setBathPos(p: 'l' | 'm' | 'r') { this.edit(c => { c.bathPos = p; if (p === 'm') { c.shower = 0; c.wc = 1; } this.settle(c); }); }
+  /** The kitchen and the bathroom cannot share a place: when one arrives where the other stands, the kitchen moves to the first place that fits. */
+  private settle(c: Cfg) {
+    if (!c.kitchen || layout(c)) return;
+    const ok = (['m', 'l', 'r'] as const).find(p => layout({ ...c, kitchenPos: p }));
+    if (ok) c.kitchenPos = ok;
+  }
   fitsBath(p: 'l' | 'm' | 'r') { return p === 'm' ? this.fits({ bathPos: p, shower: 0, wc: 1 }) : this.fits({ bathPos: p }); }
-  toggle(k: 'kitchen' | 'wc' | 'shower') { this.edit(c => { c[k] = c[k] ? 0 : 1; }); }
+  toggle(k: 'kitchen' | 'wc' | 'shower') { this.edit(c => { c[k] = c[k] ? 0 : 1; this.settle(c); }); }
   bump(k: 'count' | 'floors', d: number) { this.edit(c => { c[k] += d; }); }
   /** French doors and a panoramic window are the entrance and the glazing of their wall, so adding one clears its plain doors and windows. */
   bumpWall(k: string, d: number) {
