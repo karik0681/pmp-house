@@ -6,11 +6,12 @@ import { SETTINGS } from '../core/settings';
 import { HeaderComponent } from './header.component';
 import { FooterComponent } from './footer.component';
 import { NavService } from './nav.service';
+import { ChatWidgetComponent } from './chat-widget.component';
 
-/** Frame of every public page: header, page content, footer and the floating WhatsApp button. */
+/** Frame of every public page: header, page content, footer, the floating WhatsApp button and the chat window. */
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, ChatWidgetComponent],
   template: `
     <app-header />
     <router-outlet />
@@ -18,7 +19,8 @@ import { NavService } from './nav.service';
     <a class="waf" [hidden]="nav.wafHidden() || overCta()" [href]="waLink()" target="_blank" rel="noopener">
       <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 20l1.3-3.9A8 8 0 1 1 8 18.9z"/></svg>
       <span>{{ i18n.t('waFloat') }}</span>
-    </a>`,
+    </a>
+    <app-chat-widget [hidden]="nav.wafHidden() || overCta()" />`,
 })
 export class LayoutComponent {
   readonly i18n = inject(I18nService);
