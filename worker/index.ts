@@ -4,7 +4,7 @@ import { PRICES, SIZES } from '../src/app/configurator/data';
 
 interface Env {
   ASSETS: { fetch(r: Request): Promise<Response> };
-  AI: { run(model: string, input: unknown): Promise<{ response?: string }> };
+  AI: { run(model: string, input: unknown): Promise<unknown> };
 }
 
 const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
@@ -83,13 +83,35 @@ async function assistant(request: Request, env: Env): Promise<Response> {
       messages: [{ role: 'system', content: rules(site) }, { role: 'user', content: `PŘEDMĚT: ${subject || '(bez předmětu)'}\n\nE-MAIL ZÁKAZNÍKA:\n${body}` }],
       max_tokens: 700, temperature: .2,
     });
-    out = String(r.response || '').trim();
+    /* the text normally comes in "response"; some models wrap it differently */
+    const got: any = r;
+    const raw = got?.response ?? got?.result?.response ?? got?.choices?.[0]?.message?.content ?? '';
+    out = (typeof raw === 'string' ? raw : JSON.stringify(raw)).trim();
   } catch (e) { return json({ error: 'ai', detail: String(e).slice(0, 200) }, 502); }
 
-  /* read the three parts of the answer; anything that does not fit the format goes to a person */
-  const m = out.match(/ROZHODNUT[ÍI]:\s*(ODPOV[ĚE]D[ĚE]T|P[ŘR]EDAT)[^\n]*\n\s*D[ŮU]VOD:\s*([^\n]*)\n\s*-{3,}\s*\n([\s\S]+)/i);
-  if (!m) return json({ handover: true, reason: 'Asistent neodpověděl v očekávaném tvaru, odpověď musí napsat člověk.', reply: '' });
-  return json({ handover: !/^ODPOV/i.test(m[1]), reason: m[2].trim(), reply: m[3].trim() });
+  return json(parse(out));
+}
+
+/**
+ * Reads the model's answer: the decision, the reason for the employee and the e-mail itself.
+ * Models do not always keep the format (bold marks, a missing line, no "---"), so each part is looked for on its own.
+ * When no decision can be found, the message goes to a person, with the model's text kept as a draft.
+ */
+export function parse(out: string): { handover: boolean; reason: string; reply: string } {
+  const text = out.replace(/\r/g, '').replace(/[*_#`]+/g, '').trim();
+  const decision = text.match(/ROZHODNUT[ÍI]\s*:?\s*(ODPOV[ĚE]D[ĚE]T|P[ŘR]EDAT)/i);
+  const reason = text.match(/D[ŮU]VOD\s*:\s*([^\n]+)/i);
+  /* the e-mail starts after the "---" line, or after the last of the two header lines */
+  const sep = text.match(/\n\s*-{3,}\s*\n/);
+  let reply = '';
+  if (sep) reply = text.slice(sep.index! + sep[0].length);
+  else {
+    const last = [decision, reason].filter(Boolean).map(m => m!.index! + m![0].length);
+    reply = last.length ? text.slice(Math.max(...last)) : text;
+  }
+  reply = reply.replace(/^\s*-{3,}\s*/, '').trim();
+  if (!decision) return { handover: true, reason: 'Asistent neuvedl rozhodnutí, proto zprávu raději předává člověku. Text níže je jen návrh.', reply };
+  return { handover: !/^ODPOV/i.test(decision[1]), reason: reason ? reason[1].trim() : '', reply };
 }
 
 export default {
