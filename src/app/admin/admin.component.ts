@@ -10,10 +10,11 @@ import { Lead, STATUSES } from '../leads/lead';
 import { linkTo, summaryLines, title } from '../configurator/model';
 import { PriceListComponent } from './price-list.component';
 import { QuoteComponent } from './quote.component';
+import { AssistantDemoComponent } from './assistant-demo.component';
 
 @Component({
   selector: 'app-admin',
-  imports: [RouterLink, PriceListComponent, QuoteComponent],
+  imports: [RouterLink, PriceListComponent, QuoteComponent, AssistantDemoComponent],
   templateUrl: './admin.component.html',
 })
 export class AdminComponent {
@@ -27,8 +28,8 @@ export class AdminComponent {
   readonly query = signal('');
   readonly picked = signal<string | null>(null);
   readonly draft = signal('');
-  /** the board of enquiries or the price list */
-  readonly view = signal<'board' | 'prices'>('board');
+  /** the board of enquiries, the price list or the demo of the e-mail assistant */
+  readonly view = signal<'board' | 'prices' | 'assistant'>('board');
 
   readonly filtered = computed(() => {
     const q = this.query().trim().toLowerCase();

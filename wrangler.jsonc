@@ -1,9 +1,13 @@
 {
-  // Cloudflare: the site is plain static files after "npm run build"
+  // Cloudflare: static files after "npm run build", plus a small Worker for /api/*
   "name": "pmp-house",
   "compatibility_date": "2026-11-01",
   // public link https://pmp-house.<account>.workers.dev
   "workers_dev": true,
+  // the small server part: it answers /api/* (the assistant demo) and passes everything else to the static files
+  "main": "./worker/index.ts",
+  // Cloudflare's built-in AI models, used by the assistant demo; no outside key needed
+  "ai": { "binding": "AI" },
   // unknown addresses get 404.html (the empty app shell), which then shows the right page or the home page
-  "assets": { "directory": "./dist/pmp-house/browser", "not_found_handling": "404-page" }
+  "assets": { "directory": "./dist/pmp-house/browser", "binding": "ASSETS", "not_found_handling": "404-page", "run_worker_first": ["/api/*"] }
 }

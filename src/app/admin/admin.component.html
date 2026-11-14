@@ -25,9 +25,10 @@
       <input type="search" [placeholder]="t('adm_search')" [value]="query()" (input)="query.set($any($event.target).value)"></label>
     <button type="button" class="btn btn-o" (click)="leads.reset(); picked.set(null)">{{ t('adm_reset') }}</button>
     <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'prices'" (click)="view.set(view() === 'prices' ? 'board' : 'prices')">{{ t(view() === 'prices' ? 'adm_toBoard' : 'pl_title') }}</button>
+    <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'assistant'" (click)="view.set(view() === 'assistant' ? 'board' : 'assistant')">{{ t(view() === 'assistant' ? 'adm_toBoard' : 'as_title') }}</button>
   </div>
 
-  @if (view() === 'prices') { <div class="adm-body"><app-price-list /></div> } @else {
+  @if (view() === 'prices') { <div class="adm-body"><app-price-list /></div> } @else if (view() === 'assistant') { <div class="adm-body"><app-assistant-demo /></div> } @else {
 
   <div class="adm-body">
     <div class="adm-board">
