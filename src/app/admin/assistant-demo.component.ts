@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { I18nService } from '../core/i18n.service';
 
-interface Answer { handover: boolean; reason: string; reply: string }
+interface Answer { offtopic?: boolean; handover: boolean; reason: string; reply: string }
 
 /**
  * Demo of the e-mail assistant: write a message as a customer and see what the assistant would send back.
@@ -27,7 +27,7 @@ interface Answer { handover: boolean; reason: string; reply: string }
           <h3>{{ t('as_out') }}</h3>
           @if (error()) { <p class="note warn">{{ t(error()) }}</p> }
           @if (answer(); as a) {
-            <p class="as-badge" [class.is-hand]="a.handover">{{ t(a.handover ? 'as_hand' : 'as_auto') }}</p>
+            <p class="as-badge" [class.is-hand]="a.handover" [class.is-off]="a.offtopic">{{ t(a.offtopic ? 'as_off' : a.handover ? 'as_hand' : 'as_auto') }}</p>
             <p class="as-reason">{{ a.reason }}</p>
             @if (a.reply) { <pre class="as-mail">{{ a.reply }}</pre> }
           } @else if (!error()) { <p class="note">{{ t(busy() ? 'as_wait' : 'as_empty') }}</p> }
@@ -43,10 +43,11 @@ export class AssistantDemoComponent {
   readonly answer = signal<Answer | null>(null);
   readonly error = signal('');
 
-  /** ready-made customer messages: a simple question, one that needs a person, and one in German */
+  /** ready-made customer messages: a simple question, one that needs a person, one off the topic and one in German */
   readonly examples = [
     { k: 'as_ex1', subject: 'Dotaz na kontejner 3 × 6 m', body: 'Dobrý den,\nzajímá mě kontejner 3 × 6 m jako zahradní kancelář. Jaký je rozdíl mezi Standard a Premium a kolik stojí? Za jak dlouho ho dodáte?\nDěkuji, Novák' },
     { k: 'as_ex2', subject: 'Poptávka: dva kontejnery s dopravou do Brna', body: 'Dobrý den,\npotřebuji dva kontejnery 3 × 9 m spojené vedle sebe, s kuchyňkou a sprchou, dopravou do Brna a montáží. Jaká bude konečná cena a dáte mi slevu při platbě předem?\nS pozdravem, Dvořáková' },
+    { k: 'as_ex4', subject: 'Dotaz', body: 'Dobrý den, poradíte mi dobrý recept na svíčkovou a jaké bude zítra počasí v Praze?' },
     { k: 'as_ex3', subject: 'Anfrage Bürocontainer', body: 'Guten Tag,\nliefern Sie auch nach Tschechien an die Grenze bei Děčín? Welche Wandstärken und Dämmung bieten Sie an und in welchen Farben?\nMit freundlichen Grüßen, Weber' },
   ];
 

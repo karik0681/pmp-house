@@ -41,6 +41,7 @@ V konfigurátoru si zákazník kontejner sestaví ve 3D a pošle poptávku.`;
 const rules = (site: string) => `Jsi automatický e-mailový asistent firmy PMP House. Odpovídáš na e-maily zákazníků.
 
 PRAVIDLA
+0. Tvé jediné téma jsou kontejnery a modulární stavby firmy PMP House: typy, rozměry, ceny, výbava, zateplení, dodání, doprava, poptávka, kontakt. Na nic jiného neodpovídáš, ani stručně, ani ze zdvořilosti: žádné recepty, programování, překlady, úkoly, obecné rady, vtipy, politika, zprávy, cizí firmy a výrobky, otázky o tobě nebo o umělé inteligenci. U takové zprávy napiš TÉMA: JINÉ a místo e-mailu jen slovo NIC. Když zpráva míchá kontejnery s jiným tématem, odpověz jen na část o kontejnerech a zbytek vynech.
 1. Odpovídej jen podle PODKLADŮ níže. Nic si nevymýšlej: žádné ceny, slevy, termíny, technické údaje ani sliby, které v podkladech nejsou.
 2. Piš jazykem, kterým píše zákazník. Zdvořile, věcně, krátce (nejvýš asi 150 slov), bez odrážek, jako běžný e-mail.
 3. Když je odpověď celá v podkladech, rozhodni ODPOVĚDĚT.
@@ -49,6 +50,8 @@ PRAVIDLA
 6. Odpověď zakonči podpisem: "Automatický asistent PMP House" a větou, že jde o automatickou odpověď a že kolegové jsou na telefonu +420 771 112 113 (přelož do jazyka zákazníka).
 
 FORMÁT VÝSTUPU, přesně takto:
+TÉMA: KONTEJNERY nebo JINÉ
+JAZYK: kód jazyka zákazníka (cs, de, en, sk, pl, ru…)
 ROZHODNUTÍ: ODPOVĚDĚT nebo PŘEDAT
 DŮVOD: jedna krátká věta česky pro zaměstnance
 ---
@@ -92,26 +95,38 @@ async function assistant(request: Request, env: Env): Promise<Response> {
   return json(parse(out));
 }
 
+/* what a customer gets when the message is not about containers: one fixed sentence, never the model's own words */
+const OFF: Record<string, string> = {
+  cs: 'Dobrý den,\nděkujeme za zprávu. Tento asistent odpovídá jen na dotazy ke kontejnerům a modulárním stavbám PMP House. S takovým dotazem vám rád pomůže, případně volejte +420 771 112 113.\n\nAutomatický asistent PMP House',
+  de: 'Guten Tag,\nvielen Dank für Ihre Nachricht. Dieser Assistent beantwortet nur Fragen zu Containern und Modulbauten von PMP House. Dabei hilft er Ihnen gern, oder rufen Sie uns an: +420 771 112 113.\n\nAutomatischer Assistent PMP House',
+  en: 'Hello,\nthank you for your message. This assistant only answers questions about PMP House containers and modular buildings. It will gladly help with those, or you can call +420 771 112 113.\n\nPMP House automatic assistant',
+};
+
 /**
- * Reads the model's answer: the decision, the reason for the employee and the e-mail itself.
+ * Reads the model's answer: the topic, the decision, the reason for the employee and the e-mail itself.
  * Models do not always keep the format (bold marks, a missing line, no "---"), so each part is looked for on its own.
- * When no decision can be found, the message goes to a person, with the model's text kept as a draft.
+ * A message on another topic gets the fixed sentence above. When no decision can be found, the message goes to a person.
  */
-export function parse(out: string): { handover: boolean; reason: string; reply: string } {
+export function parse(out: string): { offtopic: boolean; handover: boolean; reason: string; reply: string } {
   const text = out.replace(/\r/g, '').replace(/[*_#`]+/g, '').trim();
+  const topic = text.match(/T[ÉE]MA\s*:\s*(KONTEJNERY|JIN[ÉE])/i);
+  if (topic && /^JIN/i.test(topic[1])) {
+    const lang = (text.match(/JAZYK\s*:\s*([a-z]{2})/i)?.[1] || 'cs').toLowerCase();
+    return { offtopic: true, handover: false, reason: 'Zpráva není o kontejnerech. Zákazník dostane jen krátké odmítnutí.', reply: OFF[lang] || `${OFF['cs']}\n\n${OFF['en']}` };
+  }
   const decision = text.match(/ROZHODNUT[ÍI]\s*:?\s*(ODPOV[ĚE]D[ĚE]T|P[ŘR]EDAT)/i);
   const reason = text.match(/D[ŮU]VOD\s*:\s*([^\n]+)/i);
-  /* the e-mail starts after the "---" line, or after the last of the two header lines */
+  /* the e-mail starts after the "---" line, or after the last of the header lines */
   const sep = text.match(/\n\s*-{3,}\s*\n/);
   let reply = '';
   if (sep) reply = text.slice(sep.index! + sep[0].length);
   else {
     const last = [decision, reason].filter(Boolean).map(m => m!.index! + m![0].length);
-    reply = last.length ? text.slice(Math.max(...last)) : text;
+    reply = last.length ? text.slice(Math.max(...last)) : text.replace(/^(T[ÉE]MA|JAZYK)\s*:[^\n]*\n/gim, '');
   }
   reply = reply.replace(/^\s*-{3,}\s*/, '').trim();
-  if (!decision) return { handover: true, reason: 'Asistent neuvedl rozhodnutí, proto zprávu raději předává člověku. Text níže je jen návrh.', reply };
-  return { handover: !/^ODPOV/i.test(decision[1]), reason: reason ? reason[1].trim() : '', reply };
+  if (!decision) return { offtopic: false, handover: true, reason: 'Asistent neuvedl rozhodnutí, proto zprávu raději předává člověku. Text níže je jen návrh.', reply };
+  return { offtopic: false, handover: !/^ODPOV/i.test(decision[1]), reason: reason ? reason[1].trim() : '', reply };
 }
 
 export default {

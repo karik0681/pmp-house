@@ -111,6 +111,7 @@ app-price-list,app-assistant-demo{flex:1;min-width:0}
 .as-ex button{background:#fff;border:2px solid var(--line);border-radius:18px;padding:5px 11px;font-size:14px;font-weight:600}.as-ex button:hover{border-color:var(--g)}
 .as-badge{align-self:flex-start;margin:0;background:var(--g);color:#fff;border-radius:16px;padding:4px 12px;font-size:14px;font-weight:600}
 .as-badge.is-hand{background:var(--post-d,#a8591a)}
+.as-badge.is-off{background:#5b6660}
 .as-reason{margin:0;font-size:14px;color:var(--mute)}
 .as-mail{margin:0;background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;font:inherit;font-size:15.5px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
 .pl{background:#fff;border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
