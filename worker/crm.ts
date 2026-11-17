@@ -128,6 +128,15 @@ async function change(id: string, request: Request, env: CrmEnv, who: string) {
   return json({ ...lead, id });
 }
 
+/** Deletes an enquiry for good (for example when the customer asks for their data to be erased under GDPR). */
+async function remove(id: string, env: CrmEnv, who: string) {
+  const n = numOf(id);
+  if (!Number.isFinite(n)) return json({ error: 'id' }, 404);
+  await (await db(env)).prepare('DELETE FROM leads WHERE n = ?').bind(n).run();
+  console.log('deleted', id, 'by', who);   /* the log keeps who deleted which number, not the customer's data */
+  return json({ deleted: id });
+}
+
 /* ---------- notifications ---------- */
 
 function message(l: Json, site: string) {
@@ -187,6 +196,7 @@ export async function crm(request: Request, env: CrmEnv, pathname: string, wait:
       if (pathname === '/api/leads' && m === 'GET') return await list(env);
       const id = decodeURIComponent(pathname.slice('/api/leads/'.length));
       if (id && m === 'PATCH') return await change(id, request, env, who);
+      if (id && m === 'DELETE') return await remove(id, env, who);
       return json({ error: 'method' }, 405);
     }
   } catch (e) {

@@ -95,6 +95,7 @@
         <ul class="adm-notes">
           @for (n of l.notes; track n.at + n.text) { <li><span>{{ when(n.at) }}@if (n.by) { · {{ n.by }}}</span>{{ n.text }}</li> }
         </ul>
+        <button type="button" class="adm-link adm-delete" (click)="remove(l)">{{ t('adm_delete') }}</button>
       } @else {
         <p class="adm-empty">{{ t('adm_pick') }}</p>
       }

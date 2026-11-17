@@ -69,6 +69,16 @@ export class LeadsService {
     this.local(id, l => ({ ...l, notes: [note, ...l.notes] }));
     this.send(id, { note: text });
   }
+  /** Deletes an enquiry for good. Returns false when the server refused. */
+  async remove(id: string): Promise<boolean> {
+    if (!this.demo) {
+      try { const r = await fetch(`/api/leads/${encodeURIComponent(id)}`, { method: 'DELETE' }); if (!r.ok) return false; }
+      catch { return false; }
+    }
+    const list = this.leads().filter(l => l.id !== id);
+    if (this.demo) this.save(list); else this.leads.set(list);
+    return true;
+  }
   /** Demo only: puts the sample enquiries back. */
   reset() { if (this.demo) this.save(seedLeads()); }
 

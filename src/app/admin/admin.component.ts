@@ -65,6 +65,11 @@ export class AdminComponent {
     this.leads.update(l.id, { status: s }, this.t('adm_statusNote').replace('{s}', this.t('st' + s)));
   }
   addNote(l: Lead) { const text = this.draft().trim(); if (!text) return; this.leads.addNote(l.id, text); this.draft.set(''); }
+  /** Deletes the enquiry after a confirmation; it cannot be undone. */
+  async remove(l: Lead) {
+    if (!confirm(this.t('adm_deleteAsk').replace('{id}', `${l.id} (${l.name})`))) return;
+    if (await this.leads.remove(l.id)) this.picked.set(null); else this.leads.failed.set(true);
+  }
   /** the client's configuration, opened in a new tab so the cabinet stays open */
   link3d(l: Lead) { return linkTo(l.cfg!); }
   async logout() { await this.auth.logout(); this.router.navigateByUrl('/admin/login'); }
