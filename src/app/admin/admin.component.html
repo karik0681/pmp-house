@@ -20,10 +20,11 @@
     <div><span>{{ t('adm_sold') }}</span><b>{{ leads.sold().length }}</b></div>
   </div>
 
+  @if (leads.failed()) { <p class="note warn adm-fail" role="alert">{{ t('adm_fail') }}</p> }
   <div class="adm-tools">
     <label class="adm-search"><span class="sr">{{ t('adm_search') }}</span>
       <input type="search" [placeholder]="t('adm_search')" [value]="query()" (input)="query.set($any($event.target).value)"></label>
-    <button type="button" class="btn btn-o" (click)="leads.reset(); picked.set(null)">{{ t('adm_reset') }}</button>
+    @if (leads.demo) { <button type="button" class="btn btn-o" (click)="leads.reset(); picked.set(null)">{{ t('adm_reset') }}</button> }
     <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'prices'" (click)="view.set(view() === 'prices' ? 'board' : 'prices')">{{ t(view() === 'prices' ? 'adm_toBoard' : 'pl_title') }}</button>
     <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'assistant'" (click)="view.set(view() === 'assistant' ? 'board' : 'assistant')">{{ t(view() === 'assistant' ? 'adm_toBoard' : 'as_title') }}</button>
   </div>

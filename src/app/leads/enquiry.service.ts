@@ -24,9 +24,13 @@ export class EnquiryService {
 
   async send(c: Cfg, f: Contact): Promise<Result> {
     const t = (k: string) => this.i18n.t(k);
-    if (SETTINGS.demoCrm) {
-      this.leads.add({ name: f.name, phone: f.phone, email: f.email, place: f.place, clientNote: f.note, cfg: c, price: priceOf(c), source: this.source.label }, t('adm_newLead'), t('adm_firstStep'));
+    const lead = () => this.leads.add({ name: f.name, phone: f.phone, email: f.email, place: f.place, clientNote: f.note, cfg: c, price: priceOf(c), source: this.source.label }, t('adm_newLead'), t('adm_firstStep'));
+    /* normal case: the enquiry goes to the shared list on the server, which also notifies the company */
+    if (!SETTINGS.demoCrm) {
+      if (await lead()) return 'sent';
+      this.mailto(c, f); return 'failed';
     }
+    await lead();
     if (!SETTINGS.formKey) {
       if (SETTINGS.demoCrm) return 'sentDemo';
       this.mailto(c, f); return 'mailto';

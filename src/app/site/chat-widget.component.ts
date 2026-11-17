@@ -42,7 +42,8 @@ interface Msg { role: 'user' | 'assistant'; content: string }
             <input type="tel" [placeholder]="t('chat_phone')" [attr.aria-label]="t('chat_phone')" autocomplete="tel" [value]="phone()" (input)="phone.set($any($event.target).value)">
             <label class="chk"><input type="checkbox" [checked]="gdpr()" (change)="gdpr.set($any($event.target).checked)"><span>{{ t('gdpr') }}</span></label>
             @if (formErr()) { <p class="note warn">{{ t('chat_formErr') }}</p> }
-            <div class="chat-form-b"><button type="submit" class="btn btn-g">{{ t('chat_formSend') }}</button><button type="button" class="btn btn-o" (click)="form.set(false)">{{ t('chat_back') }}</button></div>
+            @if (saveErr()) { <p class="note warn" role="alert">{{ t('chat_saveFail') }}</p> }
+            <div class="chat-form-b"><button type="submit" class="btn btn-g" [disabled]="saving()">{{ t(saving() ? 'sending' : 'chat_formSend') }}</button><button type="button" class="btn btn-o" (click)="form.set(false)">{{ t('chat_back') }}</button></div>
           </form>
         } @else {
           <form class="chat-in" (submit)="send($event)">
@@ -71,6 +72,8 @@ export class ChatWidgetComponent {
   readonly form = signal(false);
   readonly sent = signal(false);
   readonly formErr = signal(false);
+  readonly saveErr = signal(false);
+  readonly saving = signal(false);
   readonly name = signal(''); readonly email = signal(''); readonly phone = signal(''); readonly gdpr = signal(false);
 
   t = (k: string) => this.i18n.t(k);
@@ -94,12 +97,16 @@ export class ChatWidgetComponent {
   }
 
   /** Saves the conversation with the visitor's contact as an enquiry for the staff. */
-  leave(e: Event) {
+  async leave(e: Event) {
     e.preventDefault();
+    if (this.saving()) return;
     const name = this.name().trim(), email = this.email().trim(), phone = this.phone().trim();
     if (!name || !/.+@.+\..+/.test(email) || !this.gdpr()) { this.formErr.set(true); return; }
     const talk = this.msgs().map(m => `${this.t(m.role === 'user' ? 'chat_who_u' : 'chat_who_a')}: ${m.content}`).join('\n');
-    this.leads.add({ name, phone, email, place: '', clientNote: talk || this.t('chat_noTalk'), cfg: this.cfg.cfg(), price: null, source: this.t('chat_source') }, this.t('chat_leadNote'), this.t('adm_firstStep'));
-    this.formErr.set(false); this.form.set(false); this.sent.set(true); this.down();
+    this.formErr.set(false); this.saveErr.set(false); this.saving.set(true);
+    const id = await this.leads.add({ name, phone, email, place: '', clientNote: talk || this.t('chat_noTalk'), cfg: this.cfg.cfg(), price: null, source: this.t('chat_source') }, this.t('chat_leadNote'), this.t('adm_firstStep'));
+    this.saving.set(false);
+    if (!id) { this.saveErr.set(true); return; }
+    this.form.set(false); this.sent.set(true); this.down();
   }
 }

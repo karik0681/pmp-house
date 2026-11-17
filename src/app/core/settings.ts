@@ -19,6 +19,6 @@ export const SETTINGS = {
    *  Empty: the enquiry is not e-mailed (in demo mode it is only stored in the demo CRM). */
   formKey: '',
   formEndpoint: 'https://api.web3forms.com/submit',
-  /** Demo CRM: enquiries are stored in this browser and shown in /admin. Turn off for the plain website. */
-  demoCrm: true,
+  /** Demo CRM: enquiries are stored only in this browser. Off: they go to the shared list on the server (/api/leads). */
+  demoCrm: false,
 };

@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { SETTINGS } from '../core/settings';
 import { I18nService } from '../core/i18n.service';
@@ -40,6 +40,16 @@ export class AdminComponent {
   readonly lines = computed(() => { const l = this.lead(); return l ? summaryLines(l.cfg, k => this.t(k)) : []; });
   readonly hasDemo = computed(() => this.leads.leads().some(l => l.demo));
 
+  constructor() {
+    /* the shared list: loaded now and refreshed every minute, so new enquiries appear without reloading */
+    this.refresh();
+    const timer = setInterval(() => { if (!this.draft()) this.refresh(); }, 60_000);
+    inject(DestroyRef).onDestroy(() => clearInterval(timer));
+  }
+  private async refresh() {
+    if (!(await this.leads.load())) { this.auth.expired(); this.router.navigateByUrl('/admin/login'); }
+  }
+
   t = (k: string) => this.i18n.t(k);
   money = money;
   title(l: Lead) { return title(l.cfg, k => this.t(k)); }
@@ -52,11 +62,10 @@ export class AdminComponent {
 
   setStatus(l: Lead, s: number) {
     if (l.status === s) return;
-    this.leads.update(l.id, { status: s });
-    this.leads.addNote(l.id, this.t('adm_statusNote').replace('{s}', this.t('st' + s)));
+    this.leads.update(l.id, { status: s }, this.t('adm_statusNote').replace('{s}', this.t('st' + s)));
   }
   addNote(l: Lead) { const text = this.draft().trim(); if (!text) return; this.leads.addNote(l.id, text); this.draft.set(''); }
   /** the client's configuration, opened in a new tab so the cabinet stays open */
   link3d(l: Lead) { return linkTo(l.cfg); }
-  logout() { this.auth.logout(); this.router.navigateByUrl('/admin/login'); }
+  async logout() { await this.auth.logout(); this.router.navigateByUrl('/admin/login'); }
 }

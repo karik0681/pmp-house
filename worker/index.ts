@@ -1,8 +1,9 @@
 /* The server side of the website on Cloudflare. It answers /api/* and leaves every other address to the static site.
-   /api/assistant answers one e-mail (the demo in the cabinet), /api/chat answers in the chat window on the website. */
+   /api/assistant answers one e-mail (the demo in the cabinet), /api/chat answers in the chat window on the website. The enquiry list for the staff is in crm.ts. */
 import { PRICES, SIZES } from '../src/app/configurator/data';
+import { crm, CrmEnv } from './crm';
 
-interface Env {
+interface Env extends CrmEnv {
   ASSETS: { fetch(r: Request): Promise<Response> };
   AI: { run(model: string, input: unknown): Promise<unknown> };
 }
@@ -175,10 +176,13 @@ export function parse(out: string, off: Record<string, string> = OFF): { offtopi
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx?: { waitUntil(p: Promise<unknown>): void }): Promise<Response> {
     const { pathname } = new URL(request.url);
     if (pathname === '/api/assistant') return assistant(request, env);
     if (pathname === '/api/chat') return chat(request, env);
+    const ip = request.headers.get('cf-connecting-ip') || '?';
+    const answer = await crm(request, env, pathname, p => (ctx ? ctx.waitUntil(p) : void p), () => tooMany(ip));
+    if (answer) return answer;
     if (pathname.startsWith('/api/')) return json({ error: 'not found' }, 404);
     return env.ASSETS.fetch(request);
   },

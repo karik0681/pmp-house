@@ -1,3 +1,4 @@
+import { mime } from '../../worker/crm';
 import { describe, it, expect } from 'vitest';
 import { layout } from './three/stage';
 import { fresh, repair, valid } from './configurator/model';
@@ -66,5 +67,18 @@ describe('price calculation in the cabinet', () => {
     const c = fresh('K', 6, 3); c.wc = 1;
     expect(quote(c, prices(), blankQuote()).missing).toBe(true);
     expect(quote(c, prices(), { ...blankQuote(), rows: { wc: { unit: 0 } } }).missing).toBe(false);
+  });
+});
+
+describe('enquiry e-mail', () => {
+  it('is plain UTF-8 text that answers the customer on reply', () => {
+    const raw = mime('firma@example.cz', 'Nová poptávka P-1001: Jan Novák', 'Jméno: Jan Novák\nŘádek s háčky', 'jan@example.cz');
+    expect(raw).toContain('To: firma@example.cz');
+    expect(raw).toContain('Reply-To: jan@example.cz');
+    const body = raw.split('\r\n\r\n')[1].replace(/\r\n/g, '');
+    expect(decodeURIComponent(escape(atob(body)))).toBe('Jméno: Jan Novák\nŘádek s háčky');
+  });
+  it('leaves out a reply address that is not a plain e-mail', () => {
+    expect(mime('a@b.cz', 's', 't', 'x@y.cz\r\nBcc: z@z.cz')).not.toContain('Reply-To');
   });
 });

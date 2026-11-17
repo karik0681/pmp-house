@@ -116,7 +116,6 @@ export class QuoteComponent {
   /** writes the total into the enquiry, so the board and the sums at the top use it */
   save() {
     const l = this.lead(), total = this.res().total;
-    this.leads.update(l.id, { price: total });
-    this.leads.addNote(l.id, this.t('q_savedNote').replace('{p}', money(total)));
+    this.leads.update(l.id, { price: total }, this.t('q_savedNote').replace('{p}', money(total)));
   }
 }
