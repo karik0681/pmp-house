@@ -169,6 +169,7 @@ export function parse(out: string, off: Record<string, string> = OFF): { offtopi
     reply = last.length ? text.slice(Math.max(...last)) : text.replace(/^(T[ÉE]MA|JAZYK)\s*:[^\n]*\n/gim, '');
   }
   reply = reply.replace(/^\s*-{3,}\s*/, '').trim();
+  reply = reply.charAt(0).toLocaleUpperCase() + reply.slice(1);
   if (!decision) return { offtopic: false, handover: true, reason: 'Asistent neuvedl rozhodnutí, proto zprávu raději předává člověku. Text níže je jen návrh.', reply };
   return { offtopic: false, handover: !/^ODPOV/i.test(decision[1]), reason: reason ? reason[1].trim() : '', reply };
 }
