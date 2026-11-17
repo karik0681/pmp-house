@@ -2,6 +2,7 @@
    /api/assistant answers one e-mail (the demo in the cabinet), /api/chat answers in the chat window on the website. The enquiry list for the staff is in crm.ts. */
 import { PRICES, SIZES } from '../src/app/configurator/data';
 import { crm, CrmEnv } from './crm';
+import { SETTINGS } from '../src/app/core/settings';
 
 interface Env extends CrmEnv {
   ASSETS: { fetch(r: Request): Promise<Response> };
@@ -18,6 +19,7 @@ function memo(site: string) {
   const prices = Object.entries(PRICES as Record<string, Record<string, number>>)
     .flatMap(([k, list]) => Object.entries(list).map(([size, kc]) => { const [L, W] = size.split('x'); return `- ${NAMES[k]} ${dim([+L, +W])}: od ${kc.toLocaleString('cs-CZ')} Kč bez DPH`; })).join('\n');
   return `FIRMA: PMP House, Česká republika. Vyrábí a dodává obytné a kancelářské kontejnery (modulární stavby).
+PRACOVNÍ DOBA: ${SETTINGS.hours.cs}. Telefon ${SETTINGS.phone}, e-mail ${SETTINGS.mail}. Mimo pracovní dobu odpovídá jen tento automatický asistent; kolegové se ozvou další pracovní den.
 TELEFON: +420 771 112 113 (také WhatsApp). KONFIGURÁTOR: ${site}/#konfigurator
 
 TYPY KONSTRUKCE

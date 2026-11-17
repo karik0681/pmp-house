@@ -11,8 +11,8 @@ export const SETTINGS = {
   address: 'Roztoky, 403 32 Povrly',
   ico: '05185530',
   dic: 'CZ05185530',
-  /** DEMO: opening hours to confirm with the company. */
-  hours: { cs: 'Po–Pá 8:00–17:00', de: 'Mo–Fr 8:00–17:00' },
+  /** Opening hours, confirmed by the company. */
+  hours: { cs: 'Po–Pá 8:00–16:00', de: 'Mo–Fr 8:00–16:00' },
   /** Profile links. An empty link shows a grey icon so the place is visible in the demo. */
   social: { facebook: '', instagram: '', tiktok: '', youtube: '' } as Record<string, string>,
   /** Access key from web3forms.com, tied to the e-mail that should receive enquiries.
