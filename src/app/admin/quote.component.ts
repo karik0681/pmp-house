@@ -67,7 +67,7 @@ export class QuoteComponent {
   readonly lead = input.required<Lead>();
   readonly copied = signal(false);
   readonly q = computed<Quote>(() => ({ ...blankQuote(), ...(this.lead().quote || {}) }));
-  readonly res = computed(() => quote(this.lead().cfg, this.prices.list(), this.q()));
+  readonly res = computed(() => quote(this.lead().cfg!, this.prices.list(), this.q()));
 
   t = (k: string) => this.i18n.t(k);
   money = money;
@@ -77,7 +77,7 @@ export class QuoteComponent {
 
   /** the name of a line of the price list */
   name(id: string) {
-    if (id === 'base') return title(this.lead().cfg, this.t);
+    if (id === 'base') return title(this.lead().cfg!, this.t);
     if (id === 'km') return this.t('q_km');
     if (id === 'montage' || id === 'crane') return this.t('q_' + id);
     return optLabel(id as any, this.t);

@@ -37,7 +37,7 @@ export class AdminComponent {
   });
   readonly columns = computed(() => STATUSES.map(s => ({ s, items: this.filtered().filter(l => l.status === s) })));
   readonly lead = computed(() => this.leads.leads().find(l => l.id === this.picked()) ?? null);
-  readonly lines = computed(() => { const l = this.lead(); return l ? summaryLines(l.cfg, k => this.t(k)) : []; });
+  readonly lines = computed(() => { const l = this.lead(); return l?.cfg ? summaryLines(l.cfg, k => this.t(k)) : []; });
   readonly hasDemo = computed(() => this.leads.leads().some(l => l.demo));
 
   constructor() {
@@ -52,7 +52,7 @@ export class AdminComponent {
 
   t = (k: string) => this.i18n.t(k);
   money = money;
-  title(l: Lead) { return title(l.cfg, k => this.t(k)); }
+  title(l: Lead) { return title(l.cfg!, k => this.t(k)); }
   late(l: Lead) { return l.status < 4 && !!l.due && l.due < this.leads.today; }
   when(iso: string) {
     return new Intl.DateTimeFormat(this.i18n.lang() === 'de' ? 'de-DE' : 'cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
@@ -66,6 +66,6 @@ export class AdminComponent {
   }
   addNote(l: Lead) { const text = this.draft().trim(); if (!text) return; this.leads.addNote(l.id, text); this.draft.set(''); }
   /** the client's configuration, opened in a new tab so the cabinet stays open */
-  link3d(l: Lead) { return linkTo(l.cfg); }
+  link3d(l: Lead) { return linkTo(l.cfg!); }
   async logout() { await this.auth.logout(); this.router.navigateByUrl('/admin/login'); }
 }

@@ -1,12 +1,12 @@
 import { Cfg } from '../configurator/model';
 import type { Quote } from '../admin/quote';
 
-export interface Note { at: string; text: string }
+export interface Note { at: string; text: string; by?: string }  // by: the staff member, set by the server
 export interface Lead {
   id: string;
   createdAt: string;
   name: string; phone: string; email: string; place: string; clientNote: string;
-  cfg: Cfg;
+  cfg: Cfg | null;      // null: the enquiry came without a configuration
   price: number | null;
   quote?: Quote;         // the employee's price calculation: delivery, services, discount
   source: string;
