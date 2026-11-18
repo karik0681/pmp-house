@@ -1,7 +1,7 @@
 /* The server side of the website on Cloudflare. It answers /api/* and leaves every other address to the static site.
    /api/assistant answers one e-mail (the demo in the cabinet), /api/chat answers in the chat window on the website. The enquiry list for the staff is in crm.ts. */
 import { PRICES, SIZES } from '../src/app/configurator/data';
-import { crm, CrmEnv } from './crm';
+import { cleanup, crm, CrmEnv } from './crm';
 import { SETTINGS } from '../src/app/core/settings';
 
 interface Env extends CrmEnv {
@@ -187,5 +187,9 @@ export default {
     if (answer) return answer;
     if (pathname.startsWith('/api/')) return json({ error: 'not found' }, 404);
     return env.ASSETS.fetch(request);
+  },
+  /** once a day: removes old enquiries without a sale (crm.ts, cleanup) */
+  async scheduled(_event: unknown, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) {
+    ctx.waitUntil(cleanup(env));
   },
 };

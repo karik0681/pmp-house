@@ -5,7 +5,7 @@
    - ADMIN_PASSWORD  the staff password for /admin; changing it logs everybody out
    - NOTIFY_EMAIL    where the e-mail about a new enquiry goes (must be a verified address in Email Routing)
    - TG_TOKEN        the Telegram bot token from @BotFather
-   - TG_CHAT         the Telegram chat (person or group) that gets the messages
+   - TG_CHAT         the Telegram chat (person or group) that gets a short notice (number and link, no personal data)
    Anything missing simply switches that part off. */
 
 export interface CrmEnv {
@@ -154,7 +154,8 @@ async function notify(env: CrmEnv, lead: Json, site: string) {
   if (env.TG_TOKEN && env.TG_CHAT) {
     jobs.push(fetch(`https://api.telegram.org/bot${env.TG_TOKEN}/sendMessage`, {
       method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ chat_id: env.TG_CHAT, text: text.length > 4000 ? text.slice(0, 3990) + '…' : text, disable_web_page_preview: true }),
+      /* Telegram is outside the EU, so it gets no personal data: only the number and a link to the cabinet */
+      body: JSON.stringify({ chat_id: env.TG_CHAT, text: `Nová poptávka ${lead['id']} (${lead['source']})\n${site}/admin`, disable_web_page_preview: true }),
     }).then(r => { if (!r.ok) console.log('telegram', r.status); }));
   }
   if (env.MAILER && env.NOTIFY_EMAIL) jobs.push(mail(env, lead, text).catch(e => console.log('mail', String(e))));
@@ -179,6 +180,19 @@ async function mail(env: CrmEnv, lead: Json, text: string) {
   const { EmailMessage } = await import('cloudflare:email');
   const raw = mime(env.NOTIFY_EMAIL!, `Nová poptávka ${lead['id']}: ${lead['name']} (${lead['source']})`, text, lead['email']);
   await env.MAILER!.send(new EmailMessage(SENDER, env.NOTIFY_EMAIL!, raw));
+}
+
+/* ---------- clean-up ---------- */
+
+/** Enquiries that did not end in a sale are deleted 2 years after the last activity, as the privacy notice says.
+    notes[0] is the newest note, so its time is the last activity. Runs once a day (wrangler.jsonc, triggers). */
+export async function cleanup(env: CrmEnv) {
+  if (!env.DB) return;
+  const before = new Date(Date.now() - 730 * 864e5).toISOString();
+  const r = await (await db(env)).prepare(
+    "DELETE FROM leads WHERE json_extract(data, '$.status') < 4 AND COALESCE(json_extract(data, '$.notes[0].at'), created_at) < ?",
+  ).bind(before).run();
+  console.log('cleanup', JSON.stringify((r as any).meta?.changes ?? 0));
 }
 
 /* ---------- routes ---------- */
