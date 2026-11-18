@@ -39,7 +39,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     mtFactK2: 'Hmotnost 3 × 6 m', mtFactV2: 'zhruba 2–3 tuny',
     mtFactK3: 'Dodání', mtFactV3: 'do 30 dnů',
     asH: 'Jak se skládací kontejner sestavuje',
-    asSub: 'Skládací kontejner se převáží rozložený a sestaví se přímo na místě. Takhle to vypadá krok za krokem.',
+    asSub: 'Kontejner dodáme hotový, nebo rozložený k sestavení přímo na místě. Takhle se skládá krok za krokem.',
     as1: 'Díly přijedou složené na sobě, takže při dopravě zaberou málo místa.',
     as2: 'Oddělí se střešní a podlahový rám.',
     as3: 'Do rohů podlahového rámu se osadí sloupky.',

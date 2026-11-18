@@ -3,7 +3,8 @@
 
    Settings in Cloudflare (Workers → pmp-house → Settings → Variables and Secrets, all as "Secret"):
    - ADMIN_PASSWORD  the staff password for /admin; changing it logs everybody out
-   - NOTIFY_EMAIL    where the e-mail about a new enquiry goes (must be a verified address in Email Routing)
+   - NOTIFY_EMAIL    where the e-mail about a new enquiry goes; several addresses separated by commas
+                     (each must be a verified destination address in Email Routing)
    Anything missing simply switches that part off. */
 
 export interface CrmEnv {
@@ -147,7 +148,9 @@ function message(l: Json, site: string) {
 async function notify(env: CrmEnv, lead: Json, site: string) {
   const text = message(lead, site);
   const jobs: Promise<unknown>[] = [];
-  if (env.MAILER && env.NOTIFY_EMAIL) jobs.push(mail(env, lead, text).catch(e => console.log('mail', String(e))));
+  /* NOTIFY_EMAIL may hold several addresses separated by commas: the site mailbox and staff mailboxes */
+  const to = (env.NOTIFY_EMAIL || '').split(',').map(a => a.trim()).filter(a => /^[^\s@]+@[^\s@]+$/.test(a));
+  if (env.MAILER) for (const a of to) jobs.push(mail(env, lead, text, a).catch(e => console.log('mail', String(e))));
   await Promise.allSettled(jobs);
 }
 
@@ -164,11 +167,11 @@ export function mime(to: string, subject: string, text: string, replyTo: string)
   ].join('\r\n');
 }
 
-async function mail(env: CrmEnv, lead: Json, text: string) {
+async function mail(env: CrmEnv, lead: Json, text: string, to: string) {
   // @ts-ignore: provided by the Cloudflare runtime
   const { EmailMessage } = await import('cloudflare:email');
-  const raw = mime(env.NOTIFY_EMAIL!, `Nová poptávka ${lead['id']}: ${lead['name']} (${lead['source']})`, text, lead['email']);
-  await env.MAILER!.send(new EmailMessage(SENDER, env.NOTIFY_EMAIL!, raw));
+  const raw = mime(to, `Nová poptávka ${lead['id']}: ${lead['name']} (${lead['source']})`, text, lead['email']);
+  await env.MAILER!.send(new EmailMessage(SENDER, to, raw));
 }
 
 /* ---------- clean-up ---------- */
