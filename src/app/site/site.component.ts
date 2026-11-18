@@ -71,7 +71,9 @@ export class SiteComponent implements OnDestroy {
   go = goTo;
 
   constructor() {
-    inject(SeoService).page(this.t('title'), this.t('metaHome'));
+    const seo = inject(SeoService);
+    seo.page(this.t('title'), this.t('metaHome'), { path: '/' });
+    seo.company();
     /* a link with ?c=… (from an e-mail, the CRM or a reference) opens that exact configuration */
     const c = this.route.snapshot.queryParamMap.get('c');
     const loaded = c ? decode(c) : null;

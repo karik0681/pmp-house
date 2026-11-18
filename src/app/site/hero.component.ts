@@ -48,8 +48,8 @@ import { PLAN } from './hero-plan';
         </div>
       </div>
       <div class="hero-t">
-        <p class="eyebrow"><i></i>{{ t('eyebrow') }}</p>
-        <h1>{{ t('h1') }}</h1>
+        <h1 class="eyebrow"><i></i>{{ t('eyebrow') }}</h1>
+        <p class="hero-h">{{ t('h1') }}</p>
         <p class="hero-lead">{{ t('lead') }}</p>
         <div class="cta">
           <a class="btn btn-g" href="#konfigurator" (click)="go($event, 'konfigurator')">{{ t('cta') }}</a>

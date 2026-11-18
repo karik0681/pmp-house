@@ -11,7 +11,7 @@ import { Reference } from './refs.data';
   template: `
     @let r = ref();
     <a class="rc" [routerLink]="['/reference', r.slug]">
-      <div class="ph"><img [src]="r.cover.thumb" alt="" loading="lazy" referrerpolicy="no-referrer" (error)="$any($event.target).hidden = true"></div>
+      <div class="ph"><img [src]="r.cover.thumb" [alt]="r.title[i18n.lang()] + ', ' + r.place" loading="lazy" referrerpolicy="no-referrer" (error)="$any($event.target).hidden = true"></div>
       <span class="rc-use">{{ t('use_' + r.use) }}</span>
       <div class="rc-body">
         <p class="rc-meta">{{ r.place }} · {{ r.year }}</p>

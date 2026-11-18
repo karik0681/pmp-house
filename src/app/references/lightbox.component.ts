@@ -8,7 +8,7 @@ import { Photo } from './refs.data';
   template: `
     <dialog #dlg class="box" (click)="backdrop($event)" (keydown)="key($event)"
             (touchstart)="tx = $any($event).touches[0].clientX" (touchend)="swipe($event)">
-      @if (current(); as ph) { <img [src]="ph.full" alt="" referrerpolicy="no-referrer"> }
+      @if (current(); as ph) { <img [src]="ph.full" [alt]="(caption() || t('photo')) + ' ' + (at() + 1)" referrerpolicy="no-referrer"> }
       <p id="boxCap">{{ at() + 1 }} / {{ photos().length }}{{ caption() ? ' · ' + caption() : '' }}</p>
       @if (photos().length > 1) {
         <button type="button" id="boxPrev" class="bb" [attr.aria-label]="t('prevPhoto')" (click)="move(-1)">‹</button>

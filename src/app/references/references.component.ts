@@ -44,6 +44,6 @@ export class ReferencesComponent {
   readonly places = new Set(REFERENCES.map(r => r.place)).size;
   readonly area = REFERENCES.reduce((s, r) => s + r.L * r.W * r.count, 0);
   t = (k: string) => this.i18n.t(k);
-  constructor() { inject(SeoService).page(this.t('seoRefs'), this.t('refSub')); }
+  constructor() { inject(SeoService).page(this.t('seoRefs'), this.t('refSub'), { path: '/reference' }); }
   count = (u: Use) => this.all.filter(r => r.use === u).length;
 }

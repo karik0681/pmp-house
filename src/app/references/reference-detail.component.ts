@@ -43,7 +43,7 @@ import { REFERENCES } from './refs.data';
           <div class="mosaic">
             @for (ph of photos(); track ph.thumb; let i = $index) {
               <button type="button" class="ph" [class.big]="i === 0" [attr.aria-label]="t('openPhoto') + ' ' + (i + 1)" (click)="box.open(i)">
-                <img [src]="i === 0 ? ph.full : ph.thumb" alt="" loading="lazy" referrerpolicy="no-referrer" (error)="$any($event.target).hidden = true">
+                <img [src]="i === 0 ? ph.full : ph.thumb" [alt]="(r.title[lang()]) + ' – ' + t('photo') + ' ' + (i + 1)" loading="lazy" referrerpolicy="no-referrer" (error)="$any($event.target).hidden = true">
               </button>
             }
           </div>
@@ -96,7 +96,8 @@ export class ReferenceDetailComponent {
     const seo = inject(SeoService);
     effect(() => {
       const r = this.ref();
-      if (r) seo.page(`${r.title[this.lang()]}, ${r.place} – ${this.t('navRefs')}`, r.lead[this.lang()]);
+      /* sample stories (demo: true) stay out of Google until the real story replaces them */
+      if (r) seo.page(`${r.title[this.lang()]}, ${r.place} – ${this.t('navRefs')}`, r.lead[this.lang()], { path: `/reference/${r.slug}`, noindex: r.demo });
       else if (this.slug()) this.router.navigate(['/reference']);
     });
   }

@@ -5,6 +5,13 @@ export const SETTINGS = {
   /** Website languages. Only Czech for now; add 'de' and the CZ/DE switch comes back (German texts are kept). */
   languages: ['cs'] as Lang[],
   company: 'PMP House',
+  legalName: 'POWER MACHINERY PARTS s.r.o.',
+  /** The site's address, used for canonical links, the sitemap and sharing previews. */
+  siteUrl: 'https://pmphouse.cz',
+  /** Main switch for search engines. false while the texts are still samples; true opens the site to Google. */
+  indexable: false,
+  /** The showroom address in parts, for Google (schema.org). */
+  postal: { streetAddress: 'Roztoky', addressLocality: 'Povrly', postalCode: '403 32' },
   mail: 'info@pmphouse.cz',
   whatsapp: '420771112113',
   phone: '+420 771 112 113',

@@ -89,7 +89,7 @@ export class MontageComponent {
   readonly steps: SafeHtml[] = STEP_ART.map(a => this.dom.bypassSecurityTrustHtml(a));
   readonly foundations = ['pads', 'strips', 'slab', 'screws'].map(k => ({ k, art: this.dom.bypassSecurityTrustHtml(FOUNDATION_ART[k]) }));
   t = (k: string) => this.i18n.t(k);
-  constructor() { inject(SeoService).page(this.t('seoMontage'), this.t('mtSub')); }
+  constructor() { inject(SeoService).page(this.t('seoMontage'), this.t('mtSub'), { path: '/montaz' }); }
   print() {
     const html = document.documentElement;
     html.classList.add('print-ck');

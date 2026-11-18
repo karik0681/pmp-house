@@ -102,6 +102,8 @@ export const PAGES: Record<Lang, Record<string, string>> = {
 
     /* privacy notice (GDPR); the company should have it checked by its lawyer */
     pvUpdated: 'Účinné od 18. 11. 2026.',
+    photo: 'Fotografie',
+    pvMeta: 'Kdo zpracovává vaše údaje z poptávky a chatu na pmphouse.cz, proč, jak dlouho a jaká máte práva.',
     pvH1: 'Správce osobních údajů',
     pvP1: 'Správcem je společnost POWER MACHINERY PARTS s.r.o., IČO {ico}, se sídlem Poličanská 1487, Újezd nad Lesy, 190 16 Praha, zapsaná v obchodním rejstříku vedeném Městským soudem v Praze, oddíl C, vložka 259656. Provozuje značku {company} a tento web. Ve věcech osobních údajů nás kontaktujte na {mail} nebo na telefonu {phone}.',
     pvH2: 'Jaké údaje zpracováváme',
@@ -218,6 +220,8 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     xpNote: 'Der Aufbau hängt vom Typ ab. Genaue Materialien und Stärken nennen wir im Angebot.',
 
     pvUpdated: 'Gültig ab 18. 11. 2026.',
+    photo: 'Foto',
+    pvMeta: 'Wer Ihre Daten aus Anfrage und Chat auf pmphouse.cz verarbeitet, warum, wie lange und welche Rechte Sie haben.',
     pvH1: 'Verantwortlicher',
     pvP1: 'Verantwortlich ist die POWER MACHINERY PARTS s.r.o., IČO {ico}, Sitz Poličanská 1487, Újezd nad Lesy, 190 16 Prag, eingetragen im Handelsregister beim Stadtgericht Prag, Abteilung C, Einlage 259656. Sie betreibt die Marke {company} und diese Website. Bei Fragen zu Ihren Daten erreichen Sie uns unter {mail} oder telefonisch unter {phone}.',
     pvH2: 'Welche Daten wir verarbeiten',

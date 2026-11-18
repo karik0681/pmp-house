@@ -29,7 +29,7 @@ export class PrivacyComponent {
   readonly parts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
   /** the company's terms of sale, published on its older website */
   readonly terms = 'https://pmp-house.cz/polices';
-  constructor() { inject(SeoService).page(this.t('ftPrivacy'), this.t('pvP2')); }
+  constructor() { inject(SeoService).page(this.t('ftPrivacy'), this.t('pvMeta'), { path: '/ochrana-udaju' }); }
   fill(s: string) {
     return s.replace('{company}', SETTINGS.company).replace('{ico}', SETTINGS.ico)
       .replace('{address}', SETTINGS.address).replaceAll('{mail}', SETTINGS.mail).replace('{phone}', SETTINGS.phone);
