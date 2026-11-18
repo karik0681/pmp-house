@@ -36,6 +36,19 @@ import { FOUNDATION_ART, STEP_ART } from './drawings';
         </ol>
       </section>
 
+      <section class="wrap pg-body asm" id="sestaveni">
+        <h2>{{ t('asH') }}</h2>
+        <p class="sub">{{ t('asSub') }}</p>
+        <ol class="asm-grid">
+          @for (k of [1, 2, 3, 4, 5, 6]; track k) {
+            <li>
+              <img [src]="'montaz/sestaveni-' + k + '.webp'" width="560" height="420" loading="lazy" decoding="async" [alt]="t('as' + k)">
+              <p><span class="asm-n">{{ k }}</span>{{ t('as' + k) }}</p>
+            </li>
+          }
+        </ol>
+      </section>
+
       <section class="fnd" id="zaklady"><div class="wrap">
         <h2>{{ t('fdH') }}</h2>
         <p class="sub">{{ t('fdSub') }}</p>

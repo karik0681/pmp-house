@@ -401,3 +401,13 @@ app-chat-widget[hidden]{display:none!important}
  .hp-chip{padding:3px 7px 4px;border-radius:6px}.hp-chip b{font-size:11px}
  .hp-chip.is-main{transform:translate(-50%,-135%)}
 }
+
+/* montage page: how a flat-pack container is assembled, six pictures */
+.asm h2{margin-bottom:6px}
+.asm-grid{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.asm-grid li{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.asm-grid img{display:block;width:100%;height:auto;aspect-ratio:4/3}
+.asm-grid p{margin:0;padding:10px 14px 14px;display:flex;gap:10px;align-items:flex-start;font-size:.95rem;line-height:1.45}
+.asm-n{flex:none;width:26px;height:26px;border-radius:50%;background:var(--g);color:#fff;font-weight:700;font-size:.85rem;display:grid;place-items:center}
+@media (max-width:900px){.asm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.asm-grid{grid-template-columns:1fr}}
