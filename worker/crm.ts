@@ -1,19 +1,15 @@
 /* The shared enquiry list (CRM) on the server: enquiries from the website are stored in the D1 database,
-   staff log in to read and edit them, and every new enquiry is sent to the company by e-mail and Telegram.
+   staff log in to read and edit them, and every new enquiry is sent to the company by e-mail.
 
    Settings in Cloudflare (Workers → pmp-house → Settings → Variables and Secrets, all as "Secret"):
    - ADMIN_PASSWORD  the staff password for /admin; changing it logs everybody out
    - NOTIFY_EMAIL    where the e-mail about a new enquiry goes (must be a verified address in Email Routing)
-   - TG_TOKEN        the Telegram bot token from @BotFather
-   - TG_CHAT         the Telegram chat (person or group) that gets a short notice (number and link, no personal data)
    Anything missing simply switches that part off. */
 
 export interface CrmEnv {
   DB?: D1;
   ADMIN_PASSWORD?: string;
   NOTIFY_EMAIL?: string;
-  TG_TOKEN?: string;
-  TG_CHAT?: string;
   MAILER?: { send(message: unknown): Promise<void> };
 }
 interface D1 { prepare(sql: string): { bind(...v: unknown[]): D1Stmt } & D1Stmt }
@@ -151,13 +147,6 @@ function message(l: Json, site: string) {
 async function notify(env: CrmEnv, lead: Json, site: string) {
   const text = message(lead, site);
   const jobs: Promise<unknown>[] = [];
-  if (env.TG_TOKEN && env.TG_CHAT) {
-    jobs.push(fetch(`https://api.telegram.org/bot${env.TG_TOKEN}/sendMessage`, {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      /* Telegram is outside the EU, so it gets no personal data: only the number and a link to the cabinet */
-      body: JSON.stringify({ chat_id: env.TG_CHAT, text: `Nová poptávka ${lead['id']} (${lead['source']})\n${site}/admin`, disable_web_page_preview: true }),
-    }).then(r => { if (!r.ok) console.log('telegram', r.status); }));
-  }
   if (env.MAILER && env.NOTIFY_EMAIL) jobs.push(mail(env, lead, text).catch(e => console.log('mail', String(e))));
   await Promise.allSettled(jobs);
 }
