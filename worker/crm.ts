@@ -2,10 +2,12 @@
    staff log in to read and edit them, and every new enquiry is sent to the company by e-mail.
 
    Settings in Cloudflare (Workers → pmp-house → Settings → Variables and Secrets, all as "Secret"):
-   - ADMIN_PASSWORD  the staff password for /admin; changing it logs everybody out
+   - ADMIN_PASSWORD  the start password for the first /admin account and the key that signs sessions (staff.ts)
    - NOTIFY_EMAIL    (in wrangler.jsonc, vars) where the e-mail about a new enquiry goes; several addresses separated by commas
                      (each must be a verified destination address in Email Routing)
    Anything missing simply switches that part off. */
+
+import { staffRoutes, who } from './staff';
 
 export interface CrmEnv {
   DB?: D1;
@@ -17,8 +19,6 @@ interface D1 { prepare(sql: string): { bind(...v: unknown[]): D1Stmt } & D1Stmt 
 interface D1Stmt { run(): Promise<{ meta?: { last_row_id?: number } }>; all<T>(): Promise<{ results: T[] }>; first<T>(): Promise<T | null> }
 
 type Json = Record<string, any>;
-const COOKIE = 'pmp_s';
-const DAYS = 14;
 const SENDER = 'poptavky@pmphouse.cz';
 
 const json = (data: unknown, status = 200, extra: Record<string, string> = {}) =>
@@ -37,45 +37,6 @@ async function db(env: CrmEnv): Promise<D1> {
     ready = true;
   }
   return env.DB;
-}
-
-/* ---------- login ---------- */
-
-const enc = new TextEncoder();
-const b64url = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-async function sign(env: CrmEnv, payload: string) {
-  const key = await crypto.subtle.importKey('raw', enc.encode(`pmp:${env.ADMIN_PASSWORD}`), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  return b64url(await crypto.subtle.sign('HMAC', key, enc.encode(payload)));
-}
-/** Compares two strings without leaking how much of them matched. */
-async function same(a: string, b: string) {
-  const [x, y] = await Promise.all([a, b].map(s => crypto.subtle.digest('SHA-256', enc.encode(s))));
-  const p = new Uint8Array(x), q = new Uint8Array(y);
-  let d = 0; for (let i = 0; i < p.length; i++) d |= p[i] ^ q[i];
-  return d === 0;
-}
-
-/** The logged-in staff member's name, or null. */
-export async function staff(request: Request, env: CrmEnv): Promise<string | null> {
-  if (!env.ADMIN_PASSWORD) return null;
-  const raw = (request.headers.get('cookie') || '').split(/;\s*/).find(c => c.startsWith(COOKIE + '='))?.slice(COOKIE.length + 1);
-  if (!raw) return null;
-  const [payload, sig] = raw.split('.');
-  if (!payload || !sig || !(await same(sig, await sign(env, payload)))) return null;
-  try {
-    const s = JSON.parse(decodeURIComponent(escape(atob(payload.replace(/-/g, '+').replace(/_/g, '/')))));
-    return s.exp > Date.now() ? String(s.u) : null;
-  } catch { return null; }
-}
-
-async function login(request: Request, env: CrmEnv) {
-  if (!env.ADMIN_PASSWORD) return json({ error: 'off' }, 503);
-  let b: Json; try { b = await request.json(); } catch { return json({ error: 'input' }, 400); }
-  const user = str(b['email'], 120), pass = String(b['password'] ?? '');
-  if (!user || !(await same(pass, env.ADMIN_PASSWORD))) return json({ error: 'bad' }, 401);
-  const payload = b64url(enc.encode(unescape(encodeURIComponent(JSON.stringify({ u: user, exp: Date.now() + DAYS * 864e5 })))));
-  const token = `${payload}.${await sign(env, payload)}`;
-  return json({ user }, 200, { 'set-cookie': `${COOKIE}=${token}; Path=/api; HttpOnly; Secure; SameSite=Strict; Max-Age=${DAYS * 86400}` });
 }
 
 /* ---------- enquiries ---------- */
@@ -192,17 +153,17 @@ export async function cleanup(env: CrmEnv) {
 export async function crm(request: Request, env: CrmEnv, pathname: string, wait: (p: Promise<unknown>) => void, busy: () => boolean): Promise<Response | null> {
   const m = request.method;
   try {
-    if (pathname === '/api/login' && m === 'POST') return busy() ? json({ error: 'busy' }, 429) : await login(request, env);
-    if (pathname === '/api/logout' && m === 'POST') return json({}, 200, { 'set-cookie': `${COOKIE}=; Path=/api; HttpOnly; Secure; SameSite=Strict; Max-Age=0` });
-    if (pathname === '/api/session') { const u = await staff(request, env); return u ? json({ user: u }) : json({ error: 'auth' }, 401); }
+    const auth = await staffRoutes(request, env, pathname, busy);
+    if (auth) return auth;
     if (pathname === '/api/leads' && m === 'POST') return busy() ? json({ error: 'busy' }, 429) : await create(request, env, wait);
     if (pathname === '/api/leads' || pathname.startsWith('/api/leads/')) {
-      const who = await staff(request, env);
-      if (!who) return json({ error: 'auth' }, 401);
+      const w = await who(request, env);
+      if (!w || w.s !== 'full') return json({ error: 'auth' }, 401);
+      const by = w.name || w.u;
       if (pathname === '/api/leads' && m === 'GET') return await list(env);
       const id = decodeURIComponent(pathname.slice('/api/leads/'.length));
-      if (id && m === 'PATCH') return await change(id, request, env, who);
-      if (id && m === 'DELETE') return await remove(id, env, who);
+      if (id && m === 'PATCH') return await change(id, request, env, by);
+      if (id && m === 'DELETE') return await remove(id, env, by);
       return json({ error: 'method' }, 405);
     }
   } catch (e) {

@@ -6,6 +6,7 @@ export const serverRoutes: ServerRoute[] = [
   /* the staff cabinet is private: no ready HTML, nothing for search engines */
   { path: 'admin', renderMode: RenderMode.Client },
   { path: 'admin/login', renderMode: RenderMode.Client },
+  { path: 'admin/setup', renderMode: RenderMode.Client },
   /* one ready page per reference */
   { path: 'reference/:slug', renderMode: RenderMode.Prerender, getPrerenderParams: async () => REFERENCES.map(r => ({ slug: r.slug })) },
   { path: '**', renderMode: RenderMode.Prerender },

@@ -27,7 +27,7 @@ writeFileSync(`${out}/sitemap.xml`,
   urls.map(u => `  <url><loc>${u}</loc></url>`).join('\n') + '\n</urlset>\n');
 writeFileSync(`${out}/robots.txt`, `User-agent: *\nDisallow: /admin\nDisallow: /api/\n\nSitemap: ${site}/sitemap.xml\n`);
 
-for (const page of ['admin', 'admin/login']) {
+for (const page of ['admin', 'admin/login', 'admin/setup']) {
   mkdirSync(`${out}/${page}`, { recursive: true });
   copyFileSync(`${out}/index.csr.html`, `${out}/${page}/index.html`);
 }

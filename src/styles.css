@@ -447,3 +447,19 @@ app-chat-widget[hidden]{display:none!important}
 .wm::after{content:"";position:absolute;right:3%;bottom:3%;width:22%;max-width:180px;aspect-ratio:424/96;background:url(/watermark-light.svg) no-repeat center/contain;opacity:.8;pointer-events:none}
 .box-ph{display:inline-block;line-height:0}
 .tags button{flex:none}@media (max-width:700px){.tags{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:8px -16px 0;padding:0 16px 4px}.tags::-webkit-scrollbar{display:none}}
+
+/* staff login: setup page and staff list */
+.setup h2{display:flex;align-items:center;gap:8px;font-size:17px;margin:18px 0 6px}
+.su-qr{width:200px;margin:10px auto;background:#fff;padding:6px;border-radius:8px}
+.su-qr svg{display:block;width:100%;height:auto}
+.su-key{font-size:13px;letter-spacing:.04em;word-break:break-all}
+.staff h2{margin-bottom:4px}
+.st-table{width:100%;border-collapse:collapse;margin-top:14px;font-size:15px}
+.st-table th,.st-table td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+.st-table tr.off td{opacity:.55}
+.st-act{white-space:nowrap;display:flex;gap:14px}
+.st-add{margin-top:22px;display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;max-width:760px}
+.st-add h3{grid-column:1/-1;margin:0}
+.st-issued{margin-top:16px;padding:12px 14px;border:2px solid var(--g);border-radius:10px;background:#fff;max-width:760px}
+.st-issued p{margin:4px 0}.st-issued code{font-size:16px;background:var(--mint);padding:2px 6px;border-radius:4px}
+@media (max-width:700px){.st-add{grid-template-columns:1fr}.st-table th:nth-child(2),.st-table td:nth-child(2){display:none}}

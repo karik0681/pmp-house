@@ -10,11 +10,13 @@ import { Lang } from '../core/i18n';
   imports: [RouterLink],
   template: `
     <div class="adm-login">
-      <form class="adm-login-card" novalidate (submit)="enter($event, email.value, pass.value)">
+      <form class="adm-login-card" novalidate (submit)="enter($event, email.value, pass.value, code.value)">
         <p class="adm-brand">PMP House</p>
         <h1>{{ t('adm_login') }}</h1>
         <label class="fld"><span>{{ t('adm_email') }}</span><input #email type="email" autocomplete="username"></label>
         <label class="fld"><span>{{ t('adm_pass') }}</span><input #pass type="password" autocomplete="current-password"></label>
+        <label class="fld"><span>{{ t('adm_code') }}</span><input #code inputmode="numeric" autocomplete="one-time-code" maxlength="7" placeholder="123 456"></label>
+        <p class="note">{{ t('adm_codeHint') }}</p>
         @if (error() || demo) { <p class="note" role="status" [class.warn]="error()">{{ error() ? t(error()) : t('adm_demoHint') }}</p> }
         <button class="btn btn-g" type="submit" [disabled]="busy()">{{ t('adm_enter') }}</button>
         <div class="adm-login-foot">
@@ -35,12 +37,13 @@ export class LoginComponent {
   readonly demo = SETTINGS.demoCrm;
   readonly langs: { k: Lang; label: string }[] = SETTINGS.languages.map(k => ({ k, label: k === 'cs' ? 'CZ' : k.toUpperCase() }));
   t = (k: string) => this.i18n.t(k);
-  async enter(e: Event, email: string, pass: string) {
+  async enter(e: Event, email: string, pass: string, code: string) {
     e.preventDefault();
     this.busy.set(true);
-    const r: LoginResult = await this.auth.login(email, pass);
+    const r: LoginResult = await this.auth.login(email, pass, code);
     this.busy.set(false);
     if (r === 'ok') { this.router.navigateByUrl('/admin'); return; }
-    this.error.set({ bad: 'adm_bad', off: 'adm_off', busy: 'as_busy', error: 'adm_err' }[r]);
+    if (r === 'setup') { this.router.navigateByUrl('/admin/setup'); return; }
+    this.error.set({ bad: 'adm_bad', code: 'adm_badCode', off: 'adm_off', busy: 'as_busy', error: 'adm_err' }[r]);
   }
 }

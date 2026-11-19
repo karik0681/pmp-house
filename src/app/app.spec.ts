@@ -1,3 +1,4 @@
+import { base32, checkTotp, hashPassword, totpAt, unbase32 } from '../../worker/staff';
 import { mime } from '../../worker/crm';
 import { describe, it, expect } from 'vitest';
 import { layout } from './three/stage';
@@ -80,5 +81,29 @@ describe('enquiry e-mail', () => {
   });
   it('leaves out a reply address that is not a plain e-mail', () => {
     expect(mime('a@b.cz', 's', 't', 'x@y.cz\r\nBcc: z@z.cz')).not.toContain('Reply-To');
+  });
+});
+
+describe('staff login codes', () => {
+  it('match the RFC 6238 test vector', async () => {
+    const secret = base32(new TextEncoder().encode('12345678901234567890'));
+    expect(await totpAt(secret, Math.floor(59 / 30), 8)).toBe('94287082');
+    expect(await totpAt(secret, Math.floor(1111111109 / 30), 8)).toBe('07081804');
+  });
+  it('accept the current code once, with one step of slack, and refuse reuse', async () => {
+    const secret = base32(crypto.getRandomValues(new Uint8Array(20)));
+    const now = 1_800_000_000_000, t = Math.floor(now / 30000);
+    const code = await totpAt(secret, t);
+    expect(await checkTotp(secret, code, 0, now)).toBe(t);
+    expect(await checkTotp(secret, code, t, now)).toBe(0);
+    expect(await checkTotp(secret, await totpAt(secret, t - 1), 0, now)).toBe(t - 1);
+    expect(await checkTotp(secret, await totpAt(secret, t - 3), 0, now)).toBe(0);
+    expect(await checkTotp(secret, 'abc123', 0, now)).toBe(0);
+  });
+  it('hash passwords with a salt so the same password differs', async () => {
+    const a = await hashPassword('dlouhe-heslo-123'), b = await hashPassword('dlouhe-heslo-123');
+    expect(a.hash).not.toBe(b.hash);
+    expect((await hashPassword('dlouhe-heslo-123', a.salt)).hash).toBe(a.hash);
+    expect(unbase32(base32(new Uint8Array([1, 2, 250])))).toEqual(new Uint8Array([1, 2, 250]));
   });
 });

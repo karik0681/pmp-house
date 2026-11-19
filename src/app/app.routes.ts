@@ -6,11 +6,13 @@ import { ReferenceDetailComponent } from './references/reference-detail.componen
 import { MontageComponent } from './montage/montage.component';
 import { PrivacyComponent } from './site/privacy.component';
 import { LoginComponent } from './admin/login.component';
+import { SetupComponent } from './admin/setup.component';
 import { AdminComponent } from './admin/admin.component';
-import { authGuard } from './admin/auth.service';
+import { authGuard, setupGuard } from './admin/auth.service';
 
 export const routes: Routes = [
   { path: 'admin/login', component: LoginComponent },
+  { path: 'admin/setup', component: SetupComponent, canActivate: [setupGuard] },
   { path: 'admin', component: AdminComponent, canActivate: [authGuard] },
   /* public pages share the header, the footer and the WhatsApp button */
   {

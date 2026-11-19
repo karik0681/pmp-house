@@ -5,6 +5,7 @@ import { I18nService } from '../core/i18n.service';
 import { money } from '../core/format';
 import { Lang } from '../core/i18n';
 import { AuthService } from './auth.service';
+import { StaffComponent } from './staff.component';
 import { LeadsService } from '../leads/leads.service';
 import { Lead, STATUSES } from '../leads/lead';
 import { linkTo, summaryLines, title } from '../configurator/model';
@@ -14,7 +15,7 @@ import { AssistantDemoComponent } from './assistant-demo.component';
 
 @Component({
   selector: 'app-admin',
-  imports: [RouterLink, PriceListComponent, QuoteComponent, AssistantDemoComponent],
+  imports: [RouterLink, PriceListComponent, QuoteComponent, AssistantDemoComponent, StaffComponent],
   templateUrl: './admin.component.html',
 })
 export class AdminComponent {
@@ -29,7 +30,7 @@ export class AdminComponent {
   readonly picked = signal<string | null>(null);
   readonly draft = signal('');
   /** the board of enquiries, the price list or the demo of the e-mail assistant */
-  readonly view = signal<'board' | 'prices' | 'assistant'>('board');
+  readonly view = signal<'board' | 'prices' | 'assistant' | 'staff'>('board');
 
   readonly filtered = computed(() => {
     const q = this.query().trim().toLowerCase();
