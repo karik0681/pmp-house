@@ -3,7 +3,7 @@
 
    Settings in Cloudflare (Workers → pmp-house → Settings → Variables and Secrets, all as "Secret"):
    - ADMIN_PASSWORD  the staff password for /admin; changing it logs everybody out
-   - NOTIFY_EMAIL    where the e-mail about a new enquiry goes; several addresses separated by commas
+   - NOTIFY_EMAIL    (in wrangler.jsonc, vars) where the e-mail about a new enquiry goes; several addresses separated by commas
                      (each must be a verified destination address in Email Routing)
    Anything missing simply switches that part off. */
 
