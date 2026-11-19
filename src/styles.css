@@ -418,9 +418,10 @@ app-chat-widget[hidden]{display:none!important}
 
 /* floor plan (půdorys): the company logo as a watermark, so screenshots of the plan carry the brand.
    A large faint one in the middle and a clearer small one in the corner; clicks pass through. */
-.plan::before,.plan::after{content:"";position:absolute;pointer-events:none;background:url(/watermark.svg) no-repeat center/contain}
-.plan::after{inset:22% 18%;opacity:.07}
-.plan::before{left:16px;bottom:12px;width:120px;height:28px;opacity:.45}
+.plan::after{content:"";position:absolute;pointer-events:none;background:url(/watermark.svg) no-repeat center/contain;inset:22% 18%;opacity:.07}
+/* company logo on the configurator picture, in every view */
+.stage-logo{position:absolute;left:18px;top:18px;z-index:2;width:132px;height:auto;pointer-events:none;user-select:none}
+@media(max-width:960px){.stage-logo{left:10px;top:13px;width:88px}}
 
 /* references: compact album grid with hashtags */
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}

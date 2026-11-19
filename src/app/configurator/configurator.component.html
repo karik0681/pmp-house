@@ -154,6 +154,7 @@
   </div>
   <div class="stage" [class.no3d]="no3d()" [class.planview]="s.view() === 'plan'">
     <canvas #canvas role="img" [attr.aria-label]="t('cfgCanvas')"></canvas>
+    <img class="stage-logo" src="/watermark.svg" alt="PMP House" width="132" height="30">
     @if (s.view() === 'plan') { <div class="plan" [innerHTML]="plan()"></div> }
     <p class="no3d-msg">{{ t('no3d') }}</p>
     <div class="views">
