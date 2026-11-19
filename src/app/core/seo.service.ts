@@ -34,7 +34,7 @@ export class SeoService {
     this.meta.updateTag({ property: 'og:type', content: 'website' });
     this.meta.updateTag({ property: 'og:locale', content: 'cs_CZ' });
     this.meta.updateTag({ property: 'og:site_name', content: SETTINGS.company });
-    this.meta.updateTag({ property: 'og:image', content: SETTINGS.siteUrl + '/og.jpg' });
+    this.meta.updateTag({ property: 'og:image', content: SETTINGS.siteUrl + '/og-v2.jpg' });
     this.meta.updateTag({ name: 'twitter:card', content: 'summary_large_image' });
     this.link('canonical', url);
   }
@@ -47,7 +47,7 @@ export class SeoService {
       name: SETTINGS.company,
       legalName: SETTINGS.legalName,
       url: SETTINGS.siteUrl + '/',
-      image: SETTINGS.siteUrl + '/og.jpg',
+      image: SETTINGS.siteUrl + '/og-v2.jpg',
       telephone: SETTINGS.phone.replace(/\s/g, ''),
       email: SETTINGS.mail,
       taxID: SETTINGS.ico,
