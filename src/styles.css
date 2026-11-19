@@ -421,3 +421,29 @@ app-chat-widget[hidden]{display:none!important}
 .plan::before,.plan::after{content:"";position:absolute;pointer-events:none;background:url(/watermark.svg) no-repeat center/contain}
 .plan::after{inset:22% 18%;opacity:.07}
 .plan::before{left:16px;bottom:12px;width:120px;height:28px;opacity:.45}
+
+/* references: compact album grid with hashtags */
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tags button{background:#fff;border:1px solid var(--line);border-radius:18px;padding:5px 12px;font-weight:600;font-size:14px;color:var(--g)}
+.tags button[aria-pressed=true]{background:var(--g);border-color:var(--g);color:#fff}
+.tags small{opacity:.6;font-weight:500;margin-left:2px}
+.album{list-style:none;margin:22px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px 10px}
+.album li{min-width:0}
+.tile{position:relative;display:block;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--mint);color:#fff}
+.tile img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .25s}
+.tile:hover img{transform:scale(1.04)}
+.tile::after{content:"";position:absolute;inset:50% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.6));pointer-events:none}
+.tile-t{position:absolute;left:8px;right:8px;bottom:7px;z-index:1;font-weight:700;font-size:13px;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.tile-n{position:absolute;top:6px;right:6px;z-index:1;background:rgba(0,0,0,.55);border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
+.tile-tags{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:2px 6px;line-height:1.3}
+.tile-tags button{background:none;border:0;padding:0;font-size:12px;color:var(--mute, #5f6b63);cursor:pointer}
+.tile-tags button:hover,.tile-tags button.on{color:var(--g);text-decoration:underline}
+@media (max-width:1000px){.album{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:700px){.album{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px 6px}.tile-tags button:nth-child(n+4){display:none}}
+@media (max-width:380px){.album{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* watermark on full-size project photos (detail page and full-screen viewer): logo in the corner */
+.wm{position:relative}
+.wm::after{content:"";position:absolute;right:3%;bottom:3%;width:22%;max-width:180px;aspect-ratio:424/96;background:url(/watermark-light.svg) no-repeat center/contain;opacity:.8;pointer-events:none}
+.box-ph{display:inline-block;line-height:0}
+.tags button{flex:none}@media (max-width:700px){.tags{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:8px -16px 0;padding:0 16px 4px}.tags::-webkit-scrollbar{display:none}}

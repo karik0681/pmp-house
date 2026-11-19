@@ -42,7 +42,7 @@ import { REFERENCES } from './refs.data';
         <section class="wrap pg-body">
           <div class="mosaic">
             @for (ph of photos(); track ph.thumb; let i = $index) {
-              <button type="button" class="ph" [class.big]="i === 0" [attr.aria-label]="t('openPhoto') + ' ' + (i + 1)" (click)="box.open(i)">
+              <button type="button" class="ph wm" [class.big]="i === 0" [attr.aria-label]="t('openPhoto') + ' ' + (i + 1)" (click)="box.open(i)">
                 <img [src]="i === 0 ? ph.full : ph.thumb" [alt]="(r.title[lang()]) + ' – ' + t('photo') + ' ' + (i + 1)" loading="lazy" referrerpolicy="no-referrer" (error)="$any($event.target).hidden = true">
               </button>
             }
