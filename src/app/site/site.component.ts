@@ -42,7 +42,7 @@ import { REFERENCES } from '../references/refs.data';
         </div>
         <ol class="mini-steps">
           @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-            <li><span>{{ i }}</span><b>{{ t('mtS' + i) }}</b><small>{{ t('mtTime' + i) }}</small></li>
+            <li><span>0{{ i }}</span><b>{{ t('mtS' + i) }}</b><small>{{ t('mtTime' + i) }}</small></li>
           }
         </ol>
       </div></section>

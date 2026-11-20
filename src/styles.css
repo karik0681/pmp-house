@@ -363,8 +363,6 @@ app-chat-widget[hidden]{display:none!important}
 .hero h1{font-size:clamp(34px,3.7vw,60px);line-height:1.02}
 .hero-t{max-width:min(480px,36vw);z-index:2}
 .hero-t .hero-lead{margin-top:16px;font-size:17px;max-width:40ch}
-.hero-t .eyebrow{display:flex;margin-top:0;max-width:none;align-items:center;gap:10px;margin-bottom:12px;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
-.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--post)}
 .hero .cta{margin-top:22px}.hero .btn{min-height:46px;font-size:16px}
 .hero .facts{grid-template-columns:repeat(3,auto);width:max-content;max-width:100%;margin-top:24px;border-radius:8px}
 .hero .facts div{padding:9px 18px}.hero .facts dd{font-size:15.5px}
@@ -412,9 +410,35 @@ app-chat-widget[hidden]{display:none!important}
 @media (max-width:900px){.asm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){.asm-grid{grid-template-columns:1fr}}
 
-/* hero: the h1 is the short keyword line above, the big slogan is a paragraph styled as before */
-.hero-t h1.eyebrow{font:600 13px/1.4 var(--body);letter-spacing:.08em}
-.hero-t .hero-h{font:800 clamp(34px,3.7vw,60px)/1.02 var(--disp);font-stretch:118%;letter-spacing:-.025em;margin:0;max-width:none}
+/* hero: one plain headline that says what the company makes */
+.hero-t h1.hero-h1{font:700 clamp(34px,3.5vw,52px)/1.04 var(--disp);font-stretch:118%;letter-spacing:-.015em;margin:0;max-width:none}
+.hero-t .hero-lead{margin-top:20px;font-size:18px;max-width:30em}
+/* the three facts as dimension lines of a drawing: a thin line with end ticks, no boxes */
+.hero .facts{display:flex;gap:28px;width:auto;background:none;border:0;border-radius:0;overflow:visible;margin-top:32px}
+.hero .facts div{position:relative;background:none;padding:12px 0 0;flex:0 1 auto}
+.hero .facts div::before{content:"";position:absolute;left:0;right:0;top:-6px;height:12px;border:1.5px solid var(--g);border-width:0 1.5px}
+.hero .facts div::after{content:"";position:absolute;left:0;right:0;top:0;border-top:1.5px solid var(--g)}
+.hero .facts dt{font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.hero .facts dd{font:700 17px var(--disp);font-stretch:112%;white-space:nowrap;margin-top:4px}
+@media(max-width:560px){.hero .facts{gap:12px}.hero .facts div:last-child{grid-column:auto}.hero .facts dd{font-size:13.5px}.hero .facts dt{font-size:10px;letter-spacing:.04em}}
+/* sharper corners: technical rather than "app template" */
+.btn,.hp-chip,.hp-map,.rc,.tc,.views,.typepick button,.size,.sum{border-radius:3px}
+/* the six steps as one timeline */
+.mini-steps{position:relative;gap:0;margin-top:36px}
+.mini-steps::before{content:"";position:absolute;left:0;right:0;top:8px;border-top:2px dashed var(--post)}
+.mini-steps li{position:relative;background:none;border-radius:0;padding:32px 18px 0 0}
+.mini-steps li::before{content:"";position:absolute;left:0;top:0;width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--g)}
+.mini-steps li:last-child::before{background:var(--post);border-color:var(--post)}
+.mini-steps span{font:600 14px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em}
+.mini-steps b{font-size:18px;margin-top:4px}
+@media(max-width:960px){
+ .mini-steps{grid-template-columns:1fr;margin-left:7px}
+ .mini-steps::before{left:0;right:auto;top:8px;bottom:8px;border-top:0;border-left:2px dashed var(--post)}
+ .mini-steps li{padding:0 0 18px 26px}.mini-steps li::before{left:-7px}
+}
+/* contact buttons: WhatsApp stays the main one, the assistant is a round button above it */
+.chat-open{width:52px;height:52px;padding:0;justify-content:center;border-radius:50%}
+.chat-open span{display:none}
 
 /* floor plan (půdorys): the company logo as a watermark, so screenshots of the plan carry the brand.
    A large faint one in the middle and a clearer small one in the corner; clicks pass through. */

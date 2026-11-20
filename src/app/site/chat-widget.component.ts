@@ -16,7 +16,7 @@ interface Msg { role: 'user' | 'assistant'; content: string }
   imports: [RouterLink],
   template: `
     @if (!open()) {
-      <button type="button" class="chat-open" (click)="show()">
+      <button type="button" class="chat-open" (click)="show()" [attr.aria-label]="t('chat_open')" [title]="t('chat_open')">
         <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 5h16v11H9l-5 4z"/></svg>
         <span>{{ t('chat_open') }}</span>
       </button>
