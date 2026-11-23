@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { I18nService } from '../core/i18n.service';
 import { money } from '../core/format';
 import { Cfg, fresh, repair } from '../configurator/model';
@@ -19,12 +19,12 @@ const MODELS: Model[] = [
   { id: 'san', dim: '6 × 2,4 m · 14,4 m²', price: 175300, cfg: () => make(fresh('K', 6, 2.4), c => { c.wc = 2; c.shower = 2; }) },
 ];
 
-/** Home page: the best-selling ready models with real photos. "Poptat" opens the enquiry step, "Upravit ve 3D" the first step. */
+/** The best-selling ready models with real photos. "Poptat" opens the enquiry step, "Upravit ve 3D" the first step. */
 @Component({
   selector: 'app-models',
   template: `
-    <section class="std" id="modely"><div class="wrap">
-      <div class="sec-head"><div><h2>{{ t('mdH') }}</h2><p class="sub">{{ t('mdSub') }}</p></div></div>
+    <section class="std" [class.std-page]="page()"><div class="wrap">
+      @if (!page()) { <div class="sec-head"><div><h2>{{ t('mdH') }}</h2><p class="sub">{{ t('mdSub') }}</p></div></div> }
       <div class="std-grid">
         @for (m of models; track m.id) {
           <article class="std-c">
@@ -47,9 +47,14 @@ const MODELS: Model[] = [
           </article>
         }
       </div>
+      @if (page()) {
+        <div class="std-more"><p>{{ t('mdMore') }}</p><a class="btn btn-o" href="/#konfigurator" (click)="nav.section('konfigurator', $event)">{{ t('mdMoreBtn') }} →</a></div>
+      }
     </div></section>`,
 })
 export class ModelsComponent {
+  /** true on its own page (/modely): the page header carries the title */
+  readonly page = input(false);
   private i18n = inject(I18nService);
   readonly nav = inject(NavService);
   readonly models = MODELS;

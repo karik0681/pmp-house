@@ -6,7 +6,6 @@ import { goTo, scrollToId } from '../core/scroll';
 import { HeroComponent } from './hero.component';
 import { TypesComponent } from './types.component';
 import { ExplodedComponent } from './exploded.component';
-import { ModelsComponent } from './models.component';
 import { OfficesComponent } from './offices.component';
 import { NavService } from './nav.service';
 import { ConfiguratorComponent } from '../configurator/configurator.component';
@@ -18,14 +17,13 @@ import { REFERENCES } from '../references/refs.data';
 /** The home page. Header, footer and the WhatsApp button come from LayoutComponent. */
 @Component({
   selector: 'app-site',
-  imports: [RouterLink, HeroComponent, TypesComponent, ExplodedComponent, ModelsComponent, OfficesComponent, ConfiguratorComponent, RefCardComponent],
+  imports: [RouterLink, HeroComponent, TypesComponent, ExplodedComponent, OfficesComponent, ConfiguratorComponent, RefCardComponent],
   template: `
     <a class="skip" href="#konfigurator" (click)="go($event, 'konfigurator')">{{ t('skip') }}</a>
     <main id="top">
       <app-hero />
       <app-types />
       <app-exploded />
-      <app-models />
       <app-configurator />
 
       <section class="home-refs" id="reference"><div class="wrap">
@@ -82,7 +80,8 @@ export class SiteComponent implements OnDestroy {
     /* a link with ?c=… (from an e-mail, the CRM or a reference) opens that exact configuration */
     const c = this.route.snapshot.queryParamMap.get('c');
     const loaded = c ? decode(c) : null;
-    if (loaded) { this.cfg.load(loaded); this.cfg.go(0); }
+    const step = Number(this.route.snapshot.queryParamMap.get('step')) || 0;
+    if (loaded) { this.cfg.load(loaded); this.cfg.go(step); }
     /* coming from another page via a menu item: scroll to that section */
     const target: string | undefined = inject(Router).currentNavigation()?.extras.state?.['scroll'] ?? (typeof history !== 'undefined' ? history.state?.scroll : undefined);
     afterNextRender(() => {

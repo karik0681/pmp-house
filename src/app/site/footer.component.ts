@@ -66,6 +66,7 @@ const ICONS: Record<string, string> = {
         <div>
           <h3>{{ t('ftInfo') }}</h3>
           <ul>
+            <li><a routerLink="/modely">{{ t('mdH') }}</a></li>
             <li><a routerLink="/reference">{{ t('navRefs') }}</a></li>
             <li><a routerLink="/montaz">{{ t('navMontage') }}</a></li>
             <li><a href="#konstrukce" (click)="nav.section('konstrukce', $event)">{{ t('navTypes') }}</a></li>

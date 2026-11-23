@@ -40,6 +40,6 @@ export class NavService {
     this.menuOpen.set(false);
     repair(c);
     if (this.onHome()) { this.cfg.load(c); this.cfg.go(step); scrollToId('konfigurator'); }
-    else this.router.navigate(['/'], { queryParams: { c: encode(c) } });
+    else this.router.navigate(['/'], { queryParams: { c: encode(c), ...(step ? { step } : {}) } });
   }
 }

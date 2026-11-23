@@ -11,22 +11,22 @@ export const SETTINGS = {
   /** Main switch for search engines. false while the texts are still samples; true opens the site to Google. */
   indexable: false,
   /** The showroom address in parts, for Google (schema.org). */
-  postal: { streetAddress: 'Roztoky', addressLocality: 'Povrly', postalCode: '403 32' },
-  mail: 'info@pmphouse.cz',
+  postal: { streetAddress: 'Roztoky 9', addressLocality: 'Povrly', postalCode: '403 32' },
+  mail: 'info@pmp-house.cz',
   whatsapp: '420771112113',
   phone: '+420 771 112 113',
-  address: 'Roztoky, 403 32 Povrly',
+  address: 'Roztoky 9, 403 32 Povrly',
   ico: '05185530',
   dic: 'CZ05185530',
   /** Branches, shown in the contact section, on the map and to Google. x/y = place on the map of Czechia (cz-map.ts).
-   *  street '' = the exact address is not public yet: the card asks to arrange a visit by phone.
+   *  street '' = the exact address is not public yet: the card asks to arrange a visit by phone. Card label: i18n ofK_<id>.
    *  google / firmy = the branch's profile on Google Maps and firmy.cz ('' = no profile yet, no button). */
   offices: [
-    { id: 'usti', city: 'Ústí nad Labem', main: true, street: 'Roztoky', postal: '403 32', locality: 'Povrly',
+    { id: 'usti', city: 'Ústí nad Labem', main: true, street: 'Roztoky 9', postal: '403 32', locality: 'Povrly', phone: '+420 777 600 199',
       google: '', firmy: 'https://www.firmy.cz/detail/13420079-pmp-house-power-machinery-parts-s-r-o-povrly-roztoky.html', x: 308, y: 82 },
-    { id: 'praha', city: 'Praha', main: false, street: '', postal: '', locality: 'Praha',
-      google: '', firmy: '', x: 347, y: 218 },
-    { id: 'brno', city: 'Brno', main: false, street: 'Hodějice 397', postal: '684 01', locality: 'Hodějice',
+    { id: 'praha', city: 'Praha', main: false, street: 'Náchodská 116/208', postal: '193 21', locality: 'Praha 9 – Horní Počernice', phone: '+420 771 112 113',
+      google: '', firmy: '', x: 375, y: 211 },
+    { id: 'brno', city: 'Brno', main: false, street: 'Hodějice 397', postal: '684 01', locality: 'Hodějice', phone: '+420 771 112 113',
       google: 'https://maps.app.goo.gl/mhnTEz7M9jxyez2XA', firmy: 'https://www.firmy.cz/detail/13419644-pmp-house-power-machinery-parts-s-r-o-hodejice.html', x: 714, y: 434 },
   ],
   /** Opening hours, confirmed by the company. */

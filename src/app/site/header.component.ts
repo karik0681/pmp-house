@@ -60,7 +60,7 @@ export class HeaderComponent {
   readonly logo = inject(DomSanitizer).bypassSecurityTrustHtml(LOGO_COMPACT);
   readonly langs: { k: Lang; label: string }[] = SETTINGS.languages.map(k => ({ k, label: k === 'cs' ? 'CZ' : k.toUpperCase() }));
   readonly items: Item[] = [
-    { id: 'konfigurator', label: 'navCfg' }, { id: 'konstrukce', label: 'navTypes' },
+    { route: '/modely', label: 'navModels' }, { id: 'konfigurator', label: 'navCfg' }, { id: 'konstrukce', label: 'navTypes' },
     { route: '/reference', label: 'navRefs' }, { route: '/montaz', label: 'navMontage' },
     { id: 'otazky', label: 'navFaq' }, { id: 'kontakt', label: 'navContact' },
   ];

@@ -4,6 +4,7 @@ import { SiteComponent } from './site/site.component';
 import { ReferencesComponent } from './references/references.component';
 import { ReferenceDetailComponent } from './references/reference-detail.component';
 import { MontageComponent } from './montage/montage.component';
+import { ModelsPageComponent } from './site/models-page.component';
 import { PrivacyComponent } from './site/privacy.component';
 import { LoginComponent } from './admin/login.component';
 import { SetupComponent } from './admin/setup.component';
@@ -18,6 +19,7 @@ export const routes: Routes = [
   {
     path: '', component: LayoutComponent, children: [
       { path: '', component: SiteComponent },
+      { path: 'modely', component: ModelsPageComponent },
       { path: 'reference', component: ReferencesComponent },
       { path: 'reference/:slug', component: ReferenceDetailComponent },
       { path: 'montaz', component: MontageComponent },

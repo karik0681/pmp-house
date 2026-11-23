@@ -29,7 +29,7 @@ type Office = (typeof SETTINGS.offices)[number];
         <ul class="ofc-list">
           @for (o of offices; track o.id) {
             <li class="ofc-c" [id]="'pobocka-' + o.id" [class.is-main]="o.main" [class.is-on]="active() === o.id" (mouseenter)="active.set(o.id)">
-              <p class="ofc-k">{{ o.main ? t('ofMain') : t('ofBranch') }}</p>
+              <p class="ofc-k">{{ t('ofK_' + o.id) }}</p>
               <h3>{{ o.city }}</h3>
               @if (o.street) {
                 <p class="ofc-a">{{ o.street }}<br>{{ o.postal }} {{ o.locality }}</p>
@@ -37,12 +37,13 @@ type Office = (typeof SETTINGS.offices)[number];
                 <p class="ofc-a mute">{{ t('ofByPhone') }}</p>
               }
               <p class="ofc-h">{{ hours() }}</p>
+              <p class="ofc-t"><a [href]="'tel:' + o.phone.replace(/\s/g, '')">{{ o.phone }}</a></p>
               <div class="ofc-b">
                 @if (o.street) {
                   <a class="btn btn-g" [href]="o.google || gmaps(o)" target="_blank" rel="noopener">{{ t('ofNav') }}</a>
                   <a class="btn btn-o" [href]="mapy(o)" target="_blank" rel="noopener">Mapy.cz</a>
                 } @else {
-                  <a class="btn btn-g" [href]="'tel:+' + s.whatsapp">{{ t('ofCall') }}</a>
+                  <a class="btn btn-g" [href]="'tel:' + o.phone.replace(/\s/g, '')">{{ t('ofCall') }}</a>
                 }
               </div>
               @if (o.google || o.firmy) {

@@ -530,3 +530,6 @@ app-chat-widget[hidden]{display:none!important}
 .ofc-all{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:22px;font-size:17px}.ofc-all a{color:var(--g)}
 .ft-ofc{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px;font-size:15px;line-height:1.35}
 @media(max-width:900px){.ofc-grid{grid-template-columns:1fr}.ofc-map{position:static}}
+.std-page{padding-top:clamp(24px,3vw,40px)}.std-page .std-grid{margin-top:0}
+.std-more{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-top:28px;padding:18px 20px;background:var(--paper);border:1px solid var(--line);border-radius:3px}.std-more p{margin:0;font:700 19px var(--disp);font-stretch:112%}
+.ofc-t{margin:0 0 4px;font-size:16px;font-weight:600}.ofc-t a{color:var(--g)}

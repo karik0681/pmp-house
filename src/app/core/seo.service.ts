@@ -63,7 +63,7 @@ export class SeoService {
       department: SETTINGS.offices.filter(o => o.street && !o.main).map(o => ({
         '@type': 'HomeAndConstructionBusiness',
         name: `${SETTINGS.company} ${o.city}`,
-        telephone: SETTINGS.phone.replace(/\s/g, ''),
+        telephone: o.phone.replace(/\s/g, ''),
         address: { '@type': 'PostalAddress', streetAddress: o.street, addressLocality: o.locality, postalCode: o.postal, addressCountry: 'CZ' },
       })),
     };
