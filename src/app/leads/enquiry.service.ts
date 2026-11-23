@@ -4,6 +4,7 @@ import { I18nService } from '../core/i18n.service';
 import { SourceService } from '../core/source.service';
 import { Cfg, linkTo, priceOf, summaryLines, title, priceText } from '../configurator/model';
 import { LeadsService } from './leads.service';
+import { TrackingService } from '../core/tracking.service';
 
 export interface Contact { name: string; phone: string; email: string; place: string; note: string }
 export type Result = 'sent' | 'sentDemo' | 'mailto' | 'failed';
@@ -14,6 +15,7 @@ export class EnquiryService {
   private i18n = inject(I18nService);
   private source = inject(SourceService);
   private leads = inject(LeadsService);
+  private tr = inject(TrackingService);
 
   message(c: Cfg, f: Contact): string {
     const t = (k: string) => this.i18n.t(k);
@@ -23,6 +25,12 @@ export class EnquiryService {
   }
 
   async send(c: Cfg, f: Contact): Promise<Result> {
+    const r = await this.deliver(c, f);
+    if (r === 'sent' || r === 'sentDemo') this.tr.goal('lead');
+    return r;
+  }
+
+  private async deliver(c: Cfg, f: Contact): Promise<Result> {
     const t = (k: string) => this.i18n.t(k);
     const lead = () => this.leads.add({ name: f.name, phone: f.phone, email: f.email, place: f.place, clientNote: f.note, cfg: c, price: priceOf(c), source: this.source.label }, t('adm_newLead'), t('adm_firstStep'));
     /* normal case: the enquiry goes to the shared list on the server, which also notifies the company */
@@ -50,6 +58,7 @@ export class EnquiryService {
   }
 
   whatsapp(c: Cfg, f: Contact) {
+    this.tr.goal('whatsapp');
     window.open(`https://wa.me/${SETTINGS.whatsapp}?text=${encodeURIComponent(this.message(c, f))}`, '_blank', 'noopener');
   }
 

@@ -1,4 +1,5 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, input, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { I18nService } from '../core/i18n.service';
 import { SETTINGS } from '../core/settings';
 import { CZ } from './cz-map';
@@ -9,9 +10,13 @@ type Office = (typeof SETTINGS.offices)[number];
  *  Own map instead of an embedded Google map: loads instantly on phones and sets no cookies. */
 @Component({
   selector: 'app-offices',
+  imports: [RouterLink],
   template: `
-    <section class="ofc" id="kontakt"><div class="wrap">
-      <div class="sec-head"><div><h2>{{ t('ofH') }}</h2><p class="sub">{{ t('ofSub') }}</p></div></div>
+    <section class="ofc" [class.ofc-page]="page()" [attr.id]="page() ? null : 'kontakt'"><div class="wrap">
+      <div class="sec-head">
+        <div><h2>{{ t('ofH') }}</h2><p class="sub">{{ t('ofSub') }}</p></div>
+        @if (!page()) { <a class="btn btn-o" routerLink="/kontakt">{{ t('ofAllC') }} →</a> }
+      </div>
       <div class="ofc-grid">
         <figure class="ofc-map">
           <svg [attr.viewBox]="'-20 -40 ' + (cz.w + 40) + ' ' + (cz.h + 70)" role="img" [attr.aria-label]="t('ofMapAlt')">
@@ -56,14 +61,11 @@ type Office = (typeof SETTINGS.offices)[number];
           }
         </ul>
       </div>
-      <div class="ofc-all">
-        <a [href]="'tel:+' + s.whatsapp"><b>{{ s.phone }}</b></a>
-        <a [href]="'mailto:' + s.mail">{{ s.mail }}</a>
-        <a [href]="'https://wa.me/' + s.whatsapp" target="_blank" rel="noopener">WhatsApp</a>
-      </div>
     </div></section>`,
 })
 export class OfficesComponent {
+  /** true on /kontakt, where the page has its own contact block below */
+  readonly page = input(false);
   private i18n = inject(I18nService);
   readonly s = SETTINGS;
   readonly cz = CZ;

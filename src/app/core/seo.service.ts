@@ -45,7 +45,6 @@ export class SeoService {
       '@context': 'https://schema.org',
       '@type': 'HomeAndConstructionBusiness',
       name: SETTINGS.company,
-      legalName: SETTINGS.legalName,
       url: SETTINGS.siteUrl + '/',
       image: SETTINGS.siteUrl + '/og-v2.jpg',
       telephone: SETTINGS.phone.replace(/\s/g, ''),

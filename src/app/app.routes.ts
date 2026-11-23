@@ -5,6 +5,7 @@ import { ReferencesComponent } from './references/references.component';
 import { ReferenceDetailComponent } from './references/reference-detail.component';
 import { MontageComponent } from './montage/montage.component';
 import { ModelsPageComponent } from './site/models-page.component';
+import { ContactPageComponent } from './site/contact-page.component';
 import { PrivacyComponent } from './site/privacy.component';
 import { LoginComponent } from './admin/login.component';
 import { SetupComponent } from './admin/setup.component';
@@ -23,6 +24,7 @@ export const routes: Routes = [
       { path: 'reference', component: ReferencesComponent },
       { path: 'reference/:slug', component: ReferenceDetailComponent },
       { path: 'montaz', component: MontageComponent },
+      { path: 'kontakt', component: ContactPageComponent },
       { path: 'ochrana-udaju', component: PrivacyComponent },
     ],
   },

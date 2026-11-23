@@ -6,6 +6,7 @@ import { Kind } from '../configurator/model';
 import { NavService } from './nav.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { LOGO_WHITE } from './logo';
+import { TrackingService } from '../core/tracking.service';
 
 /** Simple own-drawn outline icons, one path each. */
 const ICONS: Record<string, string> = {
@@ -84,7 +85,7 @@ const ICONS: Record<string, string> = {
             }
           </ul>
           <p class="mute">{{ hours() }}<br>{{ t('conSub') }}</p>
-          <p><a class="ft-map" href="#kontakt" (click)="nav.section('kontakt', $event)">{{ t('ofAll') }} →</a></p>
+          <p><a class="ft-map" routerLink="/kontakt">{{ t('ofAll') }} →</a></p>
         </address>
       </div>
 
@@ -97,6 +98,7 @@ const ICONS: Record<string, string> = {
         <span>© {{ year }} {{ s.company }} · IČO {{ s.ico }} · DIČ {{ s.dic }}</span>
         <span class="ft-legal">
           <a routerLink="/ochrana-udaju">{{ t('ftPrivacy') }}</a>
+          @if (tr.enabled) { <button type="button" class="ft-cc" (click)="tr.bannerOpen.set(true)">{{ t('ccSet') }}</button> }
           <a routerLink="/admin">{{ t('ftStaff') }}</a>
           <a href="#top" (click)="up($event)">{{ t('ftUp') }} ↑</a>
         </span>
@@ -107,6 +109,7 @@ export class FooterComponent {
   private i18n = inject(I18nService);
   readonly nav = inject(NavService);
   readonly s = SETTINGS;
+  readonly tr = inject(TrackingService);
   readonly logo = inject(DomSanitizer).bypassSecurityTrustHtml(LOGO_WHITE);
   readonly icons = ICONS;
   readonly socials = ['facebook', 'instagram', 'tiktok', 'youtube'];

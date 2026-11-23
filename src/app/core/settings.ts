@@ -5,7 +5,6 @@ export const SETTINGS = {
   /** Website languages. Only Czech for now; add 'de' and the CZ/DE switch comes back (German texts are kept). */
   languages: ['cs'] as Lang[],
   company: 'PMP House',
-  legalName: 'POWER MACHINERY PARTS s.r.o.',
   /** The site's address, used for canonical links, the sitemap and sharing previews. */
   siteUrl: 'https://pmphouse.cz',
   /** Main switch for search engines. false while the texts are still samples; true opens the site to Google. */
@@ -37,6 +36,9 @@ export const SETTINGS = {
    *  Empty: the enquiry is not e-mailed (in demo mode it is only stored in the demo CRM). */
   formKey: '',
   formEndpoint: 'https://api.web3forms.com/submit',
+  /** Google tag. ads = Google Ads ID (AW-…), ga4 = Google Analytics ID (G-…), both from the company's Google account.
+   *  Empty = no Google code on the site and no cookie banner. labels = conversion labels from Google Ads (the part after the "/"). */
+  google: { ads: '', ga4: '', labels: { lead: '', chat: '', whatsapp: '', phone: '' } as Record<string, string> },
   /** Demo CRM: enquiries are stored only in this browser. Off: they go to the shared list on the server (/api/leads). */
   demoCrm: false,
 };

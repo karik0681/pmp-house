@@ -533,3 +533,20 @@ app-chat-widget[hidden]{display:none!important}
 .std-page{padding-top:clamp(24px,3vw,40px)}.std-page .std-grid{margin-top:0}
 .std-more{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-top:28px;padding:18px 20px;background:var(--paper);border:1px solid var(--line);border-radius:3px}.std-more p{margin:0;font:700 19px var(--disp);font-stretch:112%}
 .ofc-t{margin:0 0 4px;font-size:16px;font-weight:600}.ofc-t a{color:var(--g)}
+.ofc-page{padding-top:clamp(24px,3vw,40px)}.ofc-page .sec-head{display:none}.ofc-page .ofc-grid{margin-top:0}
+.ct{padding:clamp(48px,6vw,80px) 0;background:#fff}
+.ct-grid{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:clamp(28px,5vw,72px);align-items:start}
+.ct h2{font:700 30px var(--disp);font-stretch:118%;margin:0 0 14px}
+.ct-info p{margin:0 0 8px;font-size:17px}.ct-info a{color:var(--g)}.ct-big{font:700 28px var(--disp)!important}
+.ct-co{margin:20px 0 0;border-top:1px solid var(--line)}.ct-co div{display:grid;grid-template-columns:38% 1fr;gap:8px;padding:8px 0;border-bottom:1px solid var(--line);font-size:15.5px}.ct-co dt{color:var(--mute)}.ct-co dd{margin:0}
+.ct-form{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:clamp(16px,2.5vw,26px)}
+.ct-form input,.ct-form textarea{width:100%}.ct-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ct-chk{display:flex;gap:10px;align-items:center;font-size:14.5px;margin:4px 0 12px}.ct-chk input{flex:0 0 22px;width:22px;height:22px;margin:0;accent-color:var(--g)}
+.ct-ok{background:var(--mint);border-radius:3px;padding:20px;font:700 20px/1.35 var(--disp)}
+@media(max-width:860px){.ct-grid,.ct-two{grid-template-columns:1fr}}
+.cc{position:fixed;left:16px;bottom:16px;z-index:60;max-width:440px;background:#fff;border:1px solid var(--line);border-radius:4px;box-shadow:0 10px 30px rgba(23,57,44,.18);padding:16px 18px;display:grid;gap:12px}
+.cc h2{margin:0 0 4px;font:700 19px var(--disp)}.cc p{margin:0;font-size:14.5px;line-height:1.4}.cc a{color:var(--g2)}
+.cc-b{display:grid;grid-template-columns:1fr 1fr;gap:8px}.cc-b .btn{min-height:42px;font-size:15px}
+@media(max-width:560px){.cc{left:8px;right:8px;bottom:8px;max-width:none}}
+.ft-cc{background:none;border:0;padding:0;font:inherit;color:inherit;text-decoration:underline;cursor:pointer}
+.ct-info .btn-wa{color:#fff}

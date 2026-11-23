@@ -1,3 +1,4 @@
+import { TrackingService } from '../core/tracking.service';
 import { Component, ElementRef, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { I18nService } from '../core/i18n.service';
@@ -58,6 +59,7 @@ interface Msg { role: 'user' | 'assistant'; content: string }
 export class ChatWidgetComponent {
   private i18n = inject(I18nService);
   private leads = inject(LeadsService);
+  private tr = inject(TrackingService);
   private cfg = inject(ConfiguratorService);
   private log = viewChild<ElementRef<HTMLElement>>('log');
   private box = viewChild<ElementRef<HTMLInputElement>>('box');
@@ -107,6 +109,7 @@ export class ChatWidgetComponent {
     const id = await this.leads.add({ name, phone, email, place: '', clientNote: talk || this.t('chat_noTalk'), cfg: this.cfg.cfg(), price: null, source: this.t('chat_source') }, this.t('chat_leadNote'), this.t('adm_firstStep'));
     this.saving.set(false);
     if (!id) { this.saveErr.set(true); return; }
+    this.tr.goal('chat');
     this.form.set(false); this.sent.set(true); this.down();
   }
 }

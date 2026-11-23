@@ -7,11 +7,13 @@ import { HeaderComponent } from './header.component';
 import { FooterComponent } from './footer.component';
 import { NavService } from './nav.service';
 import { ChatWidgetComponent } from './chat-widget.component';
+import { ConsentComponent } from './consent.component';
+import { TrackingService } from '../core/tracking.service';
 
 /** Frame of every public page: header, page content, footer, the floating WhatsApp button and the chat window. */
 @Component({
   selector: 'app-layout',
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, ChatWidgetComponent],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, ChatWidgetComponent, ConsentComponent],
   template: `
     <app-header />
     <router-outlet />
@@ -20,7 +22,8 @@ import { ChatWidgetComponent } from './chat-widget.component';
       <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" d="M4 20l1.3-3.9A8 8 0 1 1 8 18.9z"/></svg>
       <span>{{ i18n.t('waFloat') }}</span>
     </a>
-    <app-chat-widget [hidden]="nav.wafHidden() || overCta()" />`,
+    <app-chat-widget [hidden]="nav.wafHidden() || overCta()" />
+    <app-consent />`,
 })
 export class LayoutComponent {
   readonly i18n = inject(I18nService);
@@ -50,6 +53,7 @@ export class LayoutComponent {
     };
     const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(check); } };
     if (typeof window === 'undefined') return;   /* building the page, no browser */
+    inject(TrackingService).start();
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onScroll, { passive: true });
     inject(DestroyRef).onDestroy(() => { sub.unsubscribe(); removeEventListener('scroll', onScroll); removeEventListener('resize', onScroll); });

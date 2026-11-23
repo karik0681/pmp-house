@@ -62,7 +62,7 @@ export class HeaderComponent {
   readonly items: Item[] = [
     { route: '/modely', label: 'navModels' }, { id: 'konfigurator', label: 'navCfg' }, { id: 'konstrukce', label: 'navTypes' },
     { route: '/reference', label: 'navRefs' }, { route: '/montaz', label: 'navMontage' },
-    { id: 'otazky', label: 'navFaq' }, { id: 'kontakt', label: 'navContact' },
+    { id: 'otazky', label: 'navFaq' }, { route: '/kontakt', label: 'navContact' },
   ];
   t = (k: string) => this.i18n.t(k);
 }
