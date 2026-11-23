@@ -511,11 +511,16 @@ app-chat-widget[hidden]{display:none!important}
 .ofc-map svg{display:block;width:100%;height:auto}
 .ofc-map .land{fill:var(--mint);stroke:var(--g2);stroke-width:2.5;stroke-linejoin:round}
 .ofc-map .pin{cursor:pointer;outline:none}
-.ofc-map .ring{fill:var(--post);opacity:0;transition:opacity .2s}
-.ofc-map .dot{fill:var(--g);stroke:#fff;stroke-width:4}
-.ofc-map .is-main .dot{fill:var(--post)}
-.ofc-map .pin.is-on .ring,.ofc-map .pin:focus-visible .ring{opacity:.22}
-.ofc-map text{font:700 34px var(--disp);fill:var(--g);paint-order:stroke;stroke:#fff;stroke-width:8px}
+.ofc-map .shadow{fill:rgba(23,57,44,.22)}
+.ofc-map .drop{fill:var(--g);stroke:#fff;stroke-width:4;transition:transform .2s;transform-box:fill-box;transform-origin:50% 100%}
+.ofc-map .is-main .drop{fill:var(--post)}
+.ofc-map .house,.ofc-leg .house{fill:none;stroke:#fff;stroke-width:4.5;stroke-linecap:round;stroke-linejoin:round}
+.ofc-map .pin.is-on .drop,.ofc-map .pin:focus-visible .drop{transform:scale(1.15)}
+.ofc-map text{paint-order:stroke;stroke:#fff;stroke-width:9px;stroke-linejoin:round}
+.ofc-map .city{font:700 36px var(--disp);fill:var(--g)}
+.ofc-map .kind{font:600 25px var(--body);fill:var(--mute)}
+.ofc-leg{display:flex;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:14.5px;color:var(--mute)}
+.ofc-leg svg{flex:0 0 22px;width:22px;height:32px}.ofc-leg .drop{fill:var(--g);stroke:none}
 .ofc-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
 .ofc-c{background:#fff;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:3px;padding:14px 16px;transition:border-color .2s}
 .ofc-c.is-main{border-left-color:var(--post)}

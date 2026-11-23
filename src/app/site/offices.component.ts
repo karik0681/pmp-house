@@ -19,17 +19,27 @@ type Office = (typeof SETTINGS.offices)[number];
       </div>
       <div class="ofc-grid">
         <figure class="ofc-map">
-          <svg [attr.viewBox]="'-20 -40 ' + (cz.w + 40) + ' ' + (cz.h + 70)" role="img" [attr.aria-label]="t('ofMapAlt')">
+          <svg [attr.viewBox]="'-20 -150 ' + (cz.w + 40) + ' ' + (cz.h + 180)" role="img" [attr.aria-label]="t('ofMapAlt')">
             <path class="land" [attr.d]="cz.path" />
             @for (o of offices; track o.id) {
               <g class="pin" [class.is-main]="o.main" [class.is-on]="active() === o.id" tabindex="0" role="button"
-                [attr.aria-label]="o.city" (click)="pick(o)" (keydown.enter)="pick(o)" (mouseenter)="active.set(o.id)">
-                <circle class="ring" [attr.cx]="o.x" [attr.cy]="o.y" r="30" />
-                <circle class="dot" [attr.cx]="o.x" [attr.cy]="o.y" r="13" />
-                <text [attr.x]="o.x + (o.x > 600 ? -24 : 24)" [attr.y]="o.y + 8" [attr.text-anchor]="o.x > 600 ? 'end' : 'start'">{{ o.city }}</text>
+                [attr.aria-label]="o.city + ', ' + t('ofK_' + o.id)" (click)="pick(o)" (keydown.enter)="pick(o)" (mouseenter)="active.set(o.id)">
+                <g [attr.transform]="'translate(' + o.x + ' ' + o.y + ')'">
+                  <ellipse class="shadow" cx="0" cy="0" rx="16" ry="6" />
+                  <path class="drop" d="M0 0C-7-16-30-30-30-52a30 30 0 1 1 60 0C30-30 7-16 0 0Z" />
+                  <path class="house" d="M-13-50 0-63 13-50M-9-53v15h18v-15" />
+                </g>
+                <text [attr.x]="o.x + (o.x > 600 ? -40 : 40)" [attr.y]="o.y - 56" [attr.text-anchor]="o.x > 600 ? 'end' : 'start'">
+                  <tspan class="city">{{ o.city }}</tspan>
+                  <tspan class="kind" [attr.x]="o.x + (o.x > 600 ? -40 : 40)" dy="34">{{ t('ofK_' + o.id) }}</tspan>
+                </text>
               </g>
             }
           </svg>
+          <figcaption class="ofc-leg">
+            <svg viewBox="-32 -86 64 92" aria-hidden="true"><path class="drop" d="M0 0C-7-16-30-30-30-52a30 30 0 1 1 60 0C30-30 7-16 0 0Z" /><path class="house" d="M-13-50 0-63 13-50M-9-53v15h18v-15" /></svg>
+            {{ t('ofLegend') }}
+          </figcaption>
         </figure>
         <ul class="ofc-list">
           @for (o of offices; track o.id) {
