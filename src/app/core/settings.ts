@@ -38,7 +38,7 @@ export const SETTINGS = {
   formEndpoint: 'https://api.web3forms.com/submit',
   /** Google tag. ads = Google Ads ID (AW-…), ga4 = Google Analytics ID (G-…), both from the company's Google account.
    *  Empty = no Google code on the site and no cookie banner. labels = conversion labels from Google Ads (the part after the "/"). */
-  google: { ads: 'AW-737729893', ga4: '', labels: { lead: '', chat: '', whatsapp: '', phone: '' } as Record<string, string> },
+  google: { ads: 'AW-737729893', ga4: '', labels: { lead: '33uECNaZh74dEOW6498C', chat: 'suojCNmZh74dEOW6498C', whatsapp: 'liaMCNyZh74dEOW6498C', phone: 'iY7XCN-Zh74dEOW6498C' } as Record<string, string> },
   /** Demo CRM: enquiries are stored only in this browser. Off: they go to the shared list on the server (/api/leads). */
   demoCrm: false,
 };
