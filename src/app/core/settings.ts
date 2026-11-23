@@ -18,6 +18,17 @@ export const SETTINGS = {
   address: 'Roztoky, 403 32 Povrly',
   ico: '05185530',
   dic: 'CZ05185530',
+  /** Branches, shown in the contact section, on the map and to Google. x/y = place on the map of Czechia (cz-map.ts).
+   *  street '' = the exact address is not public yet: the card asks to arrange a visit by phone.
+   *  google / firmy = the branch's profile on Google Maps and firmy.cz ('' = no profile yet, no button). */
+  offices: [
+    { id: 'usti', city: 'Ústí nad Labem', main: true, street: 'Roztoky', postal: '403 32', locality: 'Povrly',
+      google: '', firmy: 'https://www.firmy.cz/detail/13420079-pmp-house-power-machinery-parts-s-r-o-povrly-roztoky.html', x: 308, y: 82 },
+    { id: 'praha', city: 'Praha', main: false, street: '', postal: '', locality: 'Praha',
+      google: '', firmy: '', x: 347, y: 218 },
+    { id: 'brno', city: 'Brno', main: false, street: 'Hodějice 397', postal: '684 01', locality: 'Hodějice',
+      google: 'https://maps.app.goo.gl/mhnTEz7M9jxyez2XA', firmy: 'https://www.firmy.cz/detail/13419644-pmp-house-power-machinery-parts-s-r-o-hodejice.html', x: 714, y: 434 },
+  ],
   /** Opening hours, confirmed by the company. */
   hours: { cs: 'Po–Pá 8:00–16:00', de: 'Mo–Fr 8:00–16:00' },
   /** Profile links. An empty link shows a grey icon so the place is visible in the demo. */

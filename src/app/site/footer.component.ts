@@ -19,7 +19,7 @@ const ICONS: Record<string, string> = {
   selector: 'app-footer',
   imports: [RouterLink],
   template: `
-    <footer class="ft" id="kontakt">
+    <footer class="ft">
       <div class="ft-cta"><div class="wrap">
         <div>
           <h2>{{ t('ftH') }}</h2>
@@ -77,9 +77,13 @@ const ICONS: Record<string, string> = {
           <h3>{{ t('navContact') }}</h3>
           <p class="ft-phone"><a [href]="'tel:+' + s.whatsapp">{{ s.phone }}</a></p>
           <p><a [href]="'mailto:' + s.mail">{{ s.mail }}</a></p>
-          <p>{{ s.address }}</p>
+          <ul class="ft-ofc">
+            @for (o of s.offices; track o.id) {
+              <li><b>{{ o.city }}</b>@if (o.street) {<br>{{ o.street }}, {{ o.postal }} {{ o.locality }}}</li>
+            }
+          </ul>
           <p class="mute">{{ hours() }}<br>{{ t('conSub') }}</p>
-          <p><a class="ft-map" [href]="map" target="_blank" rel="noopener">{{ t('ftMap') }} ↗</a></p>
+          <p><a class="ft-map" href="#kontakt" (click)="nav.section('kontakt', $event)">{{ t('ofAll') }} →</a></p>
         </address>
       </div>
 
@@ -106,7 +110,6 @@ export class FooterComponent {
   readonly icons = ICONS;
   readonly socials = ['facebook', 'instagram', 'tiktok', 'youtube'];
   readonly year = new Date().getFullYear();
-  readonly map = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(SETTINGS.address);
   readonly models: { type: Kind; L: number; W: number; size: string }[] = [
     { type: 'Y', L: 6, W: 3, size: '3 × 6 m' }, { type: 'K', L: 6, W: 3, size: '3 × 6 m' }, { type: 'P', L: 6, W: 3, size: '3 × 6 m' },
   ];

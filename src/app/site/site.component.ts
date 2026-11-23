@@ -6,6 +6,8 @@ import { goTo, scrollToId } from '../core/scroll';
 import { HeroComponent } from './hero.component';
 import { TypesComponent } from './types.component';
 import { ExplodedComponent } from './exploded.component';
+import { ModelsComponent } from './models.component';
+import { OfficesComponent } from './offices.component';
 import { NavService } from './nav.service';
 import { ConfiguratorComponent } from '../configurator/configurator.component';
 import { ConfiguratorService } from '../configurator/configurator.service';
@@ -16,13 +18,14 @@ import { REFERENCES } from '../references/refs.data';
 /** The home page. Header, footer and the WhatsApp button come from LayoutComponent. */
 @Component({
   selector: 'app-site',
-  imports: [RouterLink, HeroComponent, TypesComponent, ExplodedComponent, ConfiguratorComponent, RefCardComponent],
+  imports: [RouterLink, HeroComponent, TypesComponent, ExplodedComponent, ModelsComponent, OfficesComponent, ConfiguratorComponent, RefCardComponent],
   template: `
     <a class="skip" href="#konfigurator" (click)="go($event, 'konfigurator')">{{ t('skip') }}</a>
     <main id="top">
       <app-hero />
       <app-types />
       <app-exploded />
+      <app-models />
       <app-configurator />
 
       <section class="home-refs" id="reference"><div class="wrap">
@@ -56,6 +59,8 @@ import { REFERENCES } from '../references/refs.data';
       <section class="faq" id="otazky"><div class="wrap duo"><h2>{{ t('faqH') }}</h2><div>
         @for (i of [1, 2, 3, 4, 5, 6]; track i) { <details><summary>{{ t('q' + i) }}</summary><p>{{ t('a' + i) }}</p></details> }
       </div></div></section>
+
+      <app-offices />
     </main>`,
 })
 export class SiteComponent implements OnDestroy {

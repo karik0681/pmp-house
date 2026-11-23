@@ -2,7 +2,7 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { scrollToId } from '../core/scroll';
 import { ConfiguratorService } from '../configurator/configurator.service';
-import { Kind, encode, fresh, repair } from '../configurator/model';
+import { Cfg, Kind, encode, fresh, repair } from '../configurator/model';
 
 /** Navigation shared by the header, the mobile menu and the footer. */
 @Injectable({ providedIn: 'root' })
@@ -31,6 +31,15 @@ export class NavService {
     c.count = m.count ?? 1;
     repair(c);
     if (this.onHome()) { this.cfg.load(c); this.cfg.go(0); scrollToId('konfigurator'); }
+    else this.router.navigate(['/'], { queryParams: { c: encode(c) } });
+  }
+
+  /** Opens the configurator with a prepared configuration at a given step (0 = start, 4 = enquiry form). */
+  preset(c: Cfg, step: number, e?: Event) {
+    e?.preventDefault();
+    this.menuOpen.set(false);
+    repair(c);
+    if (this.onHome()) { this.cfg.load(c); this.cfg.go(step); scrollToId('konfigurator'); }
     else this.router.navigate(['/'], { queryParams: { c: encode(c) } });
   }
 }

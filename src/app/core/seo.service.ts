@@ -59,7 +59,13 @@ export class SeoService {
         dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         opens: '08:00', closes: '16:00',
       }],
-      sameAs: Object.values(SETTINGS.social).filter(Boolean),
+      sameAs: [...Object.values(SETTINGS.social), ...SETTINGS.offices.flatMap(o => [o.google, o.firmy])].filter(Boolean),
+      department: SETTINGS.offices.filter(o => o.street && !o.main).map(o => ({
+        '@type': 'HomeAndConstructionBusiness',
+        name: `${SETTINGS.company} ${o.city}`,
+        telephone: SETTINGS.phone.replace(/\s/g, ''),
+        address: { '@type': 'PostalAddress', streetAddress: o.street, addressLocality: o.locality, postalCode: o.postal, addressCountry: 'CZ' },
+      })),
     };
     let s = this.doc.head.querySelector<HTMLScriptElement>('script#ld-company');
     if (!s) {

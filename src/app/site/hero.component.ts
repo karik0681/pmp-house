@@ -5,6 +5,7 @@ import { money } from '../core/format';
 import { fromPrice } from '../configurator/model';
 import { CZ } from './cz-map';
 import { PLAN } from './hero-plan';
+import { SETTINGS } from '../core/settings';
 
 /** Top of the home page: the offer on the left, a site plan with four container sets and a delivery map on the right. */
 @Component({
@@ -43,7 +44,7 @@ import { PLAN } from './hero-plan';
             <path class="land" [attr.d]="cz.path" />
             @for (c of cz.cities; track c.n) { <line [attr.x1]="cz.home.x" [attr.y1]="cz.home.y" [attr.x2]="c.x" [attr.y2]="c.y" /> }
             @for (c of cz.cities; track c.n) { <circle class="city" [attr.cx]="c.x" [attr.cy]="c.y" r="10" /> }
-            <circle class="ring" [attr.cx]="cz.home.x" [attr.cy]="cz.home.y" r="34" /><circle class="home" [attr.cx]="cz.home.x" [attr.cy]="cz.home.y" r="15" />
+            @for (o of offices; track o.id) { <circle class="ring" [attr.cx]="o.x" [attr.cy]="o.y" r="34" /><circle class="home" [attr.cx]="o.x" [attr.cy]="o.y" r="15" /> }
           </svg>
         </div>
       </div>
@@ -65,6 +66,7 @@ import { PLAN } from './hero-plan';
 export class HeroComponent {
   private i18n = inject(I18nService);
   readonly cz = CZ;
+  readonly offices = SETTINGS.offices;
   readonly plan = PLAN;
   readonly box = `0 0 ${PLAN.w} ${PLAN.h}`;
   /** the published "from" price of a 3 × 6 m Standard */
