@@ -221,6 +221,7 @@ export class Cutaway {
       pvc: std({ color: 0xfafafa, roughness: 0.35 }),
       glass: keep(new THREE.MeshPhysicalMaterial({ color: 0x8fb8ad, roughness: 0.05, transmission: 0.55, transparent: true, opacity: 0.55 })),
       door: std({ color: 0xeeebe3, metalness: 0.3, roughness: 0.45 }),
+      hole: std({ color: 0x2a241c, roughness: 0.9 }),
       steel: std({ color: 0x8a8d90, metalness: 1, roughness: 0.25 }),
       foot: std({ color: 0x9a9a96, roughness: 0.9 }),
     };
@@ -231,23 +232,21 @@ export class Cutaway {
       const m = new THREE.Mesh(g, mat); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; parent.add(m); return m;
     };
 
-    /* bolted corners */
-    const boltGeo = keep(new THREE.CylinderGeometry(0.017, 0.017, 0.014, 6)), washGeo = keep(new THREE.CylinderGeometry(0.024, 0.024, 0.004, 16));
-    const bolt = (x: number, y: number, z: number, sx: number, sz: number, ax: 'x' | 'z') => {
-      for (const [g, o] of [[washGeo, 0.002], [boltGeo, 0.009]] as [THREE.BufferGeometry, number][]) {
-        const m = new THREE.Mesh(g, M.steel);
-        if (ax === 'x') { m.rotation.z = Math.PI / 2; m.position.set(x + sx * o, y, z); } else { m.rotation.x = Math.PI / 2; m.position.set(x, y, z + sz * o); }
-        m.castShadow = true; root.add(m);
-      }
+    /* corners: the post continues into a corner piece of the same colour, with bolt holes (no bolts shown) */
+    const holeGeo = keep(new THREE.CylinderGeometry(0.016, 0.016, 0.004, 20));
+    const hole = (x: number, y: number, z: number, ax: 'x' | 'z') => {
+      const m = new THREE.Mesh(holeGeo, M.hole);
+      if (ax === 'x') m.rotation.z = Math.PI / 2; else m.rotation.x = Math.PI / 2;
+      m.position.set(x, y, z); root.add(m);
     };
     const corner = (x: number, y: number, z: number) => {
-      const sx = x < 1 ? -1 : 1, sz = z < 1 ? -1 : 1, pw = 0.3, ph = 0.26, t = 0.006, e = P / 2 + 0.035;
-      box(0.17, 0.2, 0.17, x, y, z, M.galv);
-      const fz = z + sz * (e + t / 2); box(pw, ph, t, x - sx * (pw / 2 - 0.085), y, fz, M.galv);
-      const fx = x + sx * (e + t / 2); box(t, ph, pw, fx, y, z - sz * (pw / 2 - 0.085), M.galv);
-      for (const dy of [-0.075, 0.075]) for (const d of [0.05, 0.18]) {
-        bolt(x - sx * d + sx * 0.06, y + dy, fz + sz * t / 2, sx, sz, 'z');
-        bolt(fx + sx * t / 2, y + dy, z - sz * d + sz * 0.06, sx, sz, 'x');
+      const sx = x < 1 ? -1 : 1, sz = z < 1 ? -1 : 1, pw = 0.3, ph = 0.24, t = 0.004, e = P / 2;
+      box(0.16, 0.2, 0.16, x, y, z, M.frame);
+      const fz = z + sz * (e + t / 2); box(pw, ph, t, x - sx * (pw / 2 - 0.08), y, fz, M.frame);
+      const fx = x + sx * (e + t / 2); box(t, ph, pw, fx, y, z - sz * (pw / 2 - 0.08), M.frame);
+      for (const dy of [-0.065, 0.065]) for (const d of [0.04, 0.16]) {
+        hole(x - sx * d + sx * 0.05, y + dy, fz + sz * (t / 2 + 0.0005), 'z');
+        hole(fx + sx * (t / 2 + 0.0005), y + dy, z - sz * d + sz * 0.05, 'x');
       }
     };
     for (const x of [0, L]) for (const z of [0, W]) {
@@ -260,7 +259,6 @@ export class Cutaway {
       for (const z of [0, W]) { box(L, hh, P, L / 2, y, z, M.frame); box(L - 0.6, 0.025, 0.004, L / 2, y, z + (z < 1 ? -1 : 1) * (P / 2 + 0.002), M.frameD); }
       for (const x of [0, L]) { box(P, hh, W, x, y, W / 2, M.frame); box(0.004, 0.025, W - 0.6, x + (x < 1 ? -1 : 1) * (P / 2 + 0.002), y, W / 2, M.frameD); }
     }
-    box(P, H, P, 3, H / 2, W, M.frame); box(P, H, P, 3, H / 2, 0, M.frame);
 
     /* floor */
     for (let x = 0.6; x < L; x += 0.6) box(0.07, 0.12, W - 0.1, x, 0.12, W / 2, M.joist);
