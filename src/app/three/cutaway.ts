@@ -239,12 +239,12 @@ export class Cutaway {
       if (ax === 'x') m.rotation.z = Math.PI / 2; else m.rotation.x = Math.PI / 2;
       m.position.set(x, y, z); root.add(m);
     };
-    /* 4 holes (2 × 2) on each outer face of the post at its top and at its bottom */
+    /* 2 holes, one above the other, on each outer face of the post at its top and at its bottom */
     const corner = (x: number, top: boolean, z: number) => {
       const sx = x < 1 ? -1 : 1, sz = z < 1 ? -1 : 1, fz = z + sz * (P / 2 + 0.0015), fx = x + sx * (P / 2 + 0.0015);
       for (let r = 0; r < 2; r++) {
         const y = top ? H - 0.06 - r * 0.07 : 0.06 + r * 0.07;
-        for (const c of [-0.034, 0.034]) { hole(x + c, y, fz, 'z'); hole(fx, y, z + c, 'x'); }
+        hole(x - sx * 0.035, y, fz, 'z'); hole(fx, y, z - sz * 0.035, 'x');
       }
     };
     for (const x of [0, L]) for (const z of [0, W]) {
