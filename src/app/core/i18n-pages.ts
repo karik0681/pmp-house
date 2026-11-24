@@ -90,7 +90,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
 
 
     /* exploded container */
-    xpH: 'Z čeho se skládá kontejner', xpSub: 'Šipkami projdete kontejner vrstvu po vrstvě.', xpStart: 'Teď vidíte celý kontejner. Stiskněte šipku a rozložíme ho na vrstvy.', xpPrev: 'Předchozí vrstva', xpNext: 'Další vrstva', xpReset: 'Složit zpět', xpLayer: 'Vrstva', xpWhole: 'Celý kontejner', xpSubStill: 'Sedm vrstev, ze kterých se kontejner skládá.',
+    xpH: 'Z čeho se skládá kontejner', xpSub: 'Otočte si model a vyberte vrstvu. Číslo se rozsvítí přímo na kontejneru.', xpStart: 'Teď vidíte celý kontejner. Stiskněte šipku a rozložíme ho na vrstvy.', xpPrev: 'Předchozí vrstva', xpNext: 'Další vrstva', xpReset: 'Složit zpět', xpLayer: 'Vrstva', xpWhole: 'Celý kontejner', xpSubStill: 'Sedm vrstev, ze kterých se kontejner skládá.',
     xp1: 'Ocelový rám', xp1D: 'Svařený rám z ocelových profilů nese celou stavbu. Za jeho rohy kontejner zvedá jeřáb.',
     xp2: 'Zateplená podlaha', xp2D: 'Izolace mezi profily, nad ní cementotřísková deska a PVC krytina. U typu Ekonom minerální vata 50 mm.',
     xp3: 'Sloupy', xp3D: 'Čtyři rohové sloupy spojují spodní a horní rám. Ekonom a Standard mají navíc dva sloupy v každé delší stěně.',
@@ -99,6 +99,13 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     xp6: 'Horní rám a strop', xp6D: 'Horní rám uzavírá konstrukci a nese střechu. Pod ním je zateplený stropní panel.',
     xp7: 'Střecha', xp7D: 'Profilovaný plech odvádí vodu a chrání strop před deštěm a sněhem.',
     xpNote: 'Skladba se liší podle typu. Přesné materiály a tloušťky uvedeme v nabídce.',
+    xc1: 'Pozinkovaný ocelový rám', xc1D: 'Rám z ohýbaných pozinkovaných profilů. Díly se šroubují, nic se nesvařuje.',
+    xc2: 'Rohový spoj na 4 šroubech', xc2D: 'Pozinkované rohové desky drží sloupy a rám, každá na čtyřech šroubech. Detail ukazuje lupa.',
+    xc3: 'Podlaha', xc3D: 'Ocelové profily, na nich fibrocementová deska 14 mm a PVC podlahovina 2 mm.',
+    xc4: 'Sendvičové stěny', xc4D: 'Dva lakované plechy RAL 9002 a mezi nimi jádro PUR 50 mm s hustotou 42 kg/m³.',
+    xc5: 'Okna a dveře', xc5D: 'Plastová okna s izolačním dvojsklem a ocelové dveře s výplní. Počet a místo vyberete v konfigurátoru.',
+    xc6: 'Střecha', xc6D: 'Střešní sendvičový panel se třemi žebry a izolací PUR 50 mm odvádí vodu a drží teplo.',
+    xcCut: 'Řez', xcFull: 'Celý kontejner', xcHint: 'Modelem otočíte tažením, na mobilu dvěma prsty.',
 
     /* privacy notice (GDPR); the company should have it checked by its lawyer */
     pvUpdated: 'Účinné od 18. 11. 2026.',
@@ -247,7 +254,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     homeMtBtn: 'Ablauf der Montage',
 
 
-    xpH: 'Woraus ein Container besteht', xpSub: 'Mit den Pfeilen gehen Sie den Container Schicht für Schicht durch.', xpStart: 'Sie sehen den ganzen Container. Drücken Sie den Pfeil, und wir zerlegen ihn in Schichten.', xpPrev: 'Vorherige Schicht', xpNext: 'Nächste Schicht', xpReset: 'Wieder zusammensetzen', xpLayer: 'Schicht', xpWhole: 'Ganzer Container', xpSubStill: 'Die sieben Schichten eines Containers.',
+    xpH: 'Woraus ein Container besteht', xpSub: 'Drehen Sie das Modell und wählen Sie eine Schicht. Die Nummer leuchtet direkt am Container.', xpStart: 'Sie sehen den ganzen Container. Drücken Sie den Pfeil, und wir zerlegen ihn in Schichten.', xpPrev: 'Vorherige Schicht', xpNext: 'Nächste Schicht', xpReset: 'Wieder zusammensetzen', xpLayer: 'Schicht', xpWhole: 'Ganzer Container', xpSubStill: 'Die sieben Schichten eines Containers.',
     xp1: 'Bodenrahmen aus Stahl', xp1D: 'Der geschweißte Rahmen aus Stahlprofilen trägt das ganze Gebäude. An seinen Ecken hebt der Kran den Container.',
     xp2: 'Gedämmter Boden', xp2D: 'Dämmung zwischen den Profilen, darüber eine Zementspanplatte und PVC-Belag. Beim Typ Ekonom 50 mm Mineralwolle.',
     xp3: 'Stützen', xp3D: 'Vier Eckstützen verbinden Boden- und Dachrahmen. Ekonom und Standard haben zusätzlich zwei Stützen in jeder Längswand.',
@@ -256,6 +263,13 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     xp6: 'Dachrahmen und Decke', xp6D: 'Der Dachrahmen schließt die Konstruktion und trägt das Dach. Darunter liegt ein gedämmtes Deckenpaneel.',
     xp7: 'Dach', xp7D: 'Profiliertes Blech leitet das Wasser ab und schützt die Decke vor Regen und Schnee.',
     xpNote: 'Der Aufbau hängt vom Typ ab. Genaue Materialien und Stärken nennen wir im Angebot.',
+    xc1: 'Verzinkter Stahlrahmen', xc1D: 'Rahmen aus gekanteten verzinkten Profilen. Alles wird verschraubt, nichts geschweißt.',
+    xc2: 'Eckverbindung mit 4 Schrauben', xc2D: 'Verzinkte Eckplatten halten Stützen und Rahmen, jede mit vier Schrauben. Die Lupe zeigt das Detail.',
+    xc3: 'Boden', xc3D: 'Stahlprofile, darauf eine 14 mm Faserzementplatte und 2 mm PVC-Belag.',
+    xc4: 'Sandwichwände', xc4D: 'Zwei lackierte Bleche RAL 9002 mit einem PUR-Kern von 50 mm und 42 kg/m³.',
+    xc5: 'Fenster und Türen', xc5D: 'Kunststofffenster mit Isolierglas und eine gedämmte Stahltür. Anzahl und Lage wählen Sie im Konfigurator.',
+    xc6: 'Dach', xc6D: 'Dach-Sandwichpaneel mit drei Rippen und 50 mm PUR leitet Wasser ab und hält die Wärme.',
+    xcCut: 'Schnitt', xcFull: 'Ganzer Container', xcHint: 'Ziehen dreht das Modell, auf dem Handy mit zwei Fingern.',
 
     pvUpdated: 'Gültig ab 18. 11. 2026.',
     adm_code: "Code aus der App",
