@@ -7,7 +7,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
  * ribbed roof, steel floor frame, fibre-cement board and vinyl. Numbered markers sit on the model and
  * hide when the part is behind something; a magnifier shows the bolted corner joint close up.
  */
-const L = 6, W = 3, H = 2.6, P = 0.14, T = 0.05, S = 0.004;
+const L = 6, W = 3, H = 2.6, P = 0.14, T = 0.085, S = 0.004, RT = 0.12;
 
 /** marker anchors in model space, same order as the layer list */
 export const CUT_ANCHORS: [number, number, number][] = [
@@ -16,7 +16,7 @@ export const CUT_ANCHORS: [number, number, number][] = [
   [3.45, 0.225, 1.7],
   [0.28, 0.75, W],
   [0.95, 2.05, W],
-  [1.5, H + 0.12, 1.2],
+  [1.5, H + 0.2, 1.2],
 ];
 /** camera for each layer: point to look at (model space), direction to it, share of the full-view distance */
 const VIEWS: { t: [number, number, number]; d: [number, number, number]; k: number }[] = [
@@ -25,7 +25,7 @@ const VIEWS: { t: [number, number, number]; d: [number, number, number]; k: numb
   { t: [3.9, 0.2, 1.5], d: [0.9, 1.15, 0.85], k: 0.62 },
   { t: [1.2, 1.3, W], d: [0.35, 0.3, 1], k: 0.55 },
   { t: [1.6, 1.45, W], d: [-0.1, 0.15, 1], k: 0.5 },
-  { t: [1.6, H, 1.4], d: [0.45, 1.35, 0.75], k: 0.68 },
+  { t: [1.6, H + 0.06, 1.4], d: [0.45, 1.35, 0.75], k: 0.68 },
 ];
 const HOME = { t: [3, 0.88, 1.5] as [number, number, number], d: [9.5, 5.2, 10.5] as [number, number, number], k: 1 };
 /** markers that make sense on the closed container (floor is hidden there) */
@@ -93,7 +93,7 @@ export class Cutaway {
 
     this.root.position.set(-3, 0.12, -1.5); this.scene.add(this.root);
     this.build();
-    this.ztarget.set(L + 0.06, H - 0.11, W + 0.06).add(this.root.position);
+    this.ztarget.set(L + 0.05, H - 0.17, W + 0.05).add(this.root.position);
     this.buildLens();
 
     const sec = canvas.closest('section'); if (sec) { const c = getComputedStyle(sec).backgroundColor; if (c && !c.startsWith('rgba(0, 0, 0, 0')) this.bg.setStyle(c); }
@@ -233,26 +233,24 @@ export class Cutaway {
     };
 
     /* corners: the post continues into a corner piece of the same colour, with bolt holes (no bolts shown) */
-    const holeGeo = keep(new THREE.CylinderGeometry(0.016, 0.016, 0.004, 20));
+    const holeGeo = keep(new THREE.CylinderGeometry(0.012, 0.012, 0.004, 20));
     const hole = (x: number, y: number, z: number, ax: 'x' | 'z') => {
       const m = new THREE.Mesh(holeGeo, M.hole);
       if (ax === 'x') m.rotation.z = Math.PI / 2; else m.rotation.x = Math.PI / 2;
       m.position.set(x, y, z); root.add(m);
     };
-    const corner = (x: number, y: number, z: number) => {
-      const sx = x < 1 ? -1 : 1, sz = z < 1 ? -1 : 1, pw = 0.3, ph = 0.24, t = 0.004, e = P / 2;
-      box(0.16, 0.2, 0.16, x, y, z, M.frame);
-      const fz = z + sz * (e + t / 2); box(pw, ph, t, x - sx * (pw / 2 - 0.08), y, fz, M.frame);
-      const fx = x + sx * (e + t / 2); box(t, ph, pw, fx, y, z - sz * (pw / 2 - 0.08), M.frame);
-      for (const dy of [-0.065, 0.065]) for (const d of [0.04, 0.16]) {
-        hole(x - sx * d + sx * 0.05, y + dy, fz + sz * (t / 2 + 0.0005), 'z');
-        hole(fx + sx * (t / 2 + 0.0005), y + dy, z - sz * d + sz * 0.05, 'x');
+    /* 8 holes on each outer face of the post, near its top and bottom end */
+    const corner = (x: number, top: boolean, z: number) => {
+      const sx = x < 1 ? -1 : 1, sz = z < 1 ? -1 : 1, fz = z + sz * (P / 2 + 0.0015), fx = x + sx * (P / 2 + 0.0015);
+      for (let r = 0; r < 4; r++) {
+        const y = top ? H - 0.05 - r * 0.055 : 0.05 + r * 0.055;
+        for (const c of [-0.034, 0.034]) { hole(x + c, y, fz, 'z'); hole(fx, y, z + c, 'x'); }
       }
     };
     for (const x of [0, L]) for (const z of [0, W]) {
       box(0.3, 0.12, 0.3, x, -0.06, z, M.foot); box(P, H, P, x, H / 2, z, M.frame);
-      box(0.02, H - 0.5, 0.004, x + (x < 1 ? -1 : 1) * 0.03, H / 2, z + (z < 1 ? -1 : 1) * (P / 2 + 0.002), M.frameD);
-      for (const y of [0.11, H - 0.11]) corner(x, y, z);
+      box(0.02, H - 0.62, 0.004, x + (x < 1 ? -1 : 1) * 0.03, H / 2, z + (z < 1 ? -1 : 1) * (P / 2 + 0.002), M.frameD);
+      corner(x, true, z); corner(x, false, z);
     }
     for (const y of [0.1, H - 0.08]) {
       const hh = y < 1 ? 0.2 : 0.16;
@@ -313,12 +311,13 @@ export class Cutaway {
       const m = new THREE.Mesh(geo, M.roofSheet); m.position.set(x, y, z); m.castShadow = true; m.receiveShadow = true; g.add(m);
     };
     const roof = (x0: number, x1: number) => {
-      const g = new THREE.Group(); root.add(g); const yr = H + 0.015;
-      box(x1 - x0, 0.004, W + 0.08, (x0 + x1) / 2, yr - 0.02, W / 2, M.sheet, g);
-      box(x1 - x0, 0.042, W + 0.08, (x0 + x1) / 2, yr, W / 2, M.pur, g);
-      box(x1 - x0, 0.004, W + 0.08, (x0 + x1) / 2, yr + 0.023, W / 2, M.sheet, g);
-      for (let px = x0; px < x1 - 0.01; px += 1) for (const r of [0.25, 0.5, 0.75]) rib(g, ribG, px + r, yr + 0.025, -0.04);
-      for (let px = x0 + 1; px < x1 - 0.01; px += 1) rib(g, capG, px, yr + 0.025, -0.05);
+      const g = new THREE.Group(); root.add(g);
+      const b0 = H + 0.002, top = b0 + RT + 2 * S;
+      box(x1 - x0, S, W + 0.08, (x0 + x1) / 2, b0 + S / 2, W / 2, M.sheet, g);
+      box(x1 - x0, RT, W + 0.08, (x0 + x1) / 2, b0 + S + RT / 2, W / 2, M.pur, g);
+      box(x1 - x0, S, W + 0.08, (x0 + x1) / 2, top - S / 2, W / 2, M.sheet, g);
+      for (let px = x0; px < x1 - 0.01; px += 1) for (const r of [0.25, 0.5, 0.75]) rib(g, ribG, px + r, top, -0.04);
+      for (let px = x0 + 1; px < x1 - 0.01; px += 1) rib(g, capG, px, top, -0.05);
       return g;
     };
     roof(0, 3); this.fullOnly.push(roof(3, L));
