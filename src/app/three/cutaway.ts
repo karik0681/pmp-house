@@ -13,11 +13,21 @@ const L = 6, W = 3, H = 2.6, P = 0.14, T = 0.05, S = 0.004;
 export const CUT_ANCHORS: [number, number, number][] = [
   [4.5, H - 0.08, W + 0.08],
   [L + 0.12, H - 0.11, W + 0.12],
-  [2.9, 0.23, 1.1],
+  [3.45, 0.225, 1.7],
   [0.28, 0.75, W],
   [0.95, 2.05, W],
   [1.5, H + 0.12, 1.2],
 ];
+/** camera for each layer: point to look at (model space), direction to it, share of the full-view distance */
+const VIEWS: { t: [number, number, number]; d: [number, number, number]; k: number }[] = [
+  { t: [3, 1.4, 1.5], d: [1, 0.55, 1.1], k: 0.95 },
+  { t: [L, H - 0.1, W], d: [1, 0.45, 1], k: 0.42 },
+  { t: [3.9, 0.2, 1.5], d: [0.9, 1.15, 0.85], k: 0.62 },
+  { t: [1.2, 1.3, W], d: [0.35, 0.3, 1], k: 0.55 },
+  { t: [1.6, 1.45, W], d: [-0.1, 0.15, 1], k: 0.5 },
+  { t: [1.6, H, 1.4], d: [0.45, 1.35, 0.75], k: 0.68 },
+];
+const HOME = { t: [3, 0.88, 1.5] as [number, number, number], d: [9.5, 5.2, 10.5] as [number, number, number], k: 1 };
 /** markers that make sense on the closed container (floor is hidden there) */
 const FULL_OK = [0, 1, 3, 4, 5];
 
@@ -48,6 +58,11 @@ export class Cutaway {
   active = -1;
   private lensBox: { x: number; y: number; r: number } | null = null;
   private bg = new THREE.Color(0xf1f4f1);
+  private fit = 14;
+  private goT = new THREE.Vector3();
+  private goP = new THREE.Vector3();
+  private flying = false;
+  private lastT = 0;
 
   constructor(private canvas: HTMLCanvasElement, private markers: HTMLElement[]) {
     const r = this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -66,7 +81,7 @@ export class Cutaway {
     ctl.touches = { ONE: -1 as any, TWO: THREE.TOUCH.DOLLY_ROTATE };
     canvas.style.touchAction = 'pan-y';
     ctl.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches; ctl.autoRotateSpeed = 0.35;
-    canvas.addEventListener('pointerdown', () => ctl.autoRotate = false);
+    canvas.addEventListener('pointerdown', () => { ctl.autoRotate = false; this.flying = false; });
 
     this.scene.add(new THREE.HemisphereLight(0xffffff, 0x8a8f88, 0.9));
     const sun = new THREE.DirectionalLight(0xfff4e6, 2.4);
@@ -89,7 +104,15 @@ export class Cutaway {
   }
 
   setCut(c: boolean) { this.cut = c; this.fullOnly.forEach(g => g.visible = !c); }
-  setActive(i: number) { this.active = i; this.lensOn = i === 1; }
+  setActive(i: number) {
+    this.active = i; this.lensOn = i === 1;
+    this.ctl.autoRotate = false;
+    const v = VIEWS[i] ?? HOME, o = this.root.position;
+    this.goT.set(v.t[0], v.t[1], v.t[2]).add(o);
+    this.goP.set(v.d[0], v.d[1], v.d[2]).normalize().multiplyScalar(this.fit * v.k).add(this.goT);
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) { this.ctl.target.copy(this.goT); this.cam.position.copy(this.goP); this.flying = false; }
+    else { this.flying = true; this.lastT = 0; }
+  }
 
   private start() { if (this.running) return; this.running = true; this.renderer.setAnimationLoop(() => this.frame()); }
   private stop() { this.running = false; this.renderer.setAnimationLoop(null); }
@@ -100,13 +123,20 @@ export class Cutaway {
     this.cam.updateProjectionMatrix();
     /* keep the whole container in view whatever the shape of the box */
     const vf = THREE.MathUtils.degToRad(32), hf = 2 * Math.atan(Math.tan(vf / 2) * this.cam.aspect);
-    const dist = 3.75 / Math.sin(Math.min(vf, hf) / 2);
+    const dist = this.fit = 3.75 / Math.sin(Math.min(vf, hf) / 2);
+    if (this.active >= 0) return;
     const d = this.v.copy(this.cam.position).sub(this.ctl.target).normalize();
     this.cam.position.copy(this.ctl.target).addScaledVector(d, dist);
     this.ocam.right = w; this.ocam.top = h; this.ocam.updateProjectionMatrix();
   }
 
   private frame() {
+    if (this.flying) {
+      const now = performance.now(), dt = Math.min(0.1, (now - (this.lastT || now)) / 1000); this.lastT = now;
+      const a = 1 - Math.exp(-dt * 4.5);
+      this.ctl.target.lerp(this.goT, a); this.cam.position.lerp(this.goP, a);
+      if (this.cam.position.distanceTo(this.goP) < 0.01) this.flying = false;
+    }
     this.ctl.update();
     this.renderer.render(this.scene, this.cam);
     this.lensBox = null;
@@ -129,6 +159,7 @@ export class Cutaway {
       }
       this.v.copy(this.wp).project(this.cam);
       const sx = (this.v.x + 1) / 2 * w, sy = (1 - this.v.y) / 2 * h;
+      if (sx < 8 || sx > w - 8 || sy < 8 || sy > h - 8) vis = false;
       const lb = this.lensBox;
       if (lb && i !== 1 && Math.hypot(sx - lb.x, sy - lb.y) < lb.r + 14) vis = false;
       const wide = i === this.active ? el.offsetWidth : 26, left = sx + wide - 13 > w - 4;
