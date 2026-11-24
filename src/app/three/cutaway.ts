@@ -77,8 +77,9 @@ export class Cutaway {
     const ctl = this.ctl = new OrbitControls(this.cam, canvas);
     ctl.target.set(0, 1.0, 0); ctl.enableDamping = true; ctl.enableZoom = false; ctl.enablePan = false;
     ctl.maxPolarAngle = Math.PI * 0.49; ctl.minPolarAngle = Math.PI * 0.12;
-    /* on touch: one finger scrolls the page, two fingers turn the model */
-    ctl.touches = { ONE: -1 as any, TWO: THREE.TOUCH.DOLLY_ROTATE };
+    /* on touch: a sideways swipe with one finger turns the model,
+       an up/down swipe still scrolls the page (touch-action: pan-y) */
+    ctl.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_ROTATE };
     canvas.style.touchAction = 'pan-y';
     ctl.autoRotate = !matchMedia('(prefers-reduced-motion: reduce)').matches; ctl.autoRotateSpeed = 0.35;
     canvas.addEventListener('pointerdown', () => { ctl.autoRotate = false; this.flying = false; });

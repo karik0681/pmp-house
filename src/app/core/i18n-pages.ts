@@ -106,7 +106,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     xc4: 'Sendvičové stěny', xc4D: 'Dva lakované plechy RAL 9002 a mezi nimi jádro PUR 50 mm s hustotou 42 kg/m³.',
     xc5: 'Okna a dveře', xc5D: 'Plastová okna s izolačním dvojsklem a ocelové dveře s výplní. Počet a místo vyberete v konfigurátoru.',
     xc6: 'Střecha', xc6D: 'Střešní sendvičový panel se třemi žebry a izolací PUR 120 mm odvádí vodu a drží teplo.',
-    xcCut: 'Řez', xcFull: 'Celý kontejner', xcHint: 'Modelem otočíte tažením, na mobilu dvěma prsty.',
+    xcCut: 'Řez', xcFull: 'Celý kontejner', xcHint: 'Modelem otočíte tažením do strany.',
 
     /* privacy notice (GDPR); the company should have it checked by its lawyer */
     pvUpdated: 'Účinné od 18. 11. 2026.',
@@ -271,7 +271,7 @@ export const PAGES: Record<Lang, Record<string, string>> = {
     xc4: 'Sandwichwände', xc4D: 'Zwei lackierte Bleche RAL 9002 mit einem PUR-Kern von 50 mm und 42 kg/m³.',
     xc5: 'Fenster und Türen', xc5D: 'Kunststofffenster mit Isolierglas und eine gedämmte Stahltür. Anzahl und Lage wählen Sie im Konfigurator.',
     xc6: 'Dach', xc6D: 'Dach-Sandwichpaneel mit drei Rippen und 120 mm PUR leitet Wasser ab und hält die Wärme.',
-    xcCut: 'Schnitt', xcFull: 'Ganzer Container', xcHint: 'Ziehen dreht das Modell, auf dem Handy mit zwei Fingern.',
+    xcCut: 'Schnitt', xcFull: 'Ganzer Container', xcHint: 'Zum Drehen seitlich ziehen.',
 
     pvUpdated: 'Gültig ab 18. 11. 2026.',
     adm_code: "Code aus der App",
