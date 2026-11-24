@@ -605,3 +605,4 @@ h2,.chk h2,.sec-head h2,.legal h2,.duo h2,.xpl-text h2{font-size:clamp(26px,2.8v
 .xpl-text h2{font-size:clamp(26px,2.6vw,36px)}
 .ft-cta h2{font-size:clamp(24px,2.6vw,34px)}.step h2{font-size:clamp(24px,2.4vw,32px)}.rd-cta h2{font-size:clamp(24px,2.4vw,32px)}
 .xpl-view{overflow:hidden}
+.xpl-ctl{justify-content:flex-end}@media(max-width:860px){.xpl-ctl{justify-content:center}}

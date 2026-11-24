@@ -4,7 +4,7 @@ import { Cutaway } from '../three/cutaway';
 
 /**
  * "What a container is made of": a cut-away 3D container. The visitor turns it, picks a layer in the list
- * (its number lights up on the model) and can switch between the cut and the closed container.
+ * (its number lights up on the model).
  * Picking the corner joint opens a magnifier with the bolted corner plates.
  */
 @Component({
@@ -37,10 +37,6 @@ import { Cutaway } from '../three/cutaway';
             }
           </div>
           <div class="xpl-ctl">
-            <div class="seg">
-              <button type="button" [attr.aria-pressed]="cut()" (click)="setCut(true)">{{ t('xcCut') }}</button>
-              <button type="button" [attr.aria-pressed]="!cut()" (click)="setCut(false)">{{ t('xcFull') }}</button>
-            </div>
             <span class="xpl-hint">{{ t('xcHint') }}</span>
           </div>
         </div>
@@ -54,7 +50,6 @@ export class ExplodedComponent implements OnDestroy {
   private view: Cutaway | null = null;
   readonly items = [0, 1, 2, 3, 4, 5];
   readonly active = signal(-1);
-  readonly cut = signal(true);
   t = (k: string) => this.i18n.t(k);
 
   constructor() {
@@ -67,10 +62,7 @@ export class ExplodedComponent implements OnDestroy {
   pick(i: number) {
     const next = this.active() === i ? -1 : i;
     this.active.set(next); this.view?.setActive(next);
-    /* floor is only visible in the cut */
-    if (next === 2 && !this.cut()) this.setCut(true);
   }
-  setCut(c: boolean) { this.cut.set(c); this.view?.setCut(c); }
 
   ngOnDestroy() { this.view?.destroy(); }
 }
