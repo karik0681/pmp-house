@@ -65,7 +65,7 @@ export class ReferencesComponent {
   readonly list = computed(() => { const g = this.tag(); return g ? this.all.filter(r => this.tagsOf(r).includes(g)) : this.all; });
   readonly places = new Set(REFERENCES.map(r => r.place)).size;
   readonly area = REFERENCES.reduce((s, r) => s + r.L * r.W * r.count, 0);
-  constructor() { inject(SeoService).page(this.t('seoRefs'), this.t('refSub'), { path: '/reference' }); }
+  constructor() { inject(SeoService).page(this.t('seoRefs'), this.t('refSub'), { path: '/reference', noindex: REFERENCES.every(r => r.demo) }); /* sample stories stay out of Google until real ones replace them */ }
   /** tapping the active tag again shows everything */
   pick(g: string) { this.tag.set(this.tag() === g ? null : g); }
 }

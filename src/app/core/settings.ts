@@ -7,8 +7,8 @@ export const SETTINGS = {
   company: 'PMP House',
   /** The site's address, used for canonical links, the sitemap and sharing previews. */
   siteUrl: 'https://pmphouse.cz',
-  /** Main switch for search engines. false while the texts are still samples; true opens the site to Google. */
-  indexable: false,
+  /** Main switch for search engines. true: the site is open to Google (sample pages stay hidden on their own). */
+  indexable: true,
   /** The showroom address in parts, for Google (schema.org). */
   postal: { streetAddress: 'Roztoky 9', addressLocality: 'Povrly', postalCode: '403 32' },
   mail: 'info@pmp-house.cz',
@@ -23,7 +23,7 @@ export const SETTINGS = {
   offices: [
     { id: 'usti', city: 'Ústí nad Labem', main: true, street: 'Roztoky 9', postal: '403 32', locality: 'Povrly', phone: '+420 777 600 199',
       google: '', firmy: 'https://www.firmy.cz/detail/13420079-pmp-house-power-machinery-parts-s-r-o-povrly-roztoky.html', x: 308, y: 82 },
-    { id: 'praha', city: 'Praha', main: false, street: 'Náchodská 116/208', postal: '193 21', locality: 'Praha 9 – Horní Počernice', phone: '+420 771 112 113',
+    { id: 'praha', city: 'Praha', main: false, street: 'Náchodská 116/208', postal: '193 00', locality: 'Praha 9 – Horní Počernice', phone: '+420 771 112 113',
       google: '', firmy: '', x: 375, y: 211 },
     { id: 'brno', city: 'Brno', main: false, street: 'Hodějice 397', postal: '684 01', locality: 'Hodějice', phone: '+420 771 112 113',
       google: 'https://maps.app.goo.gl/mhnTEz7M9jxyez2XA', firmy: 'https://www.firmy.cz/detail/13419644-pmp-house-power-machinery-parts-s-r-o-hodejice.html', x: 714, y: 434 },
