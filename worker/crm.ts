@@ -8,18 +8,18 @@
    Anything missing simply switches that part off. */
 
 import { staffRoutes, who } from './staff';
+import { Mailer, sendMail } from './mail';
 
 export interface CrmEnv {
   DB?: D1;
   ADMIN_PASSWORD?: string;
   NOTIFY_EMAIL?: string;
-  MAILER?: { send(message: unknown): Promise<void> };
+  MAILER?: Mailer;
 }
 interface D1 { prepare(sql: string): { bind(...v: unknown[]): D1Stmt } & D1Stmt }
 interface D1Stmt { run(): Promise<{ meta?: { last_row_id?: number } }>; all<T>(): Promise<{ results: T[] }>; first<T>(): Promise<T | null> }
 
 type Json = Record<string, any>;
-const SENDER = 'poptavky@pmphouse.cz';
 
 const json = (data: unknown, status = 200, extra: Record<string, string> = {}) =>
   new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...extra } });
@@ -115,24 +115,8 @@ async function notify(env: CrmEnv, lead: Json, site: string) {
   await Promise.allSettled(jobs);
 }
 
-/** A plain-text e-mail. "Reply" in the mail program answers the customer directly. */
-export function mime(to: string, subject: string, text: string, replyTo: string) {
-  const b64 = (s: string) => btoa(unescape(encodeURIComponent(s)));
-  const body = b64(text).replace(/.{76}/g, '$&\r\n');
-  return [
-    `From: "PMP House web" <${SENDER}>`, `To: ${to}`,
-    ...(/^[^\s@<>]+@[^\s@<>]+$/.test(replyTo) ? [`Reply-To: ${replyTo}`] : []),
-    `Subject: =?UTF-8?B?${b64(subject)}?=`, `Date: ${new Date().toUTCString()}`,
-    `Message-ID: <${crypto.randomUUID()}@pmphouse.cz>`, 'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=UTF-8', 'Content-Transfer-Encoding: base64', '', body,
-  ].join('\r\n');
-}
-
 async function mail(env: CrmEnv, lead: Json, text: string, to: string) {
-  // @ts-ignore: provided by the Cloudflare runtime
-  const { EmailMessage } = await import('cloudflare:email');
-  const raw = mime(to, `Nová poptávka ${lead['id']}: ${lead['name']} (${lead['source']})`, text, lead['email']);
-  await env.MAILER!.send(new EmailMessage(SENDER, to, raw));
+  await sendMail(env.MAILER!, to, `Nová poptávka ${lead['id']}: ${lead['name']} (${lead['source']})`, text, lead['email']);
 }
 
 /* ---------- clean-up ---------- */

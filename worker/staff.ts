@@ -1,15 +1,19 @@
-/* Staff login for /admin: every person has an own account with a password and a 6-digit code
-   from an authenticator app (Google Authenticator, Microsoft Authenticator and the like).
+/* Staff login for /admin: every person has an own account with a password, and at each login a
+   6-digit code is sent to their e-mail (worker/mail.ts). No app on the phone is needed.
 
-   How it starts: while there is no account yet, the e-mail + ADMIN_PASSWORD (Cloudflare secret) create the
-   first account, the owner. Everyone, the owner too, then sets an own password and scans a QR code once.
+   How it starts: while there is no account yet, the e-mail + ADMIN_PASSWORD (Cloudflare secret) + the code
+   from that mailbox create the first account, the owner. Everyone, the owner too, then sets an own password.
    After that ADMIN_PASSWORD is only the key that signs sessions; changing it logs everybody out.
-   The owner adds and switches off staff in the cabinet ("Zaměstnanci"). */
+   The owner adds and switches off staff in the cabinet ("Zaměstnanci").
+   The free Cloudflare plan sends only to verified addresses: each staff mailbox is confirmed once in
+   Email Routing → Destination addresses (Cloudflare sends a link to click). */
+
+import { Mailer, sendMail } from './mail';
 
 type Json = Record<string, any>;
 interface D1 { prepare(sql: string): { bind(...v: unknown[]): D1Stmt } & D1Stmt }
 interface D1Stmt { run(): Promise<unknown>; all<T>(): Promise<{ results: T[] }>; first<T>(): Promise<T | null> }
-export interface StaffEnv { DB?: D1; ADMIN_PASSWORD?: string }
+export interface StaffEnv { DB?: D1; ADMIN_PASSWORD?: string; MAILER?: Mailer }
 
 interface Row { email: string; name: string; role: 'owner' | 'staff'; salt: string; hash: string; totp: string | null; pending: string | null; last_step: number; active: number }
 /** a session: who, at which stage ('setup' = must still set a password and the app, 'full' = signed in) */
@@ -18,7 +22,8 @@ export interface Who { u: string; name: string; role: 'owner' | 'staff'; s: 'set
 const COOKIE = 'pmp_s';
 const DAYS = 14;
 const SETUP_MIN = 30;
-const ISSUER = 'PMP House';
+const CODE_MIN = 10;
+const CODE_TRIES = 5;
 const enc = new TextEncoder();
 
 const json = (data: unknown, status = 200, extra: Record<string, string> = {}) =>
@@ -34,6 +39,8 @@ async function db(env: StaffEnv): Promise<D1> {
     await env.DB.prepare(`CREATE TABLE IF NOT EXISTS staff (email TEXT PRIMARY KEY, name TEXT NOT NULL, role TEXT NOT NULL,
       salt TEXT NOT NULL, hash TEXT NOT NULL, totp TEXT, pending TEXT, last_step INTEGER NOT NULL DEFAULT 0,
       active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL)`).run();
+    /* the login codes sent by e-mail: one live code per address, kept only as a hash */
+    await env.DB.prepare('CREATE TABLE IF NOT EXISTS codes (email TEXT PRIMARY KEY, hash TEXT NOT NULL, exp INTEGER NOT NULL, tries INTEGER NOT NULL DEFAULT 0)').run();
     ready = true;
   }
   return env.DB;
@@ -61,35 +68,14 @@ export async function hashPassword(pass: string, saltHex?: string) {
   return { salt: hex(salt), hash: hex(bits) };
 }
 
-const B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-export function base32(bytes: Uint8Array) {
-  let bits = 0, val = 0, out = '';
-  for (const b of bytes) { val = (val << 8) | b; bits += 8; while (bits >= 5) { out += B32[(val >>> (bits - 5)) & 31]; bits -= 5; } }
-  if (bits > 0) out += B32[(val << (5 - bits)) & 31];
-  return out;
+/** The hash a login code is kept as: tied to the address and to the server secret. */
+async function codeHash(env: StaffEnv, email: string, code: string) {
+  return hex(await crypto.subtle.digest('SHA-256', enc.encode(`code:${email}:${code}:${env.ADMIN_PASSWORD}`)));
 }
-export function unbase32(s: string) {
-  const out: number[] = []; let bits = 0, val = 0;
-  for (const c of s.replace(/=+$/, '').toUpperCase()) { const i = B32.indexOf(c); if (i < 0) continue; val = (val << 5) | i; bits += 5; if (bits >= 8) { out.push((val >>> (bits - 8)) & 255); bits -= 8; } }
-  return new Uint8Array(out);
-}
-
-/** The code an authenticator app shows for a 30-second step (RFC 6238, SHA-1, 6 digits). */
-export async function totpAt(secret: string, step: number, digits = 6) {
-  const key = await crypto.subtle.importKey('raw', unbase32(secret), { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
-  const msg = new Uint8Array(8); let s = step;
-  for (let i = 7; i >= 0; i--) { msg[i] = s & 255; s = Math.floor(s / 256); }
-  const h = new Uint8Array(await crypto.subtle.sign('HMAC', key, msg));
-  const o = h[h.length - 1] & 15;
-  const n = ((h[o] & 127) << 24) | (h[o + 1] << 16) | (h[o + 2] << 8) | h[o + 3];
-  return String(n % 10 ** digits).padStart(digits, '0');
-}
-/** Checks a code with one step of slack for clock drift; returns the matched step, or 0. Older steps are refused (no reuse). */
-export async function checkTotp(secret: string, code: string, after = 0, now = Date.now()) {
-  if (!/^\d{6}$/.test(code)) return 0;
-  const t = Math.floor(now / 30000);
-  for (const step of [t, t - 1, t + 1]) if (step > after && (await same(await totpAt(secret, step), code))) return step;
-  return 0;
+/** A random 6-digit code. */
+export function newCode() {
+  const n = crypto.getRandomValues(new Uint32Array(1))[0] % 1000000;
+  return String(n).padStart(6, '0');
 }
 
 /* ---------- sessions ---------- */
@@ -117,13 +103,14 @@ export async function who(request: Request, env: StaffEnv): Promise<Who | null> 
   if (!(s['exp'] > Date.now()) || (s['s'] !== 'full' && s['s'] !== 'setup')) return null;
   const row = await (await db(env)).prepare('SELECT * FROM staff WHERE email = ?').bind(s['u']).first<Row>();
   if (!row || !row.active) return null;
-  /* a full session needs the app to be set up; after a reset by the owner it drops back to setup */
+  /* a full session needs an own password; after a reset by the owner it drops back to setup */
   const stage: Who['s'] = s['s'] === 'full' && row.totp ? 'full' : 'setup';
   return { u: row.email, name: row.name, role: row.role, s: stage };
 }
 
 /* ---------- login and first-time setup ---------- */
 
+/** Step 1 (no code yet): the password is right, so a code goes to the e-mail. Step 2: the same plus the code. */
 async function login(request: Request, env: StaffEnv) {
   if (!env.ADMIN_PASSWORD) return json({ error: 'off' }, 503);
   let b: Json; try { b = await request.json(); } catch { return json({ error: 'input' }, 400); }
@@ -131,45 +118,64 @@ async function login(request: Request, env: StaffEnv) {
   if (!isMail(email) || !pass) return json({ error: 'bad' }, 401);
   const d = await db(env);
   let row = await d.prepare('SELECT * FROM staff WHERE email = ?').bind(email).first<Row>();
+  /* the very first login (no account at all) creates the owner with the start password */
+  let first = false;
   if (!row) {
-    /* the very first login creates the owner with the start password; it works only while there is no account */
     const any = await d.prepare('SELECT COUNT(*) AS n FROM staff').first<{ n: number }>();
     if ((any?.n ?? 0) > 0 || !(await same(pass, env.ADMIN_PASSWORD))) return json({ error: 'bad' }, 401);
+    first = true;
+  } else if (!row.active || !(await same((await hashPassword(pass, row.salt)).hash, row.hash))) return json({ error: 'bad' }, 401);
+
+  if (!/^\d{6}$/.test(code)) {
+    if (!env.MAILER) return json({ error: 'off' }, 503);
+    const c = newCode();
+    await d.prepare('INSERT OR REPLACE INTO codes (email, hash, exp, tries) VALUES (?, ?, ?, 0)')
+      .bind(email, await codeHash(env, email, c), Date.now() + CODE_MIN * 6e4).run();
+    try {
+      await sendMail(env.MAILER, email, `PMP House: kód pro přihlášení ${c}`,
+        `Váš kód pro přihlášení do kabinetu PMP House:\n\n${c}\n\nKód platí ${CODE_MIN} minut. Pokud jste se nepřihlašovali vy, e-mail ignorujte a změňte si heslo.`);
+    } catch (e) {
+      console.log('code mail', String(e));
+      await d.prepare('DELETE FROM codes WHERE email = ?').bind(email).run();
+      return json({ error: 'mail' }, 503);
+    }
+    return json({ sent: true });
+  }
+
+  const c = await d.prepare('SELECT * FROM codes WHERE email = ?').bind(email).first<{ hash: string; exp: number; tries: number }>();
+  if (!c || c.exp < Date.now() || c.tries >= CODE_TRIES) return json({ error: 'expired' }, 401);
+  if (!(await same(await codeHash(env, email, code), c.hash))) {
+    await d.prepare('UPDATE codes SET tries = tries + 1 WHERE email = ?').bind(email).run();
+    return json({ error: 'code' }, 401);
+  }
+  await d.prepare('DELETE FROM codes WHERE email = ?').bind(email).run();
+  if (first) {
+    /* checked again: nobody may have become the owner in the meantime */
+    const any = await d.prepare('SELECT COUNT(*) AS n FROM staff').first<{ n: number }>();
+    if ((any?.n ?? 0) > 0) return json({ error: 'bad' }, 401);
     const h = await hashPassword(pass);
     await d.prepare('INSERT INTO staff (email, name, role, salt, hash, created_at) VALUES (?, ?, ?, ?, ?, ?)')
       .bind(email, email.split('@')[0], 'owner', h.salt, h.hash, new Date().toISOString()).run();
     row = await d.prepare('SELECT * FROM staff WHERE email = ?').bind(email).first<Row>();
   }
-  if (!row || !row.active || !(await same((await hashPassword(pass, row.salt)).hash, row.hash))) return json({ error: 'bad' }, 401);
+  if (!row) return json({ error: 'bad' }, 401);
   if (!row.totp) return json({ setup: true }, 200, { 'set-cookie': await cookie(env, row.email, 'setup') });
-  if (!code) return json({ error: 'code' }, 401);
-  const step = await checkTotp(row.totp, code, row.last_step);
-  if (!step) return json({ error: 'code' }, 401);
-  await d.prepare('UPDATE staff SET last_step = ? WHERE email = ?').bind(step, row.email).run();
   return json({ user: row.email, name: row.name, role: row.role }, 200, { 'set-cookie': await cookie(env, row.email, 'full') });
 }
 
-/** Step 1 of the setup: a new secret for the app (shown as a QR code). */
-async function setupStart(env: StaffEnv, w: Who) {
-  const secret = base32(crypto.getRandomValues(new Uint8Array(20)));
-  await (await db(env)).prepare('UPDATE staff SET pending = ? WHERE email = ?').bind(secret, w.u).run();
-  const label = encodeURIComponent(`${ISSUER}:${w.u}`);
-  return json({ secret, uri: `otpauth://totp/${label}?secret=${secret}&issuer=${encodeURIComponent(ISSUER)}&algorithm=SHA1&digits=6&period=30` });
-}
-
-/** Step 2: the person's own new password and the first code from the app; then the account is ready. */
+/** First login (or after a reset by the owner): the person replaces the start password with an own one. */
 async function setupFinish(request: Request, env: StaffEnv, w: Who) {
   let b: Json; try { b = await request.json(); } catch { return json({ error: 'input' }, 400); }
-  const pass = String(b['password'] ?? ''), code = str(b['code'], 6);
+  const pass = String(b['password'] ?? '');
   if (pass.length < 10) return json({ error: 'short' }, 400);
+  if (await same(pass, env.ADMIN_PASSWORD!)) return json({ error: 'reuse' }, 400);
   const d = await db(env);
   const row = await d.prepare('SELECT * FROM staff WHERE email = ?').bind(w.u).first<Row>();
-  if (!row?.pending) return json({ error: 'nosecret' }, 400);
-  if (await same(pass, env.ADMIN_PASSWORD!)) return json({ error: 'reuse' }, 400);
-  const step = await checkTotp(row.pending, code);
-  if (!step) return json({ error: 'code' }, 400);
+  if (!row) return json({ error: 'auth' }, 401);
+  if (await same((await hashPassword(pass, row.salt)).hash, row.hash)) return json({ error: 'reuse' }, 400);
   const h = await hashPassword(pass);
-  await d.prepare('UPDATE staff SET salt = ?, hash = ?, totp = pending, pending = NULL, last_step = ? WHERE email = ?').bind(h.salt, h.hash, step, w.u).run();
+  /* "totp" now only marks that the own password is set ('email' = codes come by e-mail) */
+  await d.prepare("UPDATE staff SET salt = ?, hash = ?, totp = 'email', pending = NULL WHERE email = ?").bind(h.salt, h.hash, w.u).run();
   return json({ user: w.u, name: w.name, role: w.role }, 200, { 'set-cookie': await cookie(env, w.u, 'full') });
 }
 
@@ -192,7 +198,7 @@ async function staffAdd(request: Request, env: StaffEnv) {
   return staffList(env);
 }
 
-/** Switch an account off or on, or reset its app (lost phone): the person sets it up again at the next login. */
+/** Switch an account off or on, or give it a new start password (forgotten password): the person sets an own one at the next login. */
 async function staffChange(email: string, request: Request, env: StaffEnv, w: Who) {
   let b: Json; try { b = await request.json(); } catch { return json({ error: 'input' }, 400); }
   if (email === w.u) return json({ error: 'self' }, 400);
@@ -215,7 +221,6 @@ export async function staffRoutes(request: Request, env: StaffEnv, pathname: str
   if (pathname === '/api/login' && m === 'POST') return busy() ? json({ error: 'busy' }, 429) : login(request, env);
   if (pathname === '/api/logout' && m === 'POST') return json({}, 200, { 'set-cookie': clear });
   if (pathname === '/api/session') { const w = await who(request, env); return w ? json({ user: w.u, name: w.name, role: w.role, setup: w.s === 'setup' }) : json({ error: 'auth' }, 401); }
-  if (pathname === '/api/setup/start' && m === 'POST') { const w = await who(request, env); return w ? setupStart(env, w) : json({ error: 'auth' }, 401); }
   if (pathname === '/api/setup/finish' && m === 'POST') {
     if (busy()) return json({ error: 'busy' }, 429);
     const w = await who(request, env); return w ? setupFinish(request, env, w) : json({ error: 'auth' }, 401);

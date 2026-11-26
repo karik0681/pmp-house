@@ -3,11 +3,11 @@ import { CanActivateFn, Router } from '@angular/router';
 import { SETTINGS } from '../core/settings';
 
 const KEY = 'pmp-demo-session';
-export type LoginResult = 'ok' | 'setup' | 'code' | 'bad' | 'off' | 'busy' | 'error';
+export type LoginResult = 'ok' | 'setup' | 'sent' | 'code' | 'expired' | 'mail' | 'bad' | 'off' | 'busy' | 'error';
 export interface StaffUser { user: string; name: string; role: 'owner' | 'staff'; setup: boolean }
 
 /**
- * Staff login: own account per person, password + code from an authenticator app (worker/staff.ts).
+ * Staff login: own account per person, password + a code sent to the person's e-mail (worker/staff.ts).
  * The server answers with a session cookie the page cannot read. With SETTINGS.demoCrm it is the old demo.
  */
 @Injectable({ providedIn: 'root' })
@@ -29,9 +29,11 @@ export class AuthService {
       const r = await fetch('/api/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: email.trim(), password, code: code.replace(/\s/g, '') }) });
       const b = await r.json().catch(() => ({}));
       this.checked = false;
+      if (r.ok && b.sent) return 'sent';
       if (r.ok) { await this.check(); return b.setup ? 'setup' : 'ok'; }
-      if (r.status === 401) return b.error === 'code' ? 'code' : 'bad';
-      return r.status === 503 ? 'off' : r.status === 429 ? 'busy' : 'error';
+      if (r.status === 401) return b.error === 'code' ? 'code' : b.error === 'expired' ? 'expired' : 'bad';
+      if (r.status === 503) return b.error === 'mail' ? 'mail' : 'off';
+      return r.status === 429 ? 'busy' : 'error';
     } catch { return 'error'; }
   }
 
@@ -61,7 +63,7 @@ export class AuthService {
   }
 }
 
-/** The cabinet: signed in and set up. Someone who still has to set up the app goes to /admin/setup. */
+/** The cabinet: signed in and set up. Someone who still has to set an own password goes to /admin/setup. */
 export const authGuard: CanActivateFn = async () => {
   const router = inject(Router);
   const me = await inject(AuthService).check();
@@ -69,7 +71,7 @@ export const authGuard: CanActivateFn = async () => {
   return me.setup ? router.parseUrl('/admin/setup') : true;
 };
 
-/** The setup page: only for a signed-in person who has not set up the app yet. */
+/** The setup page: only for a signed-in person who has not set an own password yet. */
 export const setupGuard: CanActivateFn = async () => {
   const router = inject(Router);
   const me = await inject(AuthService).check();
