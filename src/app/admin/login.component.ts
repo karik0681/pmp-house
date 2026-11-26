@@ -3,7 +3,6 @@ import { Router, RouterLink } from '@angular/router';
 import { SETTINGS } from '../core/settings';
 import { I18nService } from '../core/i18n.service';
 import { AuthService, LoginResult } from './auth.service';
-import { Lang } from '../core/i18n';
 
 @Component({
   selector: 'app-login',
@@ -26,9 +25,6 @@ import { Lang } from '../core/i18n';
         <button class="btn btn-g" type="submit" [disabled]="busy()">{{ t(sent() ? 'adm_enter' : 'adm_sendCode') }}</button>
         <div class="adm-login-foot">
           <a routerLink="/">{{ t('adm_web') }}</a>
-          @if (langs.length > 1) {<span class="langs">
-            @for (l of langs; track l.k) { <button type="button" [attr.aria-pressed]="i18n.lang() === l.k" (click)="i18n.lang.set(l.k)">{{ l.label }}</button> }
-          </span>}
         </div>
       </form>
     </div>`,
@@ -43,7 +39,6 @@ export class LoginComponent {
   readonly sent = signal(false);
   private code = viewChild<ElementRef<HTMLInputElement>>('code');
   readonly demo = SETTINGS.demoCrm;
-  readonly langs: { k: Lang; label: string }[] = SETTINGS.languages.map(k => ({ k, label: k === 'cs' ? 'CZ' : k.toUpperCase() }));
   t = (k: string) => this.i18n.t(k);
   async enter(e: Event, email: string, pass: string) {
     e.preventDefault();

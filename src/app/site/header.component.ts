@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { I18nService } from '../core/i18n.service';
 import { SETTINGS } from '../core/settings';
-import { Lang } from '../core/i18n';
 import { NavService } from './nav.service';
 import { DomSanitizer } from '@angular/platform-browser';
 import { LOGO_COMPACT } from './logo';
@@ -23,13 +22,6 @@ interface Item { label: string; id?: string; route?: string }
       </nav>
       <div class="top-end">
         <a class="tel" [href]="'tel:+' + s.whatsapp">{{ s.phone }}</a>
-        @if (langs.length > 1) {
-          <div class="langs">
-            @for (l of langs; track l.k) {
-              <button type="button" [attr.aria-pressed]="i18n.lang() === l.k" (click)="i18n.lang.set(l.k)">{{ l.label }}</button>
-            }
-          </div>
-        }
         <button type="button" class="burger" [attr.aria-expanded]="nav.menuOpen()" aria-controls="mmenu"
                 [attr.aria-label]="t('menu')" (click)="nav.menuOpen.set(!nav.menuOpen())">
           <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
@@ -58,7 +50,6 @@ export class HeaderComponent {
   readonly s = SETTINGS;
   /* our own constant SVG, safe to insert */
   readonly logo = inject(DomSanitizer).bypassSecurityTrustHtml(LOGO_COMPACT);
-  readonly langs: { k: Lang; label: string }[] = SETTINGS.languages.map(k => ({ k, label: k === 'cs' ? 'CZ' : k.toUpperCase() }));
   readonly items: Item[] = [
     { route: '/modely', label: 'navModels' }, { id: 'konfigurator', label: 'navCfg' }, { id: 'konstrukce', label: 'navTypes' },
     { route: '/reference', label: 'navRefs' }, { route: '/montaz', label: 'navMontage' },

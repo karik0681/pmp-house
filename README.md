@@ -23,11 +23,9 @@ npm run build      # готовый сайт в dist/pmp-house/browser
 | `src/app/three/stage.ts` | 3D-сцена (Three.js) |
 | `src/app/leads/` | заявки: модель, сервис (localStorage), отправка формы |
 | `src/app/admin/` | вход, доска заявок, карточка клиента |
-| `src/app/core/` | переводы CZ/DE, настройки, источник рекламы (utm) |
+| `src/app/core/` | тексты сайта (чешский), настройки, источник рекламы (utm) |
 
 ## Настройки: `src/app/core/settings.ts`
-
-- `languages: ['cs']` — сайт только на чешском. Немецкие тексты сохранены: если написать `['cs', 'de']`, вернётся переключатель CZ/DE.
 
 - `formKey`: ключ Web3Forms (бесплатно на web3forms.com). Пока он пустой, заявка не уходит на почту.
 - `mail`, `phone`, `whatsapp`, `address`, `hours`, `ico`, `dic`: контакты и реквизиты для футера.

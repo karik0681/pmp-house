@@ -1,9 +1,7 @@
 import { Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { SETTINGS } from '../core/settings';
 import { I18nService } from '../core/i18n.service';
 import { money } from '../core/format';
-import { Lang } from '../core/i18n';
 import { AuthService } from './auth.service';
 import { StaffComponent } from './staff.component';
 import { LeadsService } from '../leads/leads.service';
@@ -26,7 +24,6 @@ export class AdminComponent {
   private router = inject(Router);
 
   readonly statuses = STATUSES;
-  readonly langs: { k: Lang; label: string }[] = SETTINGS.languages.map(k => ({ k, label: k === 'cs' ? 'CZ' : k.toUpperCase() }));
   readonly query = signal('');
   readonly picked = signal<string | null>(null);
   readonly draft = signal('');
@@ -57,7 +54,7 @@ export class AdminComponent {
   title(l: Lead) { return title(l.cfg!, k => this.t(k)); }
   late(l: Lead) { return l.status < 4 && !!l.due && l.due < this.leads.today; }
   when(iso: string) {
-    return new Intl.DateTimeFormat(this.i18n.lang() === 'de' ? 'de-DE' : 'cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+    return new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
   }
   digits(p: string) { return p.replace(/[^\d+]/g, ''); }
   wa(p: string) { return 'https://wa.me/' + p.replace(/\D/g, ''); }

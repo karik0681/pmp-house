@@ -65,7 +65,7 @@ export class ChatsComponent {
   }
   first(c: Chat) { const q = c.msgs.find(m => m.role === 'user')?.content || ''; return q.length > 90 ? q.slice(0, 90) + '…' : q; }
   when(iso: string) {
-    return new Intl.DateTimeFormat(this.i18n.lang() === 'de' ? 'de-DE' : 'cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
+    return new Intl.DateTimeFormat('cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(iso));
   }
   async remove(c: Chat) {
     if (!confirm(this.t('ch_deleteAsk'))) return;

@@ -3,11 +3,6 @@
     <p class="adm-brand">PMP House · {{ t('adm_title') }}</p>
     <div class="adm-top-end">
       @if (hasDemo()) { <span class="adm-badge">{{ t('adm_demoBadge') }}</span> }
-      @if (langs.length > 1) {
-        <span class="langs">
-          @for (l of langs; track l.k) { <button type="button" [attr.aria-pressed]="i18n.lang() === l.k" (click)="i18n.lang.set(l.k)">{{ l.label }}</button> }
-        </span>
-      }
       <a routerLink="/">{{ t('adm_web') }}</a>
       <button type="button" class="adm-link" (click)="logout()">{{ t('adm_logout') }}</button>
     </div>
