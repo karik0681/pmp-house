@@ -606,3 +606,25 @@ h2,.chk h2,.sec-head h2,.legal h2,.duo h2,.xpl-text h2{font-size:clamp(26px,2.8v
 .ft-cta h2{font-size:clamp(24px,2.6vw,34px)}.step h2{font-size:clamp(24px,2.4vw,32px)}.rd-cta h2{font-size:clamp(24px,2.4vw,32px)}
 .xpl-view{overflow:hidden}
 .xpl-ctl{justify-content:flex-end}@media(max-width:860px){.xpl-ctl{justify-content:center}}
+
+/* hero: a real photo from a site, darkened so the text reads */
+.hero{background:#10231b}
+.hero-bg,.hero-bg img{position:absolute;inset:0;width:100%;height:100%}
+.hero-bg img{object-fit:cover;object-position:70% 55%}
+.hero::before{content:"";display:block;position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(10,26,19,.9) 0%,rgba(10,26,19,.78) 34%,rgba(10,26,19,.38) 62%,rgba(10,26,19,.18) 100%)}
+.hero::after{content:"";position:absolute;inset:auto 0 0 0;height:30%;z-index:1;pointer-events:none;background:linear-gradient(0deg,rgba(10,26,19,.55),rgba(10,26,19,0))}
+.hero-t{position:relative;z-index:2;color:#fff}
+.hero-t .hero-lead{color:#dfe9e3}
+.hero .facts dt{color:#b9cfc3}
+.hero .facts dd{color:#fff}
+.hero .facts div::before,.hero .facts div::after{border-color:rgba(255,255,255,.7)}
+.hero .btn-g{background:#fff;color:var(--g);border-color:#fff}
+.hero .btn-g:hover{background:var(--mint);border-color:var(--mint)}
+.hero .btn-o{color:#fff;border-color:rgba(255,255,255,.85);background:rgba(255,255,255,.06)}
+.hero .btn-o:hover{background:rgba(255,255,255,.16)}
+@media(min-width:861px){.hero{min-height:max(88vh,640px)}}
+@media(max-width:860px){
+  .hero{min-height:0;padding-top:300px;padding-bottom:36px}
+  .hero-bg img{object-position:60% 30%}
+  .hero::before{background:linear-gradient(180deg,rgba(10,26,19,.25) 0%,rgba(10,26,19,.45) 25%,rgba(10,26,19,.86) 50%,rgba(10,26,19,.94) 100%)}
+}
