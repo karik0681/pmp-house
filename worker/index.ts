@@ -1,8 +1,9 @@
 /* The server side of the website on Cloudflare. It answers /api/* and leaves every other address to the static site.
-   /api/assistant answers one e-mail (the demo in the cabinet), /api/chat answers in the chat window on the website. The enquiry list for the staff is in crm.ts. */
+   /api/assistant answers one e-mail (the demo in the cabinet), /api/chat answers in the chat window on the website (conversations are kept in chats.ts). The enquiry list for the staff is in crm.ts. */
 import { PRICES, SIZES } from '../src/app/configurator/data';
 import { cleanup, crm, CrmEnv } from './crm';
 import { SETTINGS } from '../src/app/core/settings';
+import { chatId, cleanupChats, record } from './chats';
 
 interface Env extends CrmEnv {
   ASSETS: { fetch(r: Request): Promise<Response> };
@@ -119,10 +120,10 @@ async function assistant(request: Request, env: Env): Promise<Response> {
 }
 
 /** One turn of the website chat. The browser sends the conversation so far; only its last ten messages are used. */
-async function chat(request: Request, env: Env): Promise<Response> {
+async function chat(request: Request, env: Env, wait: (p: Promise<unknown>) => void): Promise<Response> {
   if (request.method !== 'POST') return json({ error: 'method' }, 405);
   if (tooMany(request.headers.get('cf-connecting-ip') || '?')) return json({ error: 'busy' }, 429);
-  let data: { messages?: { role?: string; content?: string }[] };
+  let data: { id?: string; page?: string; messages?: { role?: string; content?: string }[] };
   try { data = await request.json(); } catch { return json({ error: 'input' }, 400); }
   const turns = (Array.isArray(data.messages) ? data.messages : []).slice(-10)
     .map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content || '').slice(0, 1000).trim() })).filter(m => m.content);
@@ -130,10 +131,16 @@ async function chat(request: Request, env: Env): Promise<Response> {
   /* earlier answers go back to the model in the same format it must write in, so it keeps to it */
   const history = turns.map(m => (m.role === 'assistant' ? { role: 'assistant', content: `TÉMA: KONTEJNERY\nJAZYK: cs\nROZHODNUTÍ: ODPOVĚDĚT\nDŮVOD: dřívější odpověď\n---\n${m.content}` } : m));
   const site = new URL(request.url).origin;
+  const id = chatId(data.id), page = String(data.page || '').slice(0, 200), question = turns[turns.length - 1].content;
   try {
     const { offtopic, handover, reply } = parse(await ask(env, [{ role: 'system', content: chatRules(site) }, ...history], 350), OFF_CHAT);
+    /* the conversation is kept for the staff (chats.ts); the server writes the question and its own answer */
+    wait(record(env, id, page, question, reply));
     return json({ offtopic, handover, reply });
-  } catch (e) { return json({ error: 'ai', detail: String(e).slice(0, 200) }, 502); }
+  } catch (e) {
+    wait(record(env, id, page, question, ''));
+    return json({ error: 'ai', detail: String(e).slice(0, 200) }, 502);
+  }
 }
 
 /* what a customer gets when the message is not about containers: one fixed sentence, never the model's own words */
@@ -181,9 +188,10 @@ export default {
   async fetch(request: Request, env: Env, ctx?: { waitUntil(p: Promise<unknown>): void }): Promise<Response> {
     const { pathname } = new URL(request.url);
     if (pathname === '/api/assistant') return assistant(request, env);
-    if (pathname === '/api/chat') return chat(request, env);
+    const wait = (p: Promise<unknown>) => (ctx ? ctx.waitUntil(p) : void p);
+    if (pathname === '/api/chat') return chat(request, env, wait);
     const ip = request.headers.get('cf-connecting-ip') || '?';
-    const answer = await crm(request, env, pathname, p => (ctx ? ctx.waitUntil(p) : void p), () => tooMany(ip));
+    const answer = await crm(request, env, pathname, wait, () => tooMany(ip));
     if (answer) return answer;
     if (pathname.startsWith('/api/')) return json({ error: 'not found' }, 404);
     return env.ASSETS.fetch(request);
@@ -191,5 +199,6 @@ export default {
   /** once a day: removes old enquiries without a sale (crm.ts, cleanup) */
   async scheduled(_event: unknown, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) {
     ctx.waitUntil(cleanup(env));
+    ctx.waitUntil(cleanupChats(env));
   },
 };

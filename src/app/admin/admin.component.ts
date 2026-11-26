@@ -12,10 +12,11 @@ import { linkTo, summaryLines, title } from '../configurator/model';
 import { PriceListComponent } from './price-list.component';
 import { QuoteComponent } from './quote.component';
 import { AssistantDemoComponent } from './assistant-demo.component';
+import { ChatsComponent } from './chats.component';
 
 @Component({
   selector: 'app-admin',
-  imports: [RouterLink, PriceListComponent, QuoteComponent, AssistantDemoComponent, StaffComponent],
+  imports: [RouterLink, PriceListComponent, QuoteComponent, AssistantDemoComponent, StaffComponent, ChatsComponent],
   templateUrl: './admin.component.html',
 })
 export class AdminComponent {
@@ -30,7 +31,7 @@ export class AdminComponent {
   readonly picked = signal<string | null>(null);
   readonly draft = signal('');
   /** the board of enquiries, the price list or the demo of the e-mail assistant */
-  readonly view = signal<'board' | 'prices' | 'assistant' | 'staff'>('board');
+  readonly view = signal<'board' | 'prices' | 'assistant' | 'staff' | 'chats'>('board');
 
   readonly filtered = computed(() => {
     const q = this.query().trim().toLowerCase();
@@ -71,6 +72,8 @@ export class AdminComponent {
     if (!confirm(this.t('adm_deleteAsk').replace('{id}', `${l.id} (${l.name})`))) return;
     if (await this.leads.remove(l.id)) this.picked.set(null); else this.leads.failed.set(true);
   }
+  /** from a chat conversation back to the enquiry the visitor left in it */
+  showLead(id: string) { this.view.set('board'); this.picked.set(id); }
   /** the client's configuration, opened in a new tab so the cabinet stays open */
   link3d(l: Lead) { return linkTo(l.cfg!); }
   async logout() { await this.auth.logout(); this.router.navigateByUrl('/admin/login'); }

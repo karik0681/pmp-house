@@ -26,11 +26,12 @@
       <input type="search" [placeholder]="t('adm_search')" [value]="query()" (input)="query.set($any($event.target).value)"></label>
     @if (leads.demo) { <button type="button" class="btn btn-o" (click)="leads.reset(); picked.set(null)">{{ t('adm_reset') }}</button> }
     <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'prices'" (click)="view.set(view() === 'prices' ? 'board' : 'prices')">{{ t(view() === 'prices' ? 'adm_toBoard' : 'pl_title') }}</button>
+    @if (!leads.demo) { <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'chats'" (click)="view.set(view() === 'chats' ? 'board' : 'chats')">{{ t(view() === 'chats' ? 'adm_toBoard' : 'ch_h') }}</button> }
     <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'assistant'" (click)="view.set(view() === 'assistant' ? 'board' : 'assistant')">{{ t(view() === 'assistant' ? 'adm_toBoard' : 'as_title') }}</button>
     @if (auth.me()?.role === 'owner') { <button type="button" class="btn btn-o" [attr.aria-pressed]="view() === 'staff'" (click)="view.set(view() === 'staff' ? 'board' : 'staff')">{{ t(view() === 'staff' ? 'adm_toBoard' : 'st_h') }}</button> }
   </div>
 
-  @if (view() === 'staff') { <div class="adm-body"><app-staff /></div> } @else if (view() === 'prices') { <div class="adm-body"><app-price-list /></div> } @else if (view() === 'assistant') { <div class="adm-body"><app-assistant-demo /></div> } @else {
+  @if (view() === 'chats') { <div class="adm-body"><app-chats (openLead)="showLead($event)" /></div> } @else if (view() === 'staff') { <div class="adm-body"><app-staff /></div> } @else if (view() === 'prices') { <div class="adm-body"><app-price-list /></div> } @else if (view() === 'assistant') { <div class="adm-body"><app-assistant-demo /></div> } @else {
 
   <div class="adm-body">
     <div class="adm-board">

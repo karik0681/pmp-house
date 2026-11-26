@@ -9,6 +9,7 @@
 
 import { staffRoutes, who } from './staff';
 import { Mailer, sendMail } from './mail';
+import { chatId, chatRoutes, linkLead } from './chats';
 
 export interface CrmEnv {
   DB?: D1;
@@ -54,9 +55,12 @@ async function create(request: Request, env: CrmEnv, wait: (p: Promise<unknown>)
     source: str(b['source'], 80) || 'Web', createdAt: now, status: 0, next: str(b['next'], 200), due: now.slice(0, 10),
     notes: [{ at: now, text: str(b['firstNote'], 300) }],
   };
+  if (chatId(b['chat'])) lead['chat'] = chatId(b['chat']);
   const d = await db(env);
   const r = await d.prepare('INSERT INTO leads (created_at, data) VALUES (?, ?)').bind(now, JSON.stringify(lead)).run();
   const id = idOf(Number(r.meta?.last_row_id));
+  const chat = chatId(b['chat']);
+  if (chat) wait(linkLead(env, chat, id));
   wait(notify(env, { ...lead, id }, new URL(request.url).origin));
   return json({ id });
 }
@@ -91,6 +95,8 @@ async function remove(id: string, env: CrmEnv, who: string) {
   const n = numOf(id);
   if (!Number.isFinite(n)) return json({ error: 'id' }, 404);
   await (await db(env)).prepare('DELETE FROM leads WHERE n = ?').bind(n).run();
+  /* the chat conversation the enquiry came from goes with it */
+  await env.DB!.prepare('DELETE FROM chats WHERE lead = ?').bind(id).run().catch(() => undefined);
   console.log('deleted', id, 'by', who);   /* the log keeps who deleted which number, not the customer's data */
   return json({ deleted: id });
 }
@@ -139,6 +145,8 @@ export async function crm(request: Request, env: CrmEnv, pathname: string, wait:
   try {
     const auth = await staffRoutes(request, env, pathname, busy);
     if (auth) return auth;
+    const chats = await chatRoutes(request, env, pathname);
+    if (chats) return chats;
     if (pathname === '/api/leads' && m === 'POST') return busy() ? json({ error: 'busy' }, 429) : await create(request, env, wait);
     if (pathname === '/api/leads' || pathname.startsWith('/api/leads/')) {
       const w = await who(request, env);

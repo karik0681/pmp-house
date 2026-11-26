@@ -10,6 +10,7 @@ export interface Lead {
   price: number | null;
   quote?: Quote;         // the employee's price calculation: delivery, services, discount
   source: string;
+  chat?: string;         // id of the website chat conversation the enquiry came from
   status: number;        // 0 new … 4 sold
   next: string;          // next step
   due: string;           // yyyy-mm-dd, '' when none

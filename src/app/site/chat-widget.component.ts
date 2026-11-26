@@ -76,6 +76,8 @@ export class ChatWidgetComponent {
   readonly formErr = signal(false);
   readonly saveErr = signal(false);
   readonly saving = signal(false);
+  /** one random id per conversation, so the staff see it as one thread in the cabinet (worker/chats.ts) */
+  private chatId = '';
   readonly name = signal(''); readonly email = signal(''); readonly phone = signal(''); readonly gdpr = signal(false);
 
   t = (k: string) => this.i18n.t(k);
@@ -89,7 +91,9 @@ export class ChatWidgetComponent {
     this.msgs.update(m => [...m, { role: 'user', content: text }]);
     this.draft.set(''); this.error.set(''); this.busy.set(true); this.down();
     try {
-      const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ messages: this.msgs() }) });
+      if (!this.chatId) this.chatId = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36);
+      const page = typeof location !== 'undefined' ? location.pathname : '';
+      const r = await fetch('/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: this.chatId, page, messages: this.msgs().map(({ role, content }) => ({ role, content })) }) });
       if (!r.ok) throw new Error(String(r.status));
       const a: { reply: string; handover: boolean } = await r.json();
       if (a.reply) this.msgs.update(m => [...m, { role: 'assistant', content: a.reply }]);
@@ -106,7 +110,7 @@ export class ChatWidgetComponent {
     if (!name || !/.+@.+\..+/.test(email) || !this.gdpr()) { this.formErr.set(true); return; }
     const talk = this.msgs().map(m => `${this.t(m.role === 'user' ? 'chat_who_u' : 'chat_who_a')}: ${m.content}`).join('\n');
     this.formErr.set(false); this.saveErr.set(false); this.saving.set(true);
-    const id = await this.leads.add({ name, phone, email, place: '', clientNote: talk || this.t('chat_noTalk'), cfg: this.cfg.cfg(), price: null, source: this.t('chat_source') }, this.t('chat_leadNote'), this.t('adm_firstStep'));
+    const id = await this.leads.add({ name, phone, email, place: '', clientNote: talk || this.t('chat_noTalk'), cfg: this.cfg.cfg(), price: null, source: this.t('chat_source'), ...(this.chatId ? { chat: this.chatId } : {}) }, this.t('chat_leadNote'), this.t('adm_firstStep'));
     this.saving.set(false);
     if (!id) { this.saveErr.set(true); return; }
     this.tr.goal('chat');
