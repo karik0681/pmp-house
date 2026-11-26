@@ -7,6 +7,7 @@ import { HeroComponent } from './hero.component';
 import { TypesComponent } from './types.component';
 import { ExplodedComponent } from './exploded.component';
 import { OfficesComponent } from './offices.component';
+import { ClientsComponent } from './clients.component';
 import { NavService } from './nav.service';
 import { ConfiguratorComponent } from '../configurator/configurator.component';
 import { ConfiguratorService } from '../configurator/configurator.service';
@@ -17,11 +18,12 @@ import { REFERENCES } from '../references/refs.data';
 /** The home page. Header, footer and the WhatsApp button come from LayoutComponent. */
 @Component({
   selector: 'app-site',
-  imports: [RouterLink, HeroComponent, TypesComponent, ExplodedComponent, OfficesComponent, ConfiguratorComponent, RefCardComponent],
+  imports: [RouterLink, HeroComponent, TypesComponent, ExplodedComponent, OfficesComponent, ClientsComponent, ConfiguratorComponent, RefCardComponent],
   template: `
     <a class="skip" href="#konfigurator" (click)="go($event, 'konfigurator')">{{ t('skip') }}</a>
     <main id="top">
       <app-hero />
+      <app-clients />
       <app-types />
       <app-exploded />
       <app-configurator />

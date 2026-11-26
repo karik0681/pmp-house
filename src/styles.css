@@ -645,3 +645,17 @@ h2,.chk h2,.sec-head h2,.legal h2,.duo h2,.xpl-text h2{font-size:clamp(26px,2.8v
 .ch-talk header{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:10px;font-size:14px}
 .ch-log{display:flex;flex-direction:column;gap:8px}
 @media(max-width:860px){.ch-wrap{grid-template-columns:1fr}}
+
+/* home: customers' logos under the hero */
+.clients{background:#fff;border-bottom:1px solid var(--line);padding:22px 0 24px}
+.clients-h{margin:0 0 14px;text-align:center;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.clients ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px 28px}
+.clients li{display:flex;align-items:center;height:44px}
+.clients img{width:auto;max-width:140px;filter:grayscale(1) contrast(1.15);opacity:.78;transition:filter .25s,opacity .25s}
+.clients li:hover img{filter:none;opacity:1}
+@media(max-width:860px){
+  .clients{padding:18px 0 20px}
+  .clients ul{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 12px;justify-items:center}
+  .clients li{height:38px}
+  .clients img{max-width:100%;transform:scale(.8)}
+}
