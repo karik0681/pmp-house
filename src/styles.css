@@ -659,3 +659,5 @@ h2,.chk h2,.sec-head h2,.legal h2,.duo h2,.xpl-text h2{font-size:clamp(26px,2.8v
   .clients li{height:38px}
   .clients img{max-width:100%;transform:scale(.8)}
 }
+.clients-txt{font-size:19px;font-weight:700;letter-spacing:.01em;color:#6f7773;white-space:nowrap}
+@media(max-width:860px){.clients-txt{font-size:14px}}
