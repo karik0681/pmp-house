@@ -11,7 +11,7 @@ import { fromPrice } from '../configurator/model';
     <section class="hero">
       <picture class="hero-bg" aria-hidden="true">
         <source media="(max-width: 860px)" srcset="/hero/stavba-m.webp">
-        <img src="/hero/stavba.webp" width="2000" height="924" alt="" fetchpriority="high">
+        <img src="/hero/stavba.webp" width="1672" height="941" alt="" fetchpriority="high">
       </picture>
       <div class="hero-t">
         <h1 class="hero-h1">{{ t('eyebrow') }}</h1>
